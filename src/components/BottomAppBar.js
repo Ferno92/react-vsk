@@ -1,4 +1,4 @@
-import React, { Fragment } from "react";
+import React from "react";
 import PropTypes from "prop-types";
 import { withStyles } from "@material-ui/core/styles";
 import AppBar from "@material-ui/core/AppBar";
@@ -17,6 +17,13 @@ import ListItemIcon from "@material-ui/core/ListItemIcon";
 import ListItemText from "@material-ui/core/ListItemText";
 import { Home, Group, Flag, ExitToApp } from "@material-ui/icons";
 import { Link } from "react-router-dom";
+import ls from "local-storage";
+import Dialog from '@material-ui/core/Dialog';
+import DialogActions from '@material-ui/core/DialogActions';
+import DialogContent from '@material-ui/core/DialogContent';
+import DialogContentText from '@material-ui/core/DialogContentText';
+import DialogTitle from '@material-ui/core/DialogTitle';
+import Button from '@material-ui/core/Button';
 
 const styles = theme => ({
   text: {
@@ -53,49 +60,90 @@ const styles = theme => ({
 
 class BottomAppBar extends React.Component {
   state = {
-    bottom: false
+    navigationMenuOpen: false,
+    logoutDialogOpen: false
+  };
+
+  updateState = (type, value) => {
+    const currentState = this.state;
+    this.state[type] = value;
+    this.setState(currentState);
   };
 
   toggleDrawer = open => () => {
-    this.setState({
-      bottom: open
-    });
+    this.updateState("navigationMenuOpen", open);
   };
+
+  
+  toggleLogoutDialog = () => {
+    this.updateState("logoutDialogOpen", !this.state.logoutDialogOpen);
+  };
+
+  logoutUser = ()=> {
+    this.toggleLogoutDialog();
+    this.props.logout();
+  }
 
   render() {
     const { classes } = this.props;
+    const notLoggedList = (
+      <List>
+        <ListItem button key={"Homepage"} component={Link} to='/' selected={window.location.pathname === "/"}>
+          <ListItemIcon>
+            <Home />
+          </ListItemIcon>
+          <ListItemText primary={"Homepage"} />
+        </ListItem>
+
+        <ListItem button key={"Login"} component={Link} to='/login' selected={window.location.pathname === "/login"}>
+          <ListItemIcon>
+            <Group />
+          </ListItemIcon>
+          <ListItemText primary={"Login"} />
+        </ListItem>
+
+        <ListItem button key={"Flag"} selected={window.location.pathname === "/liveGameList"}>
+          <ListItemIcon>
+            <Flag />
+          </ListItemIcon>
+          <ListItemText primary={"Partite in corso"} />
+        </ListItem>
+      </List>
+
+    );
+    const username = this.props.logged ? ls.get("user").name : "";
 
     const fullList = (
       <div className={classes.fullList}>
         <List>
-          <ListItem button key={"Luca Fernandez"}>
-            <ListItemText primary={"Luca Fernandez"} />
+          <ListItem button key={username}>
+            <ListItemText primary={username} />
           </ListItem>
         </List>
         <Divider />
         <List>
-          <ListItem button key={"Homepage"} component={Link} to='/'>
+          <ListItem button key={"Homepage"} component={Link} to='/' selected={window.location.pathname === "/"}>
             <ListItemIcon>
               <Home />
             </ListItemIcon>
             <ListItemText primary={"Homepage"} />
           </ListItem>
 
-          <ListItem button key={"Teams"}  component={Link} to='/login'>
+          <ListItem button key={"Teams"}>
             <ListItemIcon>
               <Group />
             </ListItemIcon>
             <ListItemText primary={"Le tue squadre"} />
           </ListItem>
 
-          <ListItem button key={"Flag"}>
+          <ListItem button key={"Flag"} selected={window.location.pathname === "/liveGameList"}>
             <ListItemIcon>
               <Flag />
             </ListItemIcon>
             <ListItemText primary={"Partite in corso"} />
           </ListItem>
 
-          <ListItem button key={"Logout"}>
+          <ListItem button key={"Logout"} onClick={this.toggleLogoutDialog}>
             <ListItemIcon>
               <ExitToApp />
             </ListItemIcon>
@@ -106,48 +154,75 @@ class BottomAppBar extends React.Component {
     );
     return (
       <div>
-          <SwipeableDrawer
-            anchor="bottom"
-            open={this.state.bottom}
-            onClose={this.toggleDrawer(false)}
-            onOpen={this.toggleDrawer(true)}
+        {/* navigation menu */}
+        <SwipeableDrawer
+          anchor="bottom"
+          open={this.state.navigationMenuOpen}
+          onClose={this.toggleDrawer(false)}
+          onOpen={this.toggleDrawer(true)}
+        >
+          <div
+            tabIndex={0}
+            role="button"
+            onClick={this.toggleDrawer(false)}
+            onKeyDown={this.toggleDrawer(false)}
           >
-            <div
-              tabIndex={0}
-              role="button"
-              onClick={this.toggleDrawer(false)}
-              onKeyDown={this.toggleDrawer(false)}
+            {this.props.logged ? fullList : notLoggedList}
+          </div>
+        </SwipeableDrawer>
+
+        {/* logout dialog */}
+        <Dialog
+          open={this.state.logoutDialogOpen}
+          onClose={this.toggleLogoutDialog}
+          aria-labelledby="alert-dialog-title"
+          aria-describedby="alert-dialog-description"
+        >
+          <DialogTitle id="alert-dialog-title">{"Logout"}</DialogTitle>
+          <DialogContent>
+            <DialogContentText id="alert-dialog-description">
+              Sei sicuro di voler effettuare il logout?
+            </DialogContentText>
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={this.toggleLogoutDialog} color="primary">
+              No
+            </Button>
+            <Button onClick={this.logoutUser} color="primary" autoFocus>
+              Si
+            </Button>
+          </DialogActions>
+        </Dialog>
+
+
+        {/* bottom app bar */}
+        <AppBar position="fixed" color="primary" className={classes.appBar}>
+          <Toolbar className={classes.toolbar}>
+            <IconButton
+              color="inherit"
+              aria-label="Open drawer"
+              onClick={this.toggleDrawer(true)}
             >
-              {fullList}
-            </div>
-          </SwipeableDrawer>
-          <AppBar position="fixed" color="primary" className={classes.appBar}>
-            <Toolbar className={classes.toolbar}>
-              <IconButton
-                color="inherit"
-                aria-label="Open drawer"
-                onClick={this.toggleDrawer(true)}
-              >
-                <MenuIcon />
+              <MenuIcon />
+            </IconButton>
+            <Fab
+              color="secondary"
+              aria-label="Add"
+              className={classes.fabButton}
+            >
+              <AddIcon />
+            </Fab>
+            <div>
+              <IconButton color="inherit">
+                <SearchIcon />
               </IconButton>
-              <Fab
-                color="secondary"
-                aria-label="Add"
-                className={classes.fabButton}
-              >
-                <AddIcon />
-              </Fab>
-              <div>
-                <IconButton color="inherit">
-                  <SearchIcon />
-                </IconButton>
-                <IconButton color="inherit">
-                  <MoreIcon />
-                </IconButton>
-              </div>
-            </Toolbar>
-          </AppBar>
-          </div> 
+              <IconButton color="inherit">
+                <MoreIcon />
+              </IconButton>
+            </div>
+          </Toolbar>
+        </AppBar>
+      </div>
     );
   }
 }
