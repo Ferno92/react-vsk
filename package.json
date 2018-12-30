@@ -21,5 +21,8 @@
   "bugs": {
     "url": "https://github.com/Ferno92/react-vsk/issues"
   },
-  "homepage": "https://github.com/Ferno92/react-vsk#readme"
+  "homepage": "https://github.com/Ferno92/react-vsk#readme",
+  "engines": {
+    "node": "8.x"
+  }
 }
