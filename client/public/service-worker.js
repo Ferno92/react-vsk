@@ -5,7 +5,7 @@ var doCache = false;
 var CACHE_NAME = 'pwa-app-cache';
 
 // Delete old caches
-window.self.addEventListener('activate', event => {
+self.addEventListener('activate', event => {
   const currentCachelist = [CACHE_NAME];
   event.waitUntil(
     caches.keys()
@@ -20,7 +20,7 @@ window.self.addEventListener('activate', event => {
 });
 
 // This triggers when user starts the app
-window.self.addEventListener('install', function(event) {
+self.addEventListener('install', function(event) {
   if (doCache) {
     event.waitUntil(
       caches.open(CACHE_NAME)
@@ -44,7 +44,7 @@ window.self.addEventListener('install', function(event) {
 });
 
 // Here we intercept request and serve up the matching files
-window.self.addEventListener('fetch', function(event) {
+self.addEventListener('fetch', function(event) {
   if (doCache) {
     event.respondWith(
       caches.match(event.request).then(function(response) {
