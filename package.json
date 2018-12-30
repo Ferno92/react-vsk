@@ -22,7 +22,7 @@
   "bugs": {
     "url": "https://github.com/Ferno92/react-vsk/issues"
   },
-  "homepage": "https://github.com/Ferno92/react-vsk#readme",
+  "homepage": "https://react-vsk.herokuapp.com",
   "engines": {
     "node": "10.x"
   }
