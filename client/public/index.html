@@ -22,7 +22,7 @@
         window.addEventListener("load", function() {
           navigator.serviceWorker
             .register("service-worker.js", {
-              scope: "/app/"
+              scope: "/"
             })
             .then(
               function(registration) {
