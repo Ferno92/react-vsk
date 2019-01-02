@@ -31,7 +31,7 @@ function Game(props) {
     return (
         <Card className={classes.card + " game-card"}>
             <CardContent>
-                <div className="game-content" click={openGame()}>
+                <div className="game-content" onClick={openGame}>
                     <div className={"float-left side-text live-text" + (props.game.live ? 'live' : '')}>{props.game.live ? 'Live' : 'Punteggio finale'}</div>
                     <div className="float-right side-text">{props.game.date !== undefined ? props.game.date.day : ""}</div>
                     <div className="clear">

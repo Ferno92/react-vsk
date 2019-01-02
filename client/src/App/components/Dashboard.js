@@ -2,8 +2,9 @@ import React from 'react';
 import firebase from 'firebase/app';
 import 'firebase/database';
 import ls from "local-storage";
-import Game from "./Game";
-import "./Game.scss";
+import Game from "../pages/game/Game";
+import "../pages/game/Game.scss";
+import CreateMatch from "../pages/create-match/CreateMatch";
 
 const firebaseConfig = {
   apiKey: "AIzaSyDBvxVAYOPwEk2ApbU_DfQ-tmcgOfJ6k4Y",
@@ -50,6 +51,10 @@ class Dashboard extends React.Component {
           })
           : ""
         }
+        
+
+        {/* create dialog */}
+        <CreateMatch open={false} />
       </div>
     );
   }

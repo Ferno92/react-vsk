@@ -79,6 +79,10 @@ class BottomAppBar extends React.Component {
     this.updateState("logoutDialogOpen", !this.state.logoutDialogOpen);
   };
 
+  onClickFab = () => {
+
+  }
+
   logoutUser = ()=> {
     this.toggleLogoutDialog();
     this.props.logout();
@@ -112,11 +116,15 @@ class BottomAppBar extends React.Component {
 
     );
     const username = this.props.logged ? ls.get("user").name : "";
+    const userPictureUrl = this.props.logged ? ls.get("user").imageUrl : "";
 
     const fullList = (
       <div className={classes.fullList}>
         <List>
           <ListItem button key={username}>
+          <ListItemIcon>
+              <img src={userPictureUrl} className="user-picture"/>
+            </ListItemIcon>
             <ListItemText primary={username} />
           </ListItem>
         </List>
@@ -194,7 +202,6 @@ class BottomAppBar extends React.Component {
           </DialogActions>
         </Dialog>
 
-
         {/* bottom app bar */}
         <AppBar position="fixed" color="primary" className={classes.appBar}>
           <Toolbar className={classes.toolbar}>
@@ -209,6 +216,7 @@ class BottomAppBar extends React.Component {
               color="secondary"
               aria-label="Add"
               className={classes.fabButton}
+              onClick={this.onClickFab}
             >
               <AddIcon />
             </Fab>
