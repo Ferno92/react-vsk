@@ -12,3 +12,14 @@ code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, "Courier New",
     monospace;
 }
+
+.float-left{
+  float: left;
+}
+.float-right{
+  float: right;
+}
+
+.clear{
+  clear: both;
+}
