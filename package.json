@@ -5,6 +5,7 @@
   "main": "index.js",
   "dependencies": {
     "express": "^4.16.4",
+    "node-sass": "^4.11.0",
     "react-scripts": "2.1.1",
     "ssl-express-www": "^3.0.3"
   },
