@@ -2,11 +2,12 @@ import React, { Component } from "react";
 import "./App.css";
 import BottomAppBar from "./components/BottomAppBar";
 import { MuiThemeProvider, createMuiTheme } from "@material-ui/core/styles";
-import { Route, Switch } from 'react-router-dom';
+import { Route, Switch } from "react-router-dom";
 import Dashboard from "./components/Dashboard";
 import Login from "./components/Login";
 import Messages from "./components/Messages";
 import ls from "local-storage";
+import Match from "./pages/match/Match";
 
 const theme = createMuiTheme({
   palette: {
@@ -29,7 +30,7 @@ class App extends Component {
   child = null;
   state = {
     logged: false
-  }
+  };
 
   constructor(props) {
     super(props);
@@ -44,33 +45,45 @@ class App extends Component {
     var currentState = this.state;
     currentState.logged = true;
     this.setState(currentState);
-  }
+  };
 
   logout = () => {
     ls.set("user", null);
     var currentState = this.state;
     currentState.logged = false;
     this.setState(currentState);
-    this.child.current.showMessage("success", "Logout effettuato con successo!");
-  }
+    this.child.current.showMessage(
+      "success",
+      "Logout effettuato con successo!"
+    );
+  };
 
   render() {
-
     const App = () => (
       <div>
         <div>
           <Messages ref={this.child} />
           <MuiThemeProvider theme={theme}>
-            <BottomAppBar logged={this.state.logged} logout={this.logout} navigationMenuOpen={false} logoutDialogOpen={false} />
+            <BottomAppBar
+              logged={this.state.logged}
+              logout={this.logout}
+              navigationMenuOpen={false}
+              logoutDialogOpen={false}
+            />
+            <Switch>
+              <Route exact path="/" component={Dashboard} />
+              <Route
+                path="/login"
+                render={props => (
+                  <Login {...props} loginSuccess={this.loginSuccess} />
+                )}
+              />
+              <Route path="/match" component={Match} />
+            </Switch>
           </MuiThemeProvider>
-          <Switch>
-            <Route exact path="/" component={Dashboard} />
-            <Route path="/login"
-              render={(props) => <Login {...props} loginSuccess={this.loginSuccess} />} />
-          </Switch>
         </div>
       </div>
-    )
+    );
     return (
       <Switch>
         <App />

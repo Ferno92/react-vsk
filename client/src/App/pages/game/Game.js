@@ -1,56 +1,94 @@
-import React from 'react';
-import PropTypes from 'prop-types';
-import { withStyles } from '@material-ui/core/styles';
-import Card from '@material-ui/core/Card';
-import CardContent from '@material-ui/core/CardContent';
+import React from "react";
+import PropTypes from "prop-types";
+import { withStyles } from "@material-ui/core/styles";
+import Card from "@material-ui/core/Card";
+import CardContent from "@material-ui/core/CardContent";
+import CardActionArea from "@material-ui/core/CardActionArea";
 
 const styles = {
-    card: {
-        minWidth: 275,
-    },
-    bullet: {
-        display: 'inline-block',
-        margin: '0 2px',
-        transform: 'scale(0.8)',
-    },
-    title: {
-        fontSize: 14,
-    },
-    pos: {
-        marginBottom: 12,
-    },
+  card: {
+    minWidth: 275
+  },
+  bullet: {
+    display: "inline-block",
+    margin: "0 2px",
+    transform: "scale(0.8)"
+  },
+  title: {
+    fontSize: 14
+  },
+  pos: {
+    marginBottom: 12
+  }
 };
 
-function Game(props) {
-    const { classes } = props;
+class Game extends React.Component {
+    classes = this.props;
 
-    function openGame() {
-        console.log("open game " + props.game.id);
-    }
-
+  render() {
     return (
-        <Card className={classes.card + " game-card"}>
-            <CardContent>
-                <div className="game-content" onClick={openGame}>
-                    <div className={"float-left side-text live-text" + (props.game.live ? 'live' : '')}>{props.game.live ? 'Live' : 'Punteggio finale'}</div>
-                    <div className="float-right side-text">{props.game.date !== undefined ? props.game.date.day : ""}</div>
-                    <div className="clear">
-                        <div className={"float-left relevant-text" + (props.game.resultA > props.game.resultB ? 'winner' : "")}>{props.game.teamA}</div>
-                        <div className={"float-right relevant-text" + (props.game.resultA > props.game.resultB ? "winner" : "")}>{props.game.resultA}</div>
-                    </div>
-                    <div className="clear">
-                        <div className={"float-left relevant-text" + (props.game.resultB > props.game.resultA ? "winner" : "")}>{props.game.teamB}</div>
-                        <div className={"float-right relevant-text" + (props.game.resultB > props.game.resultA ? "winner" : "")}>{props.game.resultB}</div>
-                    </div>
-                    <div className="clear side-text">{props.game.location.name}</div>
+      <Card className={this.classes.card + " game-card"}>
+        <CardActionArea>
+          <CardContent>
+            <div className="game-content" onClick={this.props.onClick}>
+              <div
+                className={
+                  "float-left side-text live-text" +
+                  (this.props.game.live ? "live" : "")
+                }
+              >
+                {this.props.game.live ? "Live" : "Punteggio finale"}
+              </div>
+              <div className="float-right side-text">
+                {this.props.game.date !== undefined ? this.props.game.date.day : ""}
+              </div>
+              <div className="clear">
+                <div
+                  className={
+                    "float-left relevant-text" +
+                    (this.props.game.resultA > this.props.game.resultB ? "winner" : "")
+                  }
+                >
+                  {this.props.game.teamA}
                 </div>
-            </CardContent>
-        </Card>
+                <div
+                  className={
+                    "float-right relevant-text" +
+                    (this.props.game.resultA > this.props.game.resultB ? "winner" : "")
+                  }
+                >
+                  {this.props.game.resultA}
+                </div>
+              </div>
+              <div className="clear">
+                <div
+                  className={
+                    "float-left relevant-text" +
+                    (this.props.game.resultB > this.props.game.resultA ? "winner" : "")
+                  }
+                >
+                  {this.props.game.teamB}
+                </div>
+                <div
+                  className={
+                    "float-right relevant-text" +
+                    (this.props.game.resultB > this.props.game.resultA ? "winner" : "")
+                  }
+                >
+                  {this.props.game.resultB}
+                </div>
+              </div>
+              <div className="clear side-text">{this.props.game.location.name}</div>
+            </div>
+          </CardContent>
+        </CardActionArea>
+      </Card>
     );
+  }
 }
 
 Game.propTypes = {
-    classes: PropTypes.object.isRequired,
-  };
-  
-  export default withStyles(styles)(Game);
+  classes: PropTypes.object.isRequired
+};
+
+export default withStyles(styles)(Game);

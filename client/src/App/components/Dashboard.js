@@ -48,13 +48,18 @@ class Dashboard extends React.Component {
     }
   }
 
+  openGame(id){
+    console.log("open game ", id);
+    this.props.history.push("/match");
+  }
+
   render() {
     return (
       <div>
         {
           this.state != null?
             this.state.games.map(game => {
-            return (<Game key={game.id} game={game}/>)
+            return (<Game key={game.id} game={game} onClick={this.openGame.bind(this)}/>)
           })
           : ""
         }
