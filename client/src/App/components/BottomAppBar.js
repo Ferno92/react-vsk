@@ -24,6 +24,9 @@ import DialogContent from '@material-ui/core/DialogContent';
 import DialogContentText from '@material-ui/core/DialogContentText';
 import DialogTitle from '@material-ui/core/DialogTitle';
 import Button from '@material-ui/core/Button';
+import store from "../store/index.js";
+import { updateAppbar } from "../actions";
+import {connect} from "react-redux";
 
 const styles = theme => ({
   text: {
@@ -57,17 +60,29 @@ const styles = theme => ({
     margin: "0 auto"
   }
 });
+const updateProps = () => {
+  console.log(store.getState());
+}
+
+const mapStateToProps = state => {
+  console.log("mapStateToProps", state);
+  return {
+    navigationMenuOpen: state.appBar.navigationMenuOpen,
+    logoutDialogOpen: state.appBar.logoutDialogOpen  
+  }
+}
 
 class BottomAppBar extends React.Component {
-  state = {
-    navigationMenuOpen: false,
-    logoutDialogOpen: false
-  };
+
+  componentDidMount(){
+    store.subscribe(updateProps);
+  }
 
   updateState = (type, value) => {
-    const currentState = this.state;
-    this.state[type] = value;
-    this.setState(currentState);
+    // const currentState = this.state;
+    // this.state[type] = value;
+    // this.setState(currentState);
+    store.dispatch(updateAppbar(type, value));
   };
 
   toggleDrawer = open => () => {
@@ -76,7 +91,7 @@ class BottomAppBar extends React.Component {
 
   
   toggleLogoutDialog = () => {
-    this.updateState("logoutDialogOpen", !this.state.logoutDialogOpen);
+    this.updateState("logoutDialogOpen", !store.getState().appBar.logoutDialogOpen);
   };
 
   onClickFab = () => {
@@ -165,7 +180,7 @@ class BottomAppBar extends React.Component {
         {/* navigation menu */}
         <SwipeableDrawer
           anchor="bottom"
-          open={this.state.navigationMenuOpen}
+          open={this.props.navigationMenuOpen}
           onClose={this.toggleDrawer(false)}
           onOpen={this.toggleDrawer(true)}
         >
@@ -181,7 +196,7 @@ class BottomAppBar extends React.Component {
 
         {/* logout dialog */}
         <Dialog
-          open={this.state.logoutDialogOpen}
+          open={store.getState().appBar.logoutDialogOpen}
           onClose={this.toggleLogoutDialog}
           aria-labelledby="alert-dialog-title"
           aria-describedby="alert-dialog-description"
@@ -239,4 +254,4 @@ BottomAppBar.propTypes = {
   classes: PropTypes.object.isRequired
 };
 
-export default withStyles(styles)(BottomAppBar);
+export default withStyles(styles)(connect(mapStateToProps)(BottomAppBar));

@@ -135,9 +135,6 @@ class CustomizedSnackbars extends React.Component {
     );
   }
 }
-
-CustomizedSnackbars.propTypes = {
-  classes: PropTypes.object.isRequired,
-};
+;
 
 export default (CustomizedSnackbars);

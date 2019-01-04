@@ -61,7 +61,7 @@ class App extends Component {
         <div>
           <Messages ref={this.child} />
           <MuiThemeProvider theme={theme}>
-            <BottomAppBar logged={this.state.logged} logout={this.logout} />
+            <BottomAppBar logged={this.state.logged} logout={this.logout} navigationMenuOpen={false} logoutDialogOpen={false} />
           </MuiThemeProvider>
           <Switch>
             <Route exact path="/" component={Dashboard} />
