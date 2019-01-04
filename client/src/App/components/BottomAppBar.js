@@ -25,7 +25,7 @@ import DialogContentText from '@material-ui/core/DialogContentText';
 import DialogTitle from '@material-ui/core/DialogTitle';
 import Button from '@material-ui/core/Button';
 import store from "../store/index.js";
-import { updateAppbar } from "../actions";
+import { updateAppbar, showCreateMatch } from "../actions";
 import {connect} from "react-redux";
 
 const styles = theme => ({
@@ -95,7 +95,7 @@ class BottomAppBar extends React.Component {
   };
 
   onClickFab = () => {
-
+    store.dispatch(showCreateMatch(true));
   }
 
   logoutUser = ()=> {

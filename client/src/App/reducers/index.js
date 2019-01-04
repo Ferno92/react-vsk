@@ -5,7 +5,11 @@ export default (state, action) => {
           ...state,
           appBar: {...state.appBar, [action.obj]: action.value}
         };
-  
+        case "SHOW_CREATEMATCH":
+        return {
+          ...state,
+          dashboard: {...state.dashboard, createMatchOpen: action.open}
+        };
       default:
         return state;
     }

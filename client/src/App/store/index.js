@@ -6,6 +6,9 @@ const initialState = {
     visible: true,
     navigationMenuOpen: false,
     logoutDialogOpen: false
+  },
+  dashboard:{
+    createMatchOpen: false
   }
 };
 const store = createStore(reducer, initialState);

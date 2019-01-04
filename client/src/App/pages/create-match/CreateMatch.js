@@ -13,31 +13,34 @@ import IconButton from '@material-ui/core/IconButton';
 import Typography from '@material-ui/core/Typography';
 import CloseIcon from '@material-ui/icons/Close';
 import Slide from '@material-ui/core/Slide';
+import store from "../../store/index.js";
+import { showCreateMatch } from "../../actions";
+import {connect} from "react-redux";
 
 const styles = {
   appBar: {
     position: 'relative',
+    background: "#000"
   },
   flex: {
     flex: 1,
   },
 };
 
+const mapStateToProps = state => {
+  return {
+    open: state.dashboard.createMatchOpen
+  }
+}
+
 function Transition(props) {
   return <Slide direction="up" {...props} />;
 }
 
 class FullScreenDialog extends React.Component {
-  state = {
-    open: this.props.open,
-  };
-
-//   handleClickOpen = () => {
-//     this.setState({ open: true });
-//   };
 
   handleClose = () => {
-    this.setState({ open: false });
+    store.dispatch(showCreateMatch(false));
   };
 
   render() {
@@ -46,7 +49,7 @@ class FullScreenDialog extends React.Component {
       <div>
         <Dialog
           fullScreen
-          open={this.state.open}
+          open={this.props.open}
           onClose={this.handleClose}
           TransitionComponent={Transition}
         >
@@ -56,10 +59,10 @@ class FullScreenDialog extends React.Component {
                 <CloseIcon />
               </IconButton>
               <Typography variant="h6" color="inherit" className={classes.flex}>
-                Sound
+                Crea Partita
               </Typography>
               <Button color="inherit" onClick={this.handleClose}>
-                save
+                Salva
               </Button>
             </Toolbar>
           </AppBar>
@@ -82,4 +85,4 @@ FullScreenDialog.propTypes = {
   classes: PropTypes.object.isRequired,
 };
 
-export default withStyles(styles)(FullScreenDialog);
+export default withStyles(styles)(connect(mapStateToProps)(FullScreenDialog));

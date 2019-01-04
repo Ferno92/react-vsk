@@ -5,6 +5,7 @@ import ls from "local-storage";
 import Game from "../pages/game/Game";
 import "../pages/game/Game.scss";
 import CreateMatch from "../pages/create-match/CreateMatch";
+import {connect} from "react-redux";
 
 const firebaseConfig = {
   apiKey: "AIzaSyDBvxVAYOPwEk2ApbU_DfQ-tmcgOfJ6k4Y",
@@ -14,6 +15,12 @@ const firebaseConfig = {
   storageBucket: "",
   messagingSenderId: "589403062376"
 };
+
+const mapStateToProps = state => {
+  return {
+    createMatchOpen: state.dashboard.createMatchOpen
+  }
+}
 
 class Dashboard extends React.Component {
 
@@ -54,10 +61,10 @@ class Dashboard extends React.Component {
         
 
         {/* create dialog */}
-        <CreateMatch open={false} />
+        <CreateMatch/>
       </div>
     );
   }
 }
 
-export default (Dashboard);
+export default connect(mapStateToProps)(Dashboard);
