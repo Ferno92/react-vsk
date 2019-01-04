@@ -28,9 +28,11 @@ class Dashboard extends React.Component {
     this.setState({ games: [] });
     var user = ls.get("user");
     if (user !== null) {
-      var app = firebase.initializeApp(firebaseConfig);
+      if (!firebase.apps.length) {
+        firebase.initializeApp(firebaseConfig);
+     }
 
-      this.db = app.database();
+      this.db = firebase.app().database();
 
       //var games = this.db.ref("/" + user.googleId + "/games");
       var games = this.db.ref("users/SnTg4iqWQ4WnwFkIDhh7WmtTHFo2/games");
