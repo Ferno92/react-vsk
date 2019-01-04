@@ -68,7 +68,8 @@ const mapStateToProps = state => {
   console.log("mapStateToProps", state);
   return {
     navigationMenuOpen: state.appBar.navigationMenuOpen,
-    logoutDialogOpen: state.appBar.logoutDialogOpen  
+    logoutDialogOpen: state.appBar.logoutDialogOpen,
+    visible: state.appBar.visible  
   }
 }
 
@@ -218,6 +219,7 @@ class BottomAppBar extends React.Component {
         </Dialog>
 
         {/* bottom app bar */}
+        {this.props.visible &&
         <AppBar position="fixed" color="primary" className={classes.appBar}>
           <Toolbar className={classes.toolbar}>
             <IconButton
@@ -245,6 +247,7 @@ class BottomAppBar extends React.Component {
             </div>
           </Toolbar>
         </AppBar>
+        }
       </div>
     );
   }

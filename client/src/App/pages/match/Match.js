@@ -9,6 +9,8 @@ import Toolbar from "@material-ui/core/Toolbar";
 import Typography from "@material-ui/core/Typography";
 import IconButton from "@material-ui/core/IconButton";
 import SwipeableViews from 'react-swipeable-views';
+import store from "../../store/index";
+import {updateAppbar} from "../../actions/index";
 
 const styles = theme => ({
   header: {
@@ -47,6 +49,11 @@ class Match extends React.Component {
   state = {
     value: 0
   };
+
+componentDidMount(){
+    
+    store.dispatch(updateAppbar("visible", false));
+}
 
   handleChange = (event, value) => {
     this.setState({ value });

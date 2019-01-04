@@ -6,6 +6,8 @@ import Game from "../pages/game/Game";
 import "../pages/game/Game.scss";
 import CreateMatch from "../pages/create-match/CreateMatch";
 import {connect} from "react-redux";
+import store from "../store/index";
+import {updateAppbar} from "../actions/index";
 
 const firebaseConfig = {
   apiKey: "AIzaSyDBvxVAYOPwEk2ApbU_DfQ-tmcgOfJ6k4Y",
@@ -47,6 +49,10 @@ class Dashboard extends React.Component {
         console.log("data_list", data_list);
         this.setState({ games: data_list });
       })
+    }
+
+    if(!store.getState().appBar.visible){
+      store.dispatch(updateAppbar("visible", true));
     }
   }
 
