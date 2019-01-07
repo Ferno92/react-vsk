@@ -58,7 +58,11 @@ class Dashboard extends React.Component {
 
   openGame(id){
     console.log("open game ", id);
-    this.props.history.push("/match");
+    store.dispatch(updateAppbar("visible", false));
+    var self = this;
+    setTimeout(function(){
+      self.props.history.push("/match");
+    }, 200);
   }
 
   render() {
@@ -66,8 +70,8 @@ class Dashboard extends React.Component {
       <div>
         {
           this.state != null?
-            this.state.games.map(game => {
-            return (<Game key={game.id} game={game} onClick={this.openGame.bind(this)}/>)
+            this.state.games.map((game, index) => {
+            return (<Game key={game.id} game={game} index={index} onClick={this.openGame.bind(this)} opening={false}/>)
           })
           : ""
         }

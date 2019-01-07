@@ -8,9 +8,9 @@ import AppBar from "@material-ui/core/AppBar";
 import Toolbar from "@material-ui/core/Toolbar";
 import Typography from "@material-ui/core/Typography";
 import IconButton from "@material-ui/core/IconButton";
-import SwipeableViews from 'react-swipeable-views';
+import SwipeableViews from "react-swipeable-views";
 import store from "../../store/index";
-import {updateAppbar} from "../../actions/index";
+import { updateAppbar } from "../../actions/index";
 
 const styles = theme => ({
   header: {
@@ -42,7 +42,7 @@ function TabContainer({ children, dir }) {
 
 TabContainer.propTypes = {
   children: PropTypes.node.isRequired,
-  dir: PropTypes.string.isRequired,
+  dir: PropTypes.string.isRequired
 };
 
 class Match extends React.Component {
@@ -50,16 +50,15 @@ class Match extends React.Component {
     value: 0
   };
 
-componentDidMount(){
-    
+  componentDidMount() {
     store.dispatch(updateAppbar("visible", false));
-}
+  }
 
   handleChange = (event, value) => {
     this.setState({ value });
   };
 
-  onBack(){
+  onBack() {
     this.props.history.push("/");
   }
 
@@ -67,30 +66,34 @@ componentDidMount(){
     const { classes, theme } = this.props;
 
     return (
-      <div  className={classes.root}>
+      <div className={classes.root}>
         <AppBar position="static" color="primary">
           <Toolbar>
-            <IconButton color="inherit" aria-label="Menu" onClick={this.onBack.bind(this)}>
+            <IconButton
+              color="inherit"
+              aria-label="Menu"
+              onClick={this.onBack.bind(this)}
+            >
               <ArrowBack />
             </IconButton>
             <Typography variant="h6" color="inherit" className={classes.grow}>
               Team A vs Team B
             </Typography>
           </Toolbar>
-        <Tabs
+          <Tabs
             value={this.state.value}
             onChange={this.handleChange}
             indicatorColor="secondary"
             textColor="secondary"
             centered
           >
-            <Tab label="Item One" />
-            <Tab label="Item Two" />
-            <Tab label="Item Three" />
+            <Tab label="Item One" style={this.state.value !== 0 ? { color: "#808080" } : {}} />
+            <Tab label="Item Two" style={this.state.value !== 1 ? { color: "#808080" } : {}} />
+            <Tab label="Item Three" style={this.state.value !== 2 ? { color: "#808080" } : {}} />
           </Tabs>
         </AppBar>
         <SwipeableViews
-          axis={theme.direction === 'rtl' ? 'x-reverse' : 'x'}
+          axis={theme.direction === "rtl" ? "x-reverse" : "x"}
           index={this.state.value}
           onChangeIndex={this.handleChangeIndex}
         >

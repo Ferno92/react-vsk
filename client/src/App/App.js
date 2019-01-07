@@ -69,6 +69,7 @@ class App extends Component {
               logout={this.logout}
               navigationMenuOpen={false}
               logoutDialogOpen={false}
+              hideAppBar ={false}
             />
             <Switch>
               <Route exact path="/" component={Dashboard} />

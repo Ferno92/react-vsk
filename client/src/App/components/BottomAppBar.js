@@ -18,15 +18,16 @@ import ListItemText from "@material-ui/core/ListItemText";
 import { Home, Group, Flag, ExitToApp } from "@material-ui/icons";
 import { Link } from "react-router-dom";
 import ls from "local-storage";
-import Dialog from '@material-ui/core/Dialog';
-import DialogActions from '@material-ui/core/DialogActions';
-import DialogContent from '@material-ui/core/DialogContent';
-import DialogContentText from '@material-ui/core/DialogContentText';
-import DialogTitle from '@material-ui/core/DialogTitle';
-import Button from '@material-ui/core/Button';
+import Dialog from "@material-ui/core/Dialog";
+import DialogActions from "@material-ui/core/DialogActions";
+import DialogContent from "@material-ui/core/DialogContent";
+import DialogContentText from "@material-ui/core/DialogContentText";
+import DialogTitle from "@material-ui/core/DialogTitle";
+import Button from "@material-ui/core/Button";
 import store from "../store/index.js";
 import { updateAppbar, showCreateMatch } from "../actions";
-import {connect} from "react-redux";
+import { connect } from "react-redux";
+import Slide from "@material-ui/core/Slide";
 
 const styles = theme => ({
   text: {
@@ -62,20 +63,20 @@ const styles = theme => ({
 });
 const updateProps = () => {
   console.log(store.getState());
-}
+};
 
 const mapStateToProps = state => {
   console.log("mapStateToProps", state);
   return {
     navigationMenuOpen: state.appBar.navigationMenuOpen,
     logoutDialogOpen: state.appBar.logoutDialogOpen,
-    visible: state.appBar.visible  
-  }
-}
+    visible: state.appBar.visible,
+    hideAppBar: !state.appBar.visible
+  };
+};
 
 class BottomAppBar extends React.Component {
-
-  componentDidMount(){
+  componentDidMount() {
     store.subscribe(updateProps);
   }
 
@@ -90,46 +91,63 @@ class BottomAppBar extends React.Component {
     this.updateState("navigationMenuOpen", open);
   };
 
-  
   toggleLogoutDialog = () => {
-    this.updateState("logoutDialogOpen", !store.getState().appBar.logoutDialogOpen);
+    this.updateState(
+      "logoutDialogOpen",
+      !store.getState().appBar.logoutDialogOpen
+    );
   };
 
   onClickFab = () => {
     store.dispatch(showCreateMatch(true));
-  }
+  };
 
-  logoutUser = ()=> {
+  logoutUser = () => {
     this.toggleLogoutDialog();
     this.props.logout();
-  }
+  };
 
   render() {
     const { classes } = this.props;
     const notLoggedList = (
       <List>
-        <ListItem button key={"Homepage"} component={Link} to='/' selected={window.location.pathname === "/"}>
+        <ListItem
+          button
+          key={"Homepage"}
+          component={Link}
+          to="/"
+          selected={window.location.pathname === "/"}
+        >
           <ListItemIcon>
             <Home />
           </ListItemIcon>
           <ListItemText primary={"Homepage"} />
         </ListItem>
 
-        <ListItem button key={"Login"} component={Link} to='/login' selected={window.location.pathname === "/login"}>
+        <ListItem
+          button
+          key={"Login"}
+          component={Link}
+          to="/login"
+          selected={window.location.pathname === "/login"}
+        >
           <ListItemIcon>
             <Group />
           </ListItemIcon>
           <ListItemText primary={"Login"} />
         </ListItem>
 
-        <ListItem button key={"Flag"} selected={window.location.pathname === "/liveGameList"}>
+        <ListItem
+          button
+          key={"Flag"}
+          selected={window.location.pathname === "/liveGameList"}
+        >
           <ListItemIcon>
             <Flag />
           </ListItemIcon>
           <ListItemText primary={"Partite in corso"} />
         </ListItem>
       </List>
-
     );
     const username = this.props.logged ? ls.get("user").name : "";
     const userPictureUrl = this.props.logged ? ls.get("user").imageUrl : "";
@@ -138,15 +156,21 @@ class BottomAppBar extends React.Component {
       <div className={classes.fullList}>
         <List>
           <ListItem button key={username}>
-          <ListItemIcon>
-              <img src={userPictureUrl} className="user-picture"/>
+            <ListItemIcon>
+              <img src={userPictureUrl} className="user-picture" />
             </ListItemIcon>
             <ListItemText primary={username} />
           </ListItem>
         </List>
         <Divider />
         <List>
-          <ListItem button key={"Homepage"} component={Link} to='/' selected={window.location.pathname === "/"}>
+          <ListItem
+            button
+            key={"Homepage"}
+            component={Link}
+            to="/"
+            selected={window.location.pathname === "/"}
+          >
             <ListItemIcon>
               <Home />
             </ListItemIcon>
@@ -160,7 +184,11 @@ class BottomAppBar extends React.Component {
             <ListItemText primary={"Le tue squadre"} />
           </ListItem>
 
-          <ListItem button key={"Flag"} selected={window.location.pathname === "/liveGameList"}>
+          <ListItem
+            button
+            key={"Flag"}
+            selected={window.location.pathname === "/liveGameList"}
+          >
             <ListItemIcon>
               <Flag />
             </ListItemIcon>
@@ -219,35 +247,35 @@ class BottomAppBar extends React.Component {
         </Dialog>
 
         {/* bottom app bar */}
-        {this.props.visible &&
-        <AppBar position="fixed" color="primary" className={classes.appBar}>
-          <Toolbar className={classes.toolbar}>
-            <IconButton
-              color="inherit"
-              aria-label="Open drawer"
-              onClick={this.toggleDrawer(true)}
-            >
-              <MenuIcon />
-            </IconButton>
-            <Fab
-              color="secondary"
-              aria-label="Add"
-              className={classes.fabButton}
-              onClick={this.onClickFab}
-            >
-              <AddIcon />
-            </Fab>
-            <div>
-              <IconButton color="inherit">
-                <SearchIcon />
-              </IconButton>
-              <IconButton color="inherit">
-                <MoreIcon />
-              </IconButton>
-            </div>
-          </Toolbar>
-        </AppBar>
-        }
+        <Slide direction="up" in={!this.props.hideAppBar} mountOnEnter unmountOnExit>
+            <AppBar position="fixed" color="primary" className={classes.appBar}>
+              <Toolbar className={classes.toolbar}>
+                <IconButton
+                  color="inherit"
+                  aria-label="Open drawer"
+                  onClick={this.toggleDrawer(true)}
+                >
+                  <MenuIcon />
+                </IconButton>
+                <Fab
+                  color="secondary"
+                  aria-label="Add"
+                  className={classes.fabButton}
+                  onClick={this.onClickFab}
+                >
+                  <AddIcon />
+                </Fab>
+                <div>
+                  <IconButton color="inherit">
+                    <SearchIcon />
+                  </IconButton>
+                  <IconButton color="inherit">
+                    <MoreIcon />
+                  </IconButton>
+                </div>
+              </Toolbar>
+            </AppBar>
+        </Slide>
       </div>
     );
   }
