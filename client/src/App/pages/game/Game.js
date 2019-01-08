@@ -31,9 +31,9 @@ class Game extends React.Component {
       this.state = {opening: props.opening};
     }
 
-  onClickGame(id){
+  onClickGame(){
     this.setState({opening: true});
-    this.props.onClick(id);
+    this.props.onClick(this.props.game.id);
   }
 
   render() {

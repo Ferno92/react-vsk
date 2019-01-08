@@ -9,7 +9,7 @@ import Messages from "./components/Messages";
 import ls from "local-storage";
 import Match from "./pages/match/Match";
 
-const theme = createMuiTheme({
+export const theme = createMuiTheme({
   palette: {
     primary: {
       light: "#484848",
@@ -25,6 +25,15 @@ const theme = createMuiTheme({
     }
   }
 });
+
+ export const firebaseConfig = {
+  apiKey: "AIzaSyDBvxVAYOPwEk2ApbU_DfQ-tmcgOfJ6k4Y",
+  authDomain: "ionicvsk.firebaseapp.com",
+  databaseURL: "https://ionicvsk.firebaseio.com",
+  projectId: "ionicvsk",
+  storageBucket: "",
+  messagingSenderId: "589403062376"
+};
 
 class App extends Component {
   child = null;
@@ -79,7 +88,7 @@ class App extends Component {
                   <Login {...props} loginSuccess={this.loginSuccess} />
                 )}
               />
-              <Route path="/match" component={Match} />
+              <Route path="/match:id" component={Match} />
             </Switch>
           </MuiThemeProvider>
         </div>

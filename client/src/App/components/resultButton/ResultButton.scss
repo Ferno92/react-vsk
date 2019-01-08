@@ -1,0 +1,108 @@
+$size-big: 100px;
+$size-medium: 80px;
+$size-small: 60px;
+$top-big: 90px;
+$top-medium: 70px;
+$top-small: 52px;
+$font-button-small: 32px;
+$font-button-medium: 44px;
+$font-result-small: 44px;
+$font-result-medium: 64px;
+.result-button-container {
+  position: relative;
+
+  .result {
+    font-size: 84px;
+    width: 100%;
+    display: inline-block;
+    text-align: center;
+    position: absolute;
+    z-index: 99;
+    color: #fff;
+    top: $top-big;
+  }
+  .button-half {
+    height: $size-big;
+    width: $size-big * 2;
+    display: block !important;
+    margin: 0 auto;
+    &.top {
+      border-top-left-radius: $size-big * 2 !important;
+      border-top-right-radius: $size-big * 2 !important;
+      span:first-child {
+        margin-top: -30px;
+      }
+    }
+    &.bottom {
+      border-bottom-left-radius: $size-big * 2;
+      border-bottom-right-radius: $size-big * 2;
+      span:first-child {    
+          margin-top: 15px;
+      }
+    }
+    span:first-child {    
+        font-size: 52px;
+      font-weight: 100;
+    }
+  }
+}
+
+@media (max-width: 768px) {
+  .result-button-container {
+    .result {
+      top: $top-medium;
+      font-size: $font-result-medium;
+    }
+    .button-half {
+      height: $size-medium;
+      width: $size-medium * 2;
+      &.top {
+        border-top-left-radius: $size-medium * 2 !important;
+        border-top-right-radius: $size-medium * 2 !important;
+        span:first-child {
+          margin-top: -15px;
+        }
+      }
+      &.bottom {
+        border-bottom-left-radius: $size-medium * 2;
+        border-bottom-right-radius: $size-medium * 2;
+        span:first-child {
+          margin-top: 10px;
+        }
+      }
+      
+    span:first-child {    
+        font-size: $font-button-medium;
+    }
+    }
+  }
+}
+@media (max-width: 414px) {
+  .result-button-container {
+    .result {
+      top: $top-small;
+      font-size: $font-result-small;
+    }
+    .button-half {
+      height: $size-small;
+      width: $size-small * 2;
+      &.top {
+        border-top-left-radius: $size-small * 2 !important;
+        border-top-right-radius: $size-small * 2 !important;
+        span:first-child {
+          margin-top: -15px;
+        }
+      }
+      &.bottom {
+        border-bottom-left-radius: $size-small * 2;
+        border-bottom-right-radius: $size-small * 2;
+        span:first-child {
+          margin-top: 10px;
+        }
+      }
+      span:first-child {    
+          font-size: $font-button-small;
+      }
+    }
+  }
+}

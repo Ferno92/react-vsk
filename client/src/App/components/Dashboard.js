@@ -8,15 +8,7 @@ import CreateMatch from "../pages/create-match/CreateMatch";
 import {connect} from "react-redux";
 import store from "../store/index";
 import {updateAppbar} from "../actions/index";
-
-const firebaseConfig = {
-  apiKey: "AIzaSyDBvxVAYOPwEk2ApbU_DfQ-tmcgOfJ6k4Y",
-  authDomain: "ionicvsk.firebaseapp.com",
-  databaseURL: "https://ionicvsk.firebaseio.com",
-  projectId: "ionicvsk",
-  storageBucket: "",
-  messagingSenderId: "589403062376"
-};
+import {firebaseConfig} from "../App";
 
 const mapStateToProps = state => {
   return {
@@ -61,7 +53,7 @@ class Dashboard extends React.Component {
     store.dispatch(updateAppbar("visible", false));
     var self = this;
     setTimeout(function(){
-      self.props.history.push("/match");
+   self.props.history.push("/match" + id);
     }, 200);
   }
 
