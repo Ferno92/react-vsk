@@ -9,6 +9,36 @@
       font-size: 36px;
     }
   }
+  &.set-info {
+    width: 50%;
+    margin: 0 auto;
+    font-size: 26px;
+
+    .separator {
+      text-align: center;
+    }
+  }
+  .flex-child-bigger {
+    flex-grow: 2;
+    text-align: center;
+  }
+}
+
+.set-list{
+  margin-top: 40px;
+  font-size: 18px;
+  .set-title{
+    text-align: center;
+  }
+  .flex-container {    
+    margin: 15px 0;
+    .flex-child {
+      text-align: center;
+      &.bold{
+        font-weight: bold;
+      }
+    }
+  }
 }
 
 @media (max-width: 768px) {

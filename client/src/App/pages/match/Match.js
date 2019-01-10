@@ -80,7 +80,7 @@ class Match extends React.Component {
           ...prevState,
           currentGame: snapshot.val()
         }));
-        console.log(this.state.currentGame);
+        // console.log(this.state.currentGame);
       });
     }
   }
@@ -96,13 +96,53 @@ class Match extends React.Component {
     this.props.history.push("/");
   }
 
-  add(team){ 
-    var currentGame = {...this.state.currentGame, [team]: this.state.currentGame[team] + 1}
+  add(team) {
+    var setsMissing = {
+      a: team === "resultA" ? 1 : 0,
+      b: team === "resultA" ? 0 : 1
+    };
+    var currentGame = {
+      ...this.state.currentGame,
+      sets: this.state.currentGame.sets
+        ? {
+            ...this.state.currentGame.sets,
+            [this.state.currentGame.sets.length - 1]: {
+              ...this.state.currentGame.sets[
+                this.state.currentGame.sets.length - 1
+              ],
+              [team === "resultA" ? "a" : "b"]:
+                this.state.currentGame.sets[
+                  this.state.currentGame.sets.length - 1
+                ][team === "resultA" ? "a" : "b"] + 1
+            }
+          }
+        : [setsMissing]
+    };
     this.gameRef.update(currentGame);
   }
 
-  remove(team){
-    var currentGame = {...this.state.currentGame, [team]: this.state.currentGame[team] - 1}
+  remove(team) {
+    var setsMissing = {
+      a: team === "resultA" ? -1 : 0,
+      b: team === "resultA" ? 0 : -1
+    };
+    var currentGame = {
+      ...this.state.currentGame,
+      sets: this.state.currentGame.sets
+        ? {
+            ...this.state.currentGame.sets,
+            [this.state.currentGame.sets.length - 1]: {
+              ...this.state.currentGame.sets[
+                this.state.currentGame.sets.length - 1
+              ],
+              [team === "resultA" ? "a" : "b"]:
+                this.state.currentGame.sets[
+                  this.state.currentGame.sets.length - 1
+                ][team === "resultA" ? "a" : "b"] - 1
+            }
+          }
+        : [setsMissing]
+    };
     this.gameRef.update(currentGame);
   }
 
@@ -155,16 +195,92 @@ class Match extends React.Component {
           onChangeIndex={this.handleChangeIndex}
         >
           <TabContainer dir={theme.direction}>
+            <div className="flex-container set-info">
+              <div className="flex-child-bigger">
+                {this.state.currentGame ? this.state.currentGame.resultA : ""}
+              </div>
+              <div className="flex-child separator">-</div>
+
+              <div className="flex-child-bigger">
+                {this.state.currentGame ? this.state.currentGame.resultB : ""}
+              </div>
+            </div>
             <div className="flex-container">
               <div className="flex-child">
-                <p className="team-name">{this.state.currentGame ? this.state.currentGame.teamA : ""}</p>
-                <ResultButton result={this.state.currentGame ? this.state.currentGame.resultA : 0} team={0} add={this.add.bind(this, "resultA")} remove={this.remove.bind(this, "resultA")}/>
+                <p className="team-name">
+                  {this.state.currentGame ? this.state.currentGame.teamA : ""}
+                </p>
+                <ResultButton
+                  result={
+                    this.state.currentGame
+                      ? this.state.currentGame.sets
+                        ? this.state.currentGame.sets[
+                            this.state.currentGame.sets.length - 1
+                          ].a
+                        : 0
+                      : 0
+                  }
+                  team={0}
+                  add={this.add.bind(this, "resultA")}
+                  remove={this.remove.bind(this, "resultA")}
+                />
               </div>
               <div className="flex-child">
-                <p className="team-name">{this.state.currentGame ? this.state.currentGame.teamB : ""}</p>
-                <ResultButton result={this.state.currentGame ? this.state.currentGame.resultB : 0} team={1}  add={this.add.bind(this, "resultB")} remove={this.remove.bind(this, "resultB")}/>  
+                <p className="team-name">
+                  {this.state.currentGame ? this.state.currentGame.teamB : ""}
+                </p>
+                <ResultButton
+                  result={
+                    this.state.currentGame
+                      ? this.state.currentGame.sets
+                        ? this.state.currentGame.sets[
+                            this.state.currentGame.sets.length - 1
+                          ].b
+                        : 0
+                      : 0
+                  }
+                  team={1}
+                  add={this.add.bind(this, "resultB")}
+                  remove={this.remove.bind(this, "resultB")}
+                />
               </div>
-
+            </div>
+            <div className="set-list">
+              {this.state.currentGame && this.state.currentGame.sets
+                ? this.state.currentGame.sets.map((set, index) => {
+                    var inCorso = (
+                      <div key={index}>
+                        <div className="set-title">{index + 1 + "° SET: "}</div>
+                        <div className="flex-container">
+                          <div className={"flex-child"}>In corso...</div>
+                        </div>
+                      </div>
+                    );
+                    return index === 0 ? (
+                      inCorso
+                    ) : (
+                      <div key={index}>
+                        <div className="set-title">{index + 1 + "° SET: "}</div>
+                        <div className="flex-container">
+                          <div
+                            className={
+                              "flex-child " + (set.a > set.b ? "bold" : "")
+                            }
+                          >
+                            {set.a}
+                          </div>
+                          <div
+                            className={
+                              "flex-child " + (set.b > set.a ? "bold" : "")
+                            }
+                          >
+                            {set.b}
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })
+                : ""}
             </div>
           </TabContainer>
           <TabContainer dir={theme.direction}>Item Two</TabContainer>
