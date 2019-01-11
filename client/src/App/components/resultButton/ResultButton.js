@@ -12,6 +12,7 @@ class ResultButton extends React.Component {
               color="primary"
               className="button-half top"
               onClick={this.props.add}
+              disabled={this.props.disabled}
             >
               +
             </Button>
@@ -23,6 +24,7 @@ class ResultButton extends React.Component {
               color="primary"
               className="button-half bottom"
               onClick={this.props.remove}
+              disabled={this.props.disabled}
             >
               -
             </Button>

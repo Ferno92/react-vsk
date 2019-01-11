@@ -9,6 +9,11 @@ const initialState = {
   },
   dashboard:{
     createMatchOpen: false
+  },
+  createMatch: {
+    teamA: "",
+    teamB: "",
+    save: false
   }
 };
 const store = createStore(reducer, initialState);

@@ -62,11 +62,11 @@ const styles = theme => ({
   }
 });
 const updateProps = () => {
-  console.log(store.getState());
+  // console.log(store.getState());
 };
 
 const mapStateToProps = state => {
-  console.log("mapStateToProps", state);
+  // console.log("mapStateToProps", state);
   return {
     navigationMenuOpen: state.appBar.navigationMenuOpen,
     logoutDialogOpen: state.appBar.logoutDialogOpen,

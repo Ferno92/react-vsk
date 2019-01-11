@@ -9,14 +9,42 @@ import {connect} from "react-redux";
 import store from "../store/index";
 import {updateAppbar} from "../actions/index";
 import {firebaseConfig} from "../App";
+import * as moment from "moment";
 
 const mapStateToProps = state => {
   return {
     createMatchOpen: state.dashboard.createMatchOpen
   }
 }
+var gamesRef = null;
 
 class Dashboard extends React.Component {
+
+  goToNewMatch(){
+    if(store.getState().createMatch.save){
+      const newGameRef = gamesRef.push();
+      
+      var date = {
+        ms: moment(new Date()).valueOf(),
+        day: moment(new Date()).format("MMM/DD")
+      };
+      const promise = newGameRef.set({
+        id: newGameRef.key,
+        teamA: store.getState().createMatch.teamA,
+        teamB: store.getState().createMatch.teamB,
+        resultA: 0,
+        resultB: 0,
+        date: date,
+        // location: location,
+        live: true,
+        // homeTeamId: this.teamId
+      });
+      promise.then(() =>{
+        this.openGame(newGameRef.key);
+      }
+            );
+    }
+  }
 
   componentDidMount() {
     this.setState({ games: [] });
@@ -29,8 +57,8 @@ class Dashboard extends React.Component {
       this.db = firebase.app().database();
 
       //var games = this.db.ref("/" + user.googleId + "/games");
-      var games = this.db.ref("users/SnTg4iqWQ4WnwFkIDhh7WmtTHFo2/games");
-      games.on("value", snapshot => {
+      gamesRef = this.db.ref("users/SnTg4iqWQ4WnwFkIDhh7WmtTHFo2/games");
+      gamesRef.on("value", snapshot => {
         console.log(snapshot.val());
 
         var data_list = [];
@@ -40,17 +68,23 @@ class Dashboard extends React.Component {
         });
         console.log("data_list", data_list);
         this.setState({ games: data_list });
-      })
+      });
+      
     }
 
     if(!store.getState().appBar.visible){
       store.dispatch(updateAppbar("visible", true));
     }
+    
+    store.subscribe(this.goToNewMatch.bind(this));
+  }
+
+  componentWillUnmount(){
+    gamesRef.off('value');
   }
 
   openGame(id){
     console.log("open game ", id);
-    store.dispatch(updateAppbar("visible", false));
     var self = this;
     setTimeout(function(){
    self.props.history.push("/match" + id);
@@ -59,7 +93,7 @@ class Dashboard extends React.Component {
 
   render() {
     return (
-      <div>
+      <div style={{marginBottom: "70px"}}>
         {
           this.state != null?
             this.state.games.map((game, index) => {

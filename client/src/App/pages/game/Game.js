@@ -38,15 +38,15 @@ class Game extends React.Component {
 
   render() {
     return (
-      <Grow in={true} timeout={500 * this.props.index}>
+      <Grow in={true} timeout={200 * this.props.index}>
       <Card className={this.classes.card + " game-card" +
                   (this.state.opening ? " opening" : "")}>
-      <CardActionArea>
+      <CardActionArea style={{height: "100%"}}>
         <CardContent>
           <div className="game-content" onClick={this.onClickGame.bind(this)}>
             <div
               className={
-                "float-left side-text live-text" +
+                "float-left side-text live-text " +
                 (this.props.game.live ? "live" : "")
               }
             >
@@ -93,7 +93,7 @@ class Game extends React.Component {
                 {this.props.game.resultB}
               </div>
             </div>
-            <div className="clear side-text">{this.props.game.location.name}</div>
+            <div className="clear side-text">{this.props.game.location ? this.props.game.location.name : ""}</div>
           </div>
         </CardContent>
       </CardActionArea>

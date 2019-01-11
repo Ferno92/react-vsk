@@ -1,3 +1,8 @@
+.title-ellipsis{
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
 .flex-container {
   display: flex;
 
