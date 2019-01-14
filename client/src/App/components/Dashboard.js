@@ -6,8 +6,8 @@ import Game from "../pages/game/Game";
 import "../pages/game/Game.scss";
 import CreateMatch from "../pages/create-match/CreateMatch";
 import {connect} from "react-redux";
-import store from "../store/index";
-import {updateAppbar} from "../actions/index";
+import store from "../store/store";
+import {updateAppbar} from "../actions/actions";
 import {firebaseConfig} from "../App";
 import * as moment from "moment";
 

@@ -7,8 +7,8 @@ import { withStyles } from '@material-ui/core/styles';
 import TextField from '@material-ui/core/TextField';
 import Paper from '@material-ui/core/Paper';
 import MenuItem from '@material-ui/core/MenuItem';
-import store from "../../store/index.js";
-import { updateCreateMatch } from "../../actions";
+import store from "../../store/store.js";
+import { updateCreateMatch } from "../../actions/actions";
 
 const suggestions = [
   { label: 'Afghanistan' },

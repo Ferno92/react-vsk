@@ -12,6 +12,8 @@ import Snackbar from '@material-ui/core/Snackbar';
 import SnackbarContent from '@material-ui/core/SnackbarContent';
 import WarningIcon from '@material-ui/icons/Warning';
 import { withStyles } from '@material-ui/core/styles';
+import store from "../store/store";
+import { resetMessages } from '../actions/actions';
 
 const variantIcon = {
   success: CheckCircleIcon,
@@ -93,6 +95,17 @@ class CustomizedSnackbars extends React.Component {
     type: "success"
   };
 
+  constructor(){
+    super();
+    store.subscribe(this.messageSubscriber.bind(this));
+  }
+
+  messageSubscriber(){
+      if(store.getState().message.on){
+        this.showMessage(store.getState().message.type, store.getState().message.text);
+      }
+  }
+
   showMessage = (type, message) => {
     this.setState({
       open: true,
@@ -105,11 +118,20 @@ class CustomizedSnackbars extends React.Component {
     if (reason === 'clickaway') {
       return;
     }
+    var self = this;
+    setTimeout(function(){
+      self.setState({
+        open: false,
+        message: "",
+        type: "success"
+      });
+    }, 200);
 
+    store.dispatch(resetMessages());
     this.setState({
       open: false,
-      message: "",
-      type: "success"
+      message: this.state.message,
+      type: this.state.type
     });
   };
 

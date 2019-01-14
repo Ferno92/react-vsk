@@ -1,7 +1,7 @@
 import { createStore } from "redux";
-import reducer from "../reducers/index";
+import reducer from "../reducers/reducers";
 
-const initialState = {
+export const initialState = {
   appBar: {
     visible: true,
     navigationMenuOpen: false,
@@ -14,6 +14,11 @@ const initialState = {
     teamA: "",
     teamB: "",
     save: false
+  },
+  message: {
+    text: "",
+    type: "success",
+    on: false
   }
 };
 const store = createStore(reducer, initialState);

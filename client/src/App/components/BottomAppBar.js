@@ -24,8 +24,8 @@ import DialogContent from "@material-ui/core/DialogContent";
 import DialogContentText from "@material-ui/core/DialogContentText";
 import DialogTitle from "@material-ui/core/DialogTitle";
 import Button from "@material-ui/core/Button";
-import store from "../store/index.js";
-import { updateAppbar, showCreateMatch } from "../actions";
+import store from "../store/store.js";
+import { updateAppbar, showCreateMatch } from "../actions/actions";
 import { connect } from "react-redux";
 import Slide from "@material-ui/core/Slide";
 

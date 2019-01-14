@@ -12,8 +12,8 @@ import IconButton from "@material-ui/core/IconButton";
 import Typography from "@material-ui/core/Typography";
 import CloseIcon from "@material-ui/icons/Close";
 import Slide from "@material-ui/core/Slide";
-import store from "../../store/index.js";
-import { showCreateMatch, updateCreateMatch } from "../../actions";
+import store from "../../store/store.js";
+import { showCreateMatch, updateCreateMatch, showMessageAction } from "../../actions/actions";
 import { connect } from "react-redux";
 import IntegrationReactSelect from "../../components/autocompleteInputs/AutocompleteInputs";
 
@@ -43,8 +43,13 @@ class FullScreenDialog extends React.Component {
   };
 
   handleSave = () => {
-    store.dispatch(showCreateMatch(false));
-    store.dispatch(updateCreateMatch("save", true));
+    if(store.getState().createMatch.teamA.trim() !== "" && store.getState().createMatch.teamB.trim() !== ""){
+      store.dispatch(showCreateMatch(false));
+      store.dispatch(updateCreateMatch("save", true));
+    }else{
+      //toast
+    store.dispatch(showMessageAction("error", "Errore: campi mancanti o non corretti"));
+    }
   };
 
   render() {

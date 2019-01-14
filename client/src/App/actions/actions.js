@@ -22,3 +22,18 @@ export function updateCreateMatch(obj, value) {
     obj: obj
   }
 }
+
+export function resetMessages(){
+  return {
+    type: "RESET_MESSAGES"
+  }
+}
+
+
+export function showMessageAction(type, text){
+  return {
+    type: "MESSAGE_ACTION",
+    messageType: type,
+    text: text
+  }
+}

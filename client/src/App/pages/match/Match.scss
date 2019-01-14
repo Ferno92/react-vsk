@@ -1,3 +1,7 @@
+.tab-container{
+  margin-top: 105px;
+}
+
 .title-ellipsis{
   overflow: hidden;
   white-space: nowrap;
@@ -28,9 +32,11 @@
     text-align: center;
   }
 }
-
+.undo-container{
+  width: fit-content;
+  margin: 20px auto;
+}
 .set-list{
-  margin-top: 40px;
   font-size: 18px;
   .set-title{
     text-align: center;
