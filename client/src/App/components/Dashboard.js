@@ -57,6 +57,7 @@ class Dashboard extends React.Component {
       this.db = firebase.app().database();
 
       //var games = this.db.ref("/" + user.googleId + "/games");
+      console.log(user);
       gamesRef = this.db.ref("users/SnTg4iqWQ4WnwFkIDhh7WmtTHFo2/games");
       gamesRef.on("value", snapshot => {
         console.log(snapshot.val());
@@ -87,7 +88,7 @@ class Dashboard extends React.Component {
     console.log("open game ", id);
     var self = this;
     setTimeout(function(){
-   self.props.history.push("/match" + id);
+   self.props.history.push("/match/" + id);
     }, 200);
   }
 

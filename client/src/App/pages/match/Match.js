@@ -7,6 +7,7 @@ import ArrowBack from "@material-ui/icons/ArrowBack";
 import Undo from "@material-ui/icons/Undo";
 import Button from "@material-ui/core/Button";
 import Delete from "@material-ui/icons/Delete";
+import Share from "@material-ui/icons/Share";
 import AppBar from "@material-ui/core/AppBar";
 import Toolbar from "@material-ui/core/Toolbar";
 import Typography from "@material-ui/core/Typography";
@@ -24,6 +25,14 @@ import SetHistoryDialog from "../../components/SetHistoryDialog";
 import ListItem from "@material-ui/core/ListItem";
 import List from "@material-ui/core/List";
 import Divider from "@material-ui/core/Divider";
+import Dialog from '@material-ui/core/Dialog';
+import DialogActions from '@material-ui/core/DialogActions';
+import DialogContent from '@material-ui/core/DialogContent';
+import DialogContentText from '@material-ui/core/DialogContentText';
+import DialogTitle from '@material-ui/core/DialogTitle';
+import Menu from '@material-ui/core/Menu';
+import MenuItem from '@material-ui/core/MenuItem';
+import MoreVertIcon from '@material-ui/icons/MoreVert';
 
 const styles = theme => ({
   header: {
@@ -68,33 +77,42 @@ class Match extends React.Component {
     selectedSet: {
       open: false,
       history: []
-    }
+    },
+    confirmDialogOpen: false,
+    spectator: false,
+    anchorEl: null
   };
   gameRef = null;
 
   componentDidMount() {
+
     store.dispatch(updateCreateMatch("save", false));
     store.dispatch(updateAppbar("visible", false));
     var user = ls.get("user");
-    if (user !== null) {
-      if (!firebase.apps.length) {
-        firebase.initializeApp(firebaseConfig);
-      }
-
-      this.db = firebase.app().database();
-
-      //var games = this.db.ref("/" + user.googleId + "/games");
-      this.gameRef = this.db.ref(
-        "users/SnTg4iqWQ4WnwFkIDhh7WmtTHFo2/games/" + this.props.match.params.id
-      );
-      this.gameRef.on("value", snapshot => {
-        this.setState(prevState => ({
-          ...prevState,
-          currentGame: snapshot.val()
-        }));
-        // console.log(this.state.currentGame);
-      });
+    var userId = "";
+    if (user !== null && (this.props.match.params.owner === undefined || this.props.match.params.owner === user.googleId)) {
+      userId = user.googleId;
+    } else {
+      userId = this.props.match.params.owner;
+      this.setState({ ...this.state, spectator: true })
     }
+    if (!firebase.apps.length) {
+      firebase.initializeApp(firebaseConfig);
+    }
+
+    this.db = firebase.app().database();
+
+    //var games = this.db.ref("/" + userId + "/games");
+    this.gameRef = this.db.ref(
+      "users/SnTg4iqWQ4WnwFkIDhh7WmtTHFo2/games/" + this.props.match.params.id
+    );
+    this.gameRef.on("value", snapshot => {
+      this.setState(prevState => ({
+        ...prevState,
+        currentGame: snapshot.val()
+      }));
+      // console.log(this.state.currentGame);
+    });
   }
 
   componentWillUnmount() {
@@ -228,10 +246,7 @@ class Match extends React.Component {
   }
 
   deleteGame() {
-    if (this.state.currentGame.live) {
-      this.gameRef.remove();
-      this.props.history.push("/");
-    }
+    this.setState({ ...this.state, confirmDialogOpen: true });
   }
 
   closeHistory(set) {
@@ -239,13 +254,56 @@ class Match extends React.Component {
   }
 
   openHistory(set) {
-    if(set.history !== undefined){
+    if (set.history !== undefined) {
       this.setState({ ...this.state, selectedSet: { ...set, open: true } });
+    }
+  }
+
+  handleCloseConfirmDialog(toDelete) {
+    if (toDelete) {
+      this.gameRef.remove();
+      this.props.history.push("/");
+    }
+    this.setState({ ...this.state, confirmDialogOpen: false, anchorEl: null });
+
+  }
+
+  handleClickMenu = event => {
+    this.setState({ ...this.state, anchorEl: event.currentTarget });
+  };
+
+  handleCloseMenu = () => {
+    this.setState({ ...this.state, anchorEl: null });
+  };
+
+  share() {
+    var url = window.location.origin;
+    if (this.state.spectator) {
+      // same url
+      url += this.props.pathname;
+    } else {
+      // url += this.props.pathname + "/" + ls.get("user").googleId;
+      url += this.props.pathname + "/SnTg4iqWQ4WnwFkIDhh7WmtTHFo2";
+    }
+    var newVariable = window.navigator;
+    if (newVariable && newVariable.share) {
+      newVariable
+        .share({
+          title: this.state.currentGame.teamA + " vs " + this.state.currentGame.teamB,
+          text: "Segui la partita in diretta: ",
+          url: url
+        })
+        .then(() => console.log("Successful share"))
+        .catch(error => console.log("Error sharing", error));
+    } else {
+      alert("share not supported");
     }
   }
 
   render() {
     const { classes, theme } = this.props;
+    const { anchorEl } = this.state;
+    const openMenu = Boolean(anchorEl);
 
     return (
       <div className={classes.root}>
@@ -268,10 +326,31 @@ class Match extends React.Component {
             <IconButton
               color="inherit"
               aria-label="Menu"
-              onClick={this.deleteGame.bind(this)}
+              onClick={this.handleClickMenu.bind(this)}
             >
-              <Delete />
+              <MoreVertIcon />
             </IconButton>
+            <Menu
+              id="long-menu"
+              anchorEl={anchorEl}
+              open={openMenu}
+              onClose={this.handleCloseMenu}
+              style={{ marginTop: "40px" }}
+            >
+              {!this.state.spectator && (
+                <MenuItem key={"deleteGame"} onClick={this.deleteGame.bind(this)}>
+                  Elimina
+              <Delete />
+                </MenuItem>
+              )}
+
+              <MenuItem key={"shareGame"} onClick={this.share.bind(this)}>
+                Condividi
+              <Share />
+              </MenuItem>
+            </Menu>
+
+
           </Toolbar>
           <Tabs
             value={this.state.value}
@@ -301,16 +380,19 @@ class Match extends React.Component {
           className="tab-container"
         >
           <TabContainer dir={theme.direction}>
-            <div className="flex-container set-info">
-              <div className="flex-child-bigger">
-                {this.state.currentGame ? this.state.currentGame.resultA : ""}
-              </div>
-              <div className="flex-child separator">-</div>
+            {this.state.currentGame && this.state.currentGame.live && (
+              <div className="flex-container set-info">
+                <div className="flex-child-bigger">
+                  {this.state.currentGame ? this.state.currentGame.resultA : ""}
+                </div>
+                <div className="flex-child separator">-</div>
 
-              <div className="flex-child-bigger">
-                {this.state.currentGame ? this.state.currentGame.resultB : ""}
+                <div className="flex-child-bigger">
+                  {this.state.currentGame ? this.state.currentGame.resultB : ""}
+                </div>
               </div>
-            </div>
+            )}
+
             <div className="flex-container">
               <div className="flex-child">
                 <p className="team-name">
@@ -319,17 +401,19 @@ class Match extends React.Component {
                 <ResultButton
                   result={
                     this.state.currentGame
-                      ? this.state.currentGame.sets
+                      ? this.state.currentGame.live ? this.state.currentGame.sets
                         ? this.state.currentGame.sets[
                           this.state.currentGame.sets.length - 1
                         ].a
                         : 0
+                        : this.state.currentGame.resultA
                       : 0
                   }
                   team={0}
                   add={this.add.bind(this, "resultA")}
                   remove={this.remove.bind(this, "resultA")}
                   disabled={this.state.currentGame ? !this.state.currentGame.live : true}
+                  spectator={this.state.spectator}
                 />
               </div>
               <div className="flex-child">
@@ -339,17 +423,21 @@ class Match extends React.Component {
                 <ResultButton
                   result={
                     this.state.currentGame
-                      ? this.state.currentGame.sets
-                        ? this.state.currentGame.sets[
-                          this.state.currentGame.sets.length - 1
-                        ].b
-                        : 0
+                      ?
+                      this.state.currentGame.live ?
+                        this.state.currentGame.sets
+                          ? this.state.currentGame.sets[
+                            this.state.currentGame.sets.length - 1
+                          ].b
+                          : 0
+                        : this.state.currentGame.resultB
                       : 0
                   }
                   team={1}
                   add={this.add.bind(this, "resultB")}
                   remove={this.remove.bind(this, "resultB")}
                   disabled={this.state.currentGame ? !this.state.currentGame.live : true}
+                  spectator={this.state.spectator}
                 />
               </div>
             </div>
@@ -416,6 +504,27 @@ class Match extends React.Component {
           <TabContainer dir={theme.direction}>Item Two</TabContainer>
           <TabContainer dir={theme.direction}>Item Three</TabContainer>
         </SwipeableViews>
+        <Dialog
+          open={this.state.confirmDialogOpen}
+          onClose={this.handleCloseConfirmDialog.bind(this, false)}
+          aria-labelledby="alert-dialog-title"
+          aria-describedby="alert-dialog-description"
+        >
+          <DialogTitle id="alert-dialog-title">{"Elimina partita"}</DialogTitle>
+          <DialogContent>
+            <DialogContentText id="alert-dialog-description">
+              Sei sicuro di voler eliminare la partita?
+            </DialogContentText>
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={this.handleCloseConfirmDialog.bind(this, false)} color="primary">
+              No
+            </Button>
+            <Button onClick={this.handleCloseConfirmDialog.bind(this, true)} color="primary" autoFocus>
+              Si
+            </Button>
+          </DialogActions>
+        </Dialog>
       </div>
     );
   }

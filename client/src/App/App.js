@@ -88,7 +88,7 @@ class App extends Component {
                   <Login {...props} loginSuccess={this.loginSuccess} />
                 )}
               />
-              <Route path="/match:id" component={Match} />
+              <Route path="/match/:id?/:owner?" component={Match} />
             </Switch>
           </MuiThemeProvider>
         </div>

@@ -19,7 +19,11 @@ $font-result-medium: 64px;
     position: absolute;
     z-index: 99;
     color: #fff;
-    top: $top-big;
+    top: $top-big;    
+    pointer-events: none;
+    &.final{
+      color: black;
+    }
   }
   .button-half {
     height: $size-big;
