@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 import "./App.css";
-import BottomAppBar from "./components/BottomAppBar";
+import BottomAppBar from "./components/bottom-appbar/BottomAppBar";
 import { MuiThemeProvider, createMuiTheme } from "@material-ui/core/styles";
 import { Route, Switch } from "react-router-dom";
 import Dashboard from "./components/Dashboard";
@@ -8,6 +8,7 @@ import Login from "./components/Login";
 import Messages from "./components/Messages";
 import ls from "local-storage";
 import Match from "./pages/match/Match";
+import SearchLive from "./pages/search-live/SearchLive";
 
 export const theme = createMuiTheme({
   palette: {
@@ -26,13 +27,22 @@ export const theme = createMuiTheme({
   }
 });
 
- export const firebaseConfig = {
-  apiKey: "AIzaSyDBvxVAYOPwEk2ApbU_DfQ-tmcgOfJ6k4Y",
-  authDomain: "ionicvsk.firebaseapp.com",
-  databaseURL: "https://ionicvsk.firebaseio.com",
-  projectId: "ionicvsk",
-  storageBucket: "",
-  messagingSenderId: "589403062376"
+//  export const firebaseConfig = {
+//   apiKey: "AIzaSyDBvxVAYOPwEk2ApbU_DfQ-tmcgOfJ6k4Y",
+//   authDomain: "ionicvsk.firebaseapp.com",
+//   databaseURL: "https://ionicvsk.firebaseio.com",
+//   projectId: "ionicvsk",
+//   storageBucket: "",
+//   messagingSenderId: "589403062376"
+// };
+export const firebaseConfig = {
+  apiKey: "AIzaSyDO4KLmlNjHJ88eV6bOpH2hHptrBkcD1ko",
+  authDomain: "react-pwa-2280e.firebaseapp.com",
+  databaseURL: "https://react-pwa-2280e.firebaseio.com",
+  projectId: "react-pwa-2280e",
+  storageBucket: "react-pwa-2280e.appspot.com",
+  messagingSenderId: "522350313041"
+
 };
 
 class App extends Component {
@@ -89,6 +99,7 @@ class App extends Component {
                 )}
               />
               <Route path="/match/:id?/:owner?" component={Match} />
+              <Route path="/search" component={SearchLive} />
             </Switch>
           </MuiThemeProvider>
         </div>

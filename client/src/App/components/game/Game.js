@@ -4,7 +4,7 @@ import { withStyles } from "@material-ui/core/styles";
 import Card from "@material-ui/core/Card";
 import CardContent from "@material-ui/core/CardContent";
 import CardActionArea from "@material-ui/core/CardActionArea";
-import Grow from '@material-ui/core/Grow';
+import Grow from "@material-ui/core/Grow";
 
 const styles = {
   card: {
@@ -24,81 +24,119 @@ const styles = {
 };
 
 class Game extends React.Component {
-    classes = this.props;
-    constructor(props){
-      super(props);
-      
-      this.state = {opening: props.opening};
-    }
+  classes = this.props;
+  constructor(props) {
+    super(props);
 
-  onClickGame(){
-    this.setState({opening: true});
+    this.state = { opening: props.opening };
+  }
+
+  onClickGame() {
+    this.setState({ opening: true });
     this.props.onClick(this.props.game.id);
+  }
+
+  getNameChar() {
+    var matches = this.props.owner.displayName.match(/\b(\w)/g); // ['J','S','O','N']
+    var acronym = matches.join("");
+    return acronym;
   }
 
   render() {
     return (
       <Grow in={true} timeout={200 * this.props.index}>
-      <Card className={this.classes.card + " game-card" +
-                  (this.state.opening ? " opening" : "")}>
-      <CardActionArea style={{height: "100%"}}>
-        <CardContent>
-          <div className="game-content" onClick={this.onClickGame.bind(this)}>
-            <div
-              className={
-                "float-left side-text live-text " +
-                (this.props.game.live ? "live" : "")
-              }
-            >
-              {this.props.game.live ? "Live" : "Punteggio finale"}
-            </div>
-            <div className="float-right side-text">
-              {this.props.game.date !== undefined ? this.props.game.date.day : ""}
-            </div>
-            <div className="clear">
+        <Card
+          className={
+            this.classes.card +
+            " game-card" +
+            (this.state.opening ? " opening" : "")
+          }
+        >
+          <CardActionArea style={{ height: "100%" }}>
+            <CardContent>
               <div
-                className={
-                  "float-left relevant-text" +
-                  (this.props.game.resultA > this.props.game.resultB ? "winner" : "") +
-                  (this.state.opening ? " opening" : "")
-                }
+                className="game-content"
+                onClick={this.onClickGame.bind(this)}
               >
-                {this.props.game.teamA}
+                {this.props.owner &&
+                  (this.props.owner.pictureUrl || !this.props.owner.displayName ? (
+                    <img
+                      alt={this.props.owner.displayName}
+                      className="owner"
+                      src={this.props.owner.pictureUrl ? this.props.owner.pictureUrl : "/images/player.svg"}
+                    />
+                  ) : (
+                    <div className="owner"><div className="initial-char">{this.getNameChar()}</div></div>
+                  ))}
+                <div
+                  className={
+                    "float-left side-text live-text " +
+                    (this.props.game.live ? "live" : "")
+                  }
+                >
+                  {this.props.game.live ? "Live" : "Punteggio finale"}
+                </div>
+                <div className="float-right side-text">
+                  {this.props.game.date !== undefined
+                    ? this.props.game.date.day
+                    : ""}
+                </div>
+                <div className="clear">
+                  <div
+                    className={
+                      "float-left relevant-text" +
+                      (this.props.game.resultA > this.props.game.resultB
+                        ? "winner"
+                        : "") +
+                      (this.state.opening ? " opening" : "")
+                    }
+                  >
+                    {this.props.game.teamA}
+                  </div>
+                  <div
+                    className={
+                      "float-right relevant-text" +
+                      (this.props.game.resultA > this.props.game.resultB
+                        ? "winner"
+                        : "")
+                    }
+                  >
+                    {this.props.game.resultA}
+                  </div>
+                </div>
+                <div className="clear">
+                  <div
+                    className={
+                      "float-left relevant-text" +
+                      (this.props.game.resultB > this.props.game.resultA
+                        ? "winner"
+                        : "") +
+                      (this.state.opening ? " opening" : "")
+                    }
+                  >
+                    {this.props.game.teamB}
+                  </div>
+                  <div
+                    className={
+                      "float-right relevant-text" +
+                      (this.props.game.resultB > this.props.game.resultA
+                        ? "winner"
+                        : "")
+                    }
+                  >
+                    {this.props.game.resultB}
+                  </div>
+                </div>
+                <div className="clear side-text">
+                  {this.props.game.location
+                    ? this.props.game.location.name
+                    : ""}
+                </div>
               </div>
-              <div
-                className={
-                  "float-right relevant-text" +
-                  (this.props.game.resultA > this.props.game.resultB ? "winner" : "")
-                }
-              >
-                {this.props.game.resultA}
-              </div>
-            </div>
-            <div className="clear">
-              <div
-                className={
-                  "float-left relevant-text" +
-                  (this.props.game.resultB > this.props.game.resultA ? "winner" : "") +
-                  (this.state.opening ? " opening" : "")
-                }
-              >
-                {this.props.game.teamB}
-              </div>
-              <div
-                className={
-                  "float-right relevant-text" +
-                  (this.props.game.resultB > this.props.game.resultA ? "winner" : "")
-                }
-              >
-                {this.props.game.resultB}
-              </div>
-            </div>
-            <div className="clear side-text">{this.props.game.location ? this.props.game.location.name : ""}</div>
-          </div>
-        </CardContent>
-      </CardActionArea>
-    </Card></Grow>
-      
+            </CardContent>
+          </CardActionArea>
+        </Card>
+      </Grow>
     );
   }
 }

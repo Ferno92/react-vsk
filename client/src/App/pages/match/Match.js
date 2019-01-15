@@ -93,9 +93,8 @@ class Match extends React.Component {
 
     this.db = firebase.app().database();
 
-    //var games = this.db.ref("/" + userId + "/games");
     this.gameRef = this.db.ref(
-      "users/SnTg4iqWQ4WnwFkIDhh7WmtTHFo2/games/" + this.props.match.params.id
+      "users/" + userId + "/games/" + this.props.match.params.id
     );
     this.gameRef.on("value", snapshot => {
       this.setState(prevState => ({
@@ -148,8 +147,7 @@ class Match extends React.Component {
       // same url
       url += this.props.match.url;
     } else {
-      // url += this.props.pathname + "/" + ls.get("user").googleId;
-      url += this.props.match.url + "/SnTg4iqWQ4WnwFkIDhh7WmtTHFo2";
+      url += this.props.match.url + "/" + ls.get("user").googleId;
     }
     var newVariable = window.navigator;
     if (newVariable && newVariable.share) {

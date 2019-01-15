@@ -1,11 +1,15 @@
 import React from "react";
 import GoogleLogin from "react-google-login";
 import ls from "local-storage";
+import { firebaseConfig } from "../App";
+import firebase from "firebase/app";
+import "firebase/database";
 //https://medium.com/@siobhanpmahoney/local-storage-in-a-react-single-page-application-34ba30fc977d
 //https://medium.com/@rocksinghajay/login-with-facebook-and-google-in-reactjs-990d818d5dab
 //https://reacttraining.com/react-router/web/api/withRouter ?
 
 class Login extends React.Component {
+  userRef = null;
   constructor(props, context) {
     super(props, context);
     console.log(ls.get("user"));
@@ -14,12 +18,37 @@ class Login extends React.Component {
     }
   }
 
+  componentWillUnmount() {
+    if (this.userRef !== null) {
+      this.userRef.off("value");
+    }
+  }
+
   responseGoogle = response => {
     console.log(response);
     //TODO check error
     if (response.error === undefined) {
       ls.set("user", response.profileObj);
-      this.redirectToDashboard(true);
+      if (!firebase.apps.length) {
+        firebase.initializeApp(firebaseConfig);
+      }
+
+      this.db = firebase.app().database();
+
+      this.userRef = this.db.ref("/users/" + response.profileObj.googleId);
+      var self = this;
+      this.userRef.on("value", snapshot => {
+        if (snapshot.val() === null) {
+          console.log("null user, add info to db");
+          const promise = self.userRef.set({
+            displayName: response.profileObj.name,
+            pictureUrl: response.profileObj.imageUrl
+          });
+          promise.then(() => {
+            self.redirectToDashboard(true);
+          });
+        }
+      });
     }
   };
 

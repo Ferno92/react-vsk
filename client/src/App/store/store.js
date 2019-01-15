@@ -5,7 +5,10 @@ export const initialState = {
   appBar: {
     visible: true,
     navigationMenuOpen: false,
-    logoutDialogOpen: false
+    logoutDialogOpen: false,
+    fabVisible: true,
+    search: false,
+    inputSearch: ""
   },
   dashboard:{
     createMatchOpen: false

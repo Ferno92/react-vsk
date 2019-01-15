@@ -7,6 +7,7 @@ import IconButton from "@material-ui/core/IconButton";
 import Fab from "@material-ui/core/Fab";
 import MenuIcon from "@material-ui/icons/Menu";
 import AddIcon from "@material-ui/icons/Add";
+import Close from "@material-ui/icons/Close";
 import SearchIcon from "@material-ui/icons/Search";
 import MoreIcon from "@material-ui/icons/MoreVert";
 import SwipeableDrawer from "@material-ui/core/SwipeableDrawer";
@@ -24,10 +25,13 @@ import DialogContent from "@material-ui/core/DialogContent";
 import DialogContentText from "@material-ui/core/DialogContentText";
 import DialogTitle from "@material-ui/core/DialogTitle";
 import Button from "@material-ui/core/Button";
-import store from "../store/store.js";
-import { updateAppbar, showCreateMatch } from "../actions/actions";
+import store from "../../store/store.js";
+import { updateAppbar, showCreateMatch } from "../../actions/actions";
 import { connect } from "react-redux";
 import Slide from "@material-ui/core/Slide";
+import TextField from '@material-ui/core/TextField';
+import purple from '@material-ui/core/colors/purple';
+import "./BottomAppBar.scss";
 
 const styles = theme => ({
   text: {
@@ -59,7 +63,51 @@ const styles = theme => ({
     left: 0,
     right: 0,
     margin: "0 auto"
-  }
+  },
+  inputRoot: {
+    color: "inherit",
+    width: "100%"
+  },
+  inputInput: {
+    paddingTop: theme.spacing.unit,
+    paddingRight: theme.spacing.unit,
+    paddingBottom: theme.spacing.unit,
+    paddingLeft: theme.spacing.unit * 10,
+    transition: theme.transitions.create("width"),
+    width: "100%",
+    [theme.breakpoints.up("sm")]: {
+      width: 120,
+      "&:focus": {
+        width: 200
+      }
+    }
+  },
+  container: {
+    display: 'flex',
+    flexWrap: 'wrap',
+  },
+  textField: {
+    marginLeft: theme.spacing.unit,
+    marginRight: theme.spacing.unit,
+    width: 200
+  },
+
+  cssLabel: {
+    color : 'white'
+  },
+
+  cssOutlinedInput: {
+    '&$cssFocused $notchedOutline': {
+      borderColor: `${theme.palette.secondary.main} !important`,
+    }
+  },
+
+  cssFocused: {},
+
+  notchedOutline: {
+    borderWidth: '1px',
+    borderColor: 'white !important'
+  },
 });
 const updateProps = () => {
   // console.log(store.getState());
@@ -71,7 +119,10 @@ const mapStateToProps = state => {
     navigationMenuOpen: state.appBar.navigationMenuOpen,
     logoutDialogOpen: state.appBar.logoutDialogOpen,
     visible: state.appBar.visible,
-    hideAppBar: !state.appBar.visible
+    hideAppBar: !state.appBar.visible,
+    fabVisible: state.appBar.fabVisible,
+    search: state.appBar.search,
+    inputSearch: state.appBar.inputSearch
   };
 };
 
@@ -107,6 +158,20 @@ class BottomAppBar extends React.Component {
     this.props.logout();
   };
 
+  openCloseSearch() {
+    if(this.props.search){
+      //TODO remove text in input
+      this.updateState("inputSearch", "");
+    }
+    this.updateState("search", !this.props.search);
+  }
+
+  
+  handleSearchChange = event => {
+    console.log(event.target.value);
+    this.updateState("inputSearch", event.target.value);
+  };
+
   render() {
     const { classes } = this.props;
     const notLoggedList = (
@@ -140,7 +205,9 @@ class BottomAppBar extends React.Component {
         <ListItem
           button
           key={"Flag"}
-          selected={window.location.pathname === "/liveGameList"}
+          component={Link}
+          to="/search"
+          selected={window.location.pathname === "/search"}
         >
           <ListItemIcon>
             <Flag />
@@ -187,7 +254,9 @@ class BottomAppBar extends React.Component {
           <ListItem
             button
             key={"Flag"}
-            selected={window.location.pathname === "/liveGameList"}
+            component={Link}
+            to="/search"
+            selected={window.location.pathname === "/search"}
           >
             <ListItemIcon>
               <Flag />
@@ -247,16 +316,22 @@ class BottomAppBar extends React.Component {
         </Dialog>
 
         {/* bottom app bar */}
-        <Slide direction="up" in={!this.props.hideAppBar} mountOnEnter unmountOnExit>
-            <AppBar position="fixed" color="primary" className={classes.appBar}>
-              <Toolbar className={classes.toolbar}>
-                <IconButton
-                  color="inherit"
-                  aria-label="Open drawer"
-                  onClick={this.toggleDrawer(true)}
-                >
-                  <MenuIcon />
-                </IconButton>
+        <Slide
+          direction="up"
+          in={!this.props.hideAppBar}
+          mountOnEnter
+          unmountOnExit
+        >
+          <AppBar position="fixed" color="primary" className={classes.appBar}>
+            <Toolbar className={classes.toolbar}>
+              <IconButton
+                color="inherit"
+                aria-label="Open drawer"
+                onClick={this.toggleDrawer(true)}
+              >
+                <MenuIcon />
+              </IconButton>
+              {this.props.fabVisible && (
                 <Fab
                   color="secondary"
                   aria-label="Add"
@@ -265,16 +340,44 @@ class BottomAppBar extends React.Component {
                 >
                   <AddIcon />
                 </Fab>
+              )}
+              <TextField
+              id="outlined-search"
+              type="search"
+              margin="normal"
+              color="primary"
+              variant="outlined"
+              className={"search-input " + (this.props.search ? "search-open" : "search-close" )}
+        onChange={this.handleSearchChange}
+              InputLabelProps={{
+                classes: {
+                  root: classes.cssLabel,
+                  focused: classes.cssFocused,
+                },
+              }}
+              InputProps={{
+                classes: {
+                  root: classes.cssOutlinedInput,
+                  focused: classes.cssFocused,
+                  notchedOutline: classes.notchedOutline,
+                },
+                inputMode: "numeric"
+              }}
+            />
                 <div>
-                  <IconButton color="inherit">
-                    <SearchIcon />
-                  </IconButton>
-                  <IconButton color="inherit">
-                    <MoreIcon />
-                  </IconButton>
-                </div>
-              </Toolbar>
-            </AppBar>
+                  
+                <IconButton
+                  color="inherit"
+                  onClick={this.openCloseSearch.bind(this)}
+                >
+                  {this.props.search ? (<Close />) : (<SearchIcon />)}
+                </IconButton>
+                <IconButton color="inherit">
+                  <MoreIcon />
+                </IconButton>
+              </div>
+            </Toolbar>
+          </AppBar>
         </Slide>
       </div>
     );
