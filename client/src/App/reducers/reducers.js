@@ -47,20 +47,43 @@ export default (state, action) => {
             //sposto l'ultimo elemento nei past nel current
             currentHistory.present =
               currentHistory.past[currentHistory.past.length - 1];
-            //elimino dai past l'ultimo elemento
-            currentHistory.past.splice(currentHistory.past.length - 1, 1);
+            if(currentHistory.present !== "dashboard"){
+              //elimino dai past l'ultimo elemento
+              currentHistory.past.splice(currentHistory.past.length - 1, 1);
+            }else{
+              //pulisco past
+              currentHistory.past = [];
+            }
+          } else if (currentHistory.present !== "dashboard") { //come push di dashboard
+            //pulisco past
+            currentHistory.past = [];
+            //pulisco future
+            currentHistory.future = [];
+            //setto il nuovo current
+            currentHistory.present = "dashboard";
           } else {
             doNothing = true;
           }
           break;
         case "push":
           // navigo in una nuova pagina
-          //pulisco future
-          currentHistory.future = [];
-          // sposto il current nei past
-          currentHistory.past.push(currentHistory.present);
-          //setto il nuovo current
-          currentHistory.present = action.page;
+          if (action.page !== currentHistory.present) {
+            //pulisco future
+            currentHistory.future = [];
+            if(action.page === "dashboard"){
+              //pulisco past
+              currentHistory.past = [];
+            }else{
+              // sposto il current nei past
+              if(currentHistory.present !== null && currentHistory.present !== "createMatch"){
+                currentHistory.past.push(currentHistory.present);
+              }
+            }
+            //setto il nuovo current
+            currentHistory.present = action.page;
+          } else {
+            doNothing = true;
+          }
           break;
         case "forward":
           //premo "avanti" nel browser
@@ -76,6 +99,8 @@ export default (state, action) => {
             doNothing = true;
           }
           break;
+        case "doNothing":
+          doNothing = action.page;
       }
       currentHistory = { ...currentHistory, doNothing: doNothing };
       return {
