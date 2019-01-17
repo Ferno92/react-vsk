@@ -22,6 +22,11 @@ export const initialState = {
     text: "",
     type: "success",
     on: false
+  },
+  history: {
+    past: [],
+    present: null,
+    future: []
   }
 };
 const store = createStore(reducer, initialState);

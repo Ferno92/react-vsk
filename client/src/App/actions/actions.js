@@ -37,3 +37,11 @@ export function showMessageAction(type, text){
     text: text
   }
 }
+
+export function updateHistory(acction, page){
+  return  {
+    type: "UPDATE_HISTORY",
+    action: action,
+    page: page
+  }
+}

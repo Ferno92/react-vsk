@@ -29,8 +29,8 @@ import store from "../../store/store.js";
 import { updateAppbar, showCreateMatch } from "../../actions/actions";
 import { connect } from "react-redux";
 import Slide from "@material-ui/core/Slide";
-import TextField from '@material-ui/core/TextField';
-import purple from '@material-ui/core/colors/purple';
+import TextField from "@material-ui/core/TextField";
+import purple from "@material-ui/core/colors/purple";
 import "./BottomAppBar.scss";
 
 const styles = theme => ({
@@ -83,8 +83,8 @@ const styles = theme => ({
     }
   },
   container: {
-    display: 'flex',
-    flexWrap: 'wrap',
+    display: "flex",
+    flexWrap: "wrap"
   },
   textField: {
     marginLeft: theme.spacing.unit,
@@ -93,21 +93,21 @@ const styles = theme => ({
   },
 
   cssLabel: {
-    color : 'white'
+    color: "white"
   },
 
   cssOutlinedInput: {
-    '&$cssFocused $notchedOutline': {
-      borderColor: `${theme.palette.secondary.main} !important`,
+    "&$cssFocused $notchedOutline": {
+      borderColor: `${theme.palette.secondary.main} !important`
     }
   },
 
   cssFocused: {},
 
   notchedOutline: {
-    borderWidth: '1px',
-    borderColor: 'white !important'
-  },
+    borderWidth: "1px",
+    borderColor: "white !important"
+  }
 });
 const updateProps = () => {
   // console.log(store.getState());
@@ -159,14 +159,13 @@ class BottomAppBar extends React.Component {
   };
 
   openCloseSearch() {
-    if(this.props.search){
+    if (this.props.search) {
       //TODO remove text in input
       this.updateState("inputSearch", "");
     }
     this.updateState("search", !this.props.search);
   }
 
-  
   handleSearchChange = event => {
     console.log(event.target.value);
     this.updateState("inputSearch", event.target.value);
@@ -342,36 +341,41 @@ class BottomAppBar extends React.Component {
                 </Fab>
               )}
               <TextField
-              id="outlined-search"
-              type="search"
-              margin="normal"
-              color="primary"
-              variant="outlined"
-              className={"search-input " + (this.props.search ? "search-open" : "search-close" )}
-        onChange={this.handleSearchChange}
-              InputLabelProps={{
-                classes: {
-                  root: classes.cssLabel,
-                  focused: classes.cssFocused,
-                },
-              }}
-              InputProps={{
-                classes: {
-                  root: classes.cssOutlinedInput,
-                  focused: classes.cssFocused,
-                  notchedOutline: classes.notchedOutline,
-                },
-                inputMode: "numeric"
-              }}
-            />
-                <div>
-                  
-                <IconButton
-                  color="inherit"
-                  onClick={this.openCloseSearch.bind(this)}
-                >
-                  {this.props.search ? (<Close />) : (<SearchIcon />)}
-                </IconButton>
+                id="outlined-search"
+                type="search"
+                margin="normal"
+                color="primary"
+                variant="outlined"
+                className={
+                  "search-input " +
+                  (this.props.search ? "search-open" : "search-close")
+                }
+                onChange={this.handleSearchChange}
+                InputLabelProps={{
+                  classes: {
+                    root: classes.cssLabel,
+                    focused: classes.cssFocused
+                  }
+                }}
+                InputProps={{
+                  classes: {
+                    root: classes.cssOutlinedInput,
+                    focused: classes.cssFocused,
+                    notchedOutline: classes.notchedOutline
+                  },
+                  inputMode: "numeric"
+                }}
+              />
+              <div>
+                {!this.props.fabVisible && (
+                  <IconButton
+                    color="inherit"
+                    onClick={this.openCloseSearch.bind(this)}
+                  >
+                    {this.props.search ? <Close /> : <SearchIcon />}
+                  </IconButton>
+                )}
+
                 <IconButton color="inherit">
                   <MoreIcon />
                 </IconButton>

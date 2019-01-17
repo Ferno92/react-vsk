@@ -7,7 +7,7 @@ import "../components/game/Game.scss";
 import CreateMatch from "../pages/create-match/CreateMatch";
 import { connect } from "react-redux";
 import store from "../store/store";
-import { updateAppbar } from "../actions/actions";
+import { updateAppbar, showCreateMatch } from "../actions/actions";
 import { firebaseConfig } from "../App";
 import * as moment from "moment";
 
@@ -56,9 +56,17 @@ class Dashboard extends React.Component {
     }
 
     this.storeUnsubscribe = store.subscribe(this.goToNewMatch.bind(this));
+
+    //prevent back button
+    window.history.pushState(null, null, window.location.href);
+    window.onpopstate = function(event) {
+      // window.history.go(1);
+      //close create
+
+      store.dispatch(showCreateMatch(false));
+    };
   }
 
-  
   goToNewMatch() {
     if (store.getState().createMatch.save) {
       console.log("" + this.count, store.getState());
@@ -86,8 +94,10 @@ class Dashboard extends React.Component {
   }
 
   componentWillUnmount() {
-    gamesRef.off("value");
-    if(this.storeUnsubscribe !== null){
+    if (gamesRef !== null) {
+      gamesRef.off("value");
+    }
+    if (this.storeUnsubscribe !== null) {
       this.storeUnsubscribe();
     }
   }

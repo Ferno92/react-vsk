@@ -47,6 +47,7 @@ class SearchLive extends React.Component {
 
   componentDidMount() {
     store.dispatch(updateAppbar("fabVisible", false));
+    store.dispatch(updateAppbar("visible", true));
 
     if (!firebase.apps.length) {
       firebase.initializeApp(firebaseConfig);
@@ -90,7 +91,7 @@ class SearchLive extends React.Component {
     var self = this;
     setTimeout(function() {
       var user = ls.get("user");
-      if (owner.id === user.googleId) {
+      if (user && owner.id === user.googleId) {
         self.props.history.push("/match/" + id);
       } else {
         self.props.history.push("/match/" + id + "/" + owner.id);

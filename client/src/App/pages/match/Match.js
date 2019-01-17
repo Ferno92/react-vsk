@@ -117,7 +117,11 @@ class Match extends React.Component {
   };
 
   onBack() {
-    this.props.history.push("/");
+    if(window.history.length > 0){
+      window.history.back();
+    }else{
+      this.props.history.push("/");
+    }
   }
 
   deleteGame() {
