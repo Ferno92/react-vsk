@@ -3,12 +3,14 @@ import "./App.css";
 import BottomAppBar from "./components/bottom-appbar/BottomAppBar";
 import { MuiThemeProvider, createMuiTheme } from "@material-ui/core/styles";
 import { Route, Switch } from "react-router-dom";
-import Dashboard from "./components/Dashboard";
+import Dashboard from "./pages/dashboard/Dashboard";
 import Login from "./components/Login";
 import Messages from "./components/Messages";
 import ls from "local-storage";
 import Match from "./pages/match/Match";
 import SearchLive from "./pages/search-live/SearchLive";
+import store from "./store/store";
+import {updateLoggedUser} from "./actions/actions";
 
 export const theme = createMuiTheme({
   palette: {
@@ -56,6 +58,7 @@ class App extends Component {
     this.child = React.createRef();
     if (ls.get("user") !== null) {
       this.state.logged = true;
+      store.dispatch(updateLoggedUser(true));
     }
   }
 

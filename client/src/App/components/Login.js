@@ -4,6 +4,8 @@ import ls from "local-storage";
 import { firebaseConfig } from "../App";
 import firebase from "firebase/app";
 import "firebase/database";
+import store from "../store/store";
+import {updateLoggedUser} from "../actions/actions";
 //https://medium.com/@siobhanpmahoney/local-storage-in-a-react-single-page-application-34ba30fc977d
 //https://medium.com/@rocksinghajay/login-with-facebook-and-google-in-reactjs-990d818d5dab
 //https://reacttraining.com/react-router/web/api/withRouter ?
@@ -45,6 +47,7 @@ class Login extends React.Component {
             pictureUrl: response.profileObj.imageUrl
           });
           promise.then(() => {
+            store.dispatch(updateLoggedUser(true));
             self.redirectToDashboard(true);
           });
         }

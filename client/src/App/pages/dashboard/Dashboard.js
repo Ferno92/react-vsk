@@ -2,14 +2,17 @@ import React from "react";
 import firebase from "firebase/app";
 import "firebase/database";
 import ls from "local-storage";
-import Game from "../components/game/Game";
-import "../components/game/Game.scss";
-import CreateMatch from "../pages/create-match/CreateMatch";
+import Game from "../../components/game/Game";
+import "../../components/game/Game.scss";
+import CreateMatch from "..//create-match/CreateMatch";
 import { connect } from "react-redux";
-import store from "../store/store";
-import { updateAppbar, showCreateMatch } from "../actions/actions";
-import { firebaseConfig } from "../App";
+import store from "../../store/store";
+import { updateAppbar, showCreateMatch } from "../../actions/actions";
+import { firebaseConfig } from "../../App";
 import * as moment from "moment";
+import Button from "@material-ui/core/Button";
+import "./Dashboard.scss";
+import { Link } from "react-router-dom";
 
 const mapStateToProps = state => {
   return {
@@ -21,11 +24,13 @@ var gamesRef = null;
 class Dashboard extends React.Component {
   count = 0;
   storeUnsubscribe = null;
+  loggedIn = false;
 
   componentDidMount() {
     this.setState({ games: [] });
     var user = ls.get("user");
     if (user !== null) {
+      this.loggedIn = true;
       if (!firebase.apps.length) {
         firebase.initializeApp(firebaseConfig);
       }
@@ -112,7 +117,7 @@ class Dashboard extends React.Component {
   render() {
     return (
       <div style={{ marginBottom: "70px" }}>
-        {this.state != null
+        {this.state != null && this.loggedIn
           ? this.state.games.map((game, index) => {
               return (
                 <Game
@@ -125,6 +130,22 @@ class Dashboard extends React.Component {
               );
             })
           : ""}
+        {!this.loggedIn && (
+          <div className="ask-login">
+            <div className="ask-login-title">
+              Effettua il login per accedere a più funzionalità!
+            </div>
+            <Button className="to-login"
+              variant="contained"
+              color="primary"
+              key={"Login"}
+              component={Link}
+              to="/login"
+            >
+              Login
+            </Button>
+          </div>
+        )}
 
         {/* create dialog */}
         <CreateMatch />

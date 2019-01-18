@@ -35,6 +35,11 @@ export default (state, action) => {
           on: true
         }
       };
+      case "UPDATE_LOGGED_USER":
+      return {
+        ...state,
+        loggedIn: action.loggedIn
+      }
     case "UPDATE_HISTORY":
       var currentHistory = { ...state.history };
       var doNothing = false;

@@ -30,7 +30,6 @@ import { updateAppbar, showCreateMatch } from "../../actions/actions";
 import { connect } from "react-redux";
 import Slide from "@material-ui/core/Slide";
 import TextField from "@material-ui/core/TextField";
-import purple from "@material-ui/core/colors/purple";
 import "./BottomAppBar.scss";
 
 const styles = theme => ({
@@ -122,7 +121,8 @@ const mapStateToProps = state => {
     hideAppBar: !state.appBar.visible,
     fabVisible: state.appBar.fabVisible,
     search: state.appBar.search,
-    inputSearch: state.appBar.inputSearch
+    inputSearch: state.appBar.inputSearch,
+    loggedIn: state.loggedIn
   };
 };
 
@@ -330,7 +330,7 @@ class BottomAppBar extends React.Component {
               >
                 <MenuIcon />
               </IconButton>
-              {this.props.fabVisible && (
+              {this.props.fabVisible && this.props.loggedIn && (
                 <Fab
                   color="secondary"
                   aria-label="Add"
@@ -376,9 +376,9 @@ class BottomAppBar extends React.Component {
                   </IconButton>
                 )}
 
-                <IconButton color="inherit">
+                {/* <IconButton color="inherit">
                   <MoreIcon />
-                </IconButton>
+                </IconButton> */}
               </div>
             </Toolbar>
           </AppBar>

@@ -27,7 +27,8 @@ export const initialState = {
     past: [],
     present: null,
     future: []
-  }
+  },
+  loggedIn: false
 };
 const store = createStore(reducer, initialState);
 
