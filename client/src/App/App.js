@@ -4,7 +4,7 @@ import BottomAppBar from "./components/bottom-appbar/BottomAppBar";
 import { MuiThemeProvider, createMuiTheme } from "@material-ui/core/styles";
 import { Route, Switch } from "react-router-dom";
 import Dashboard from "./pages/dashboard/Dashboard";
-import Login from "./components/Login";
+import Login from "./pages/login/Login";
 import Messages from "./components/Messages";
 import ls from "local-storage";
 import Match from "./pages/match/Match";

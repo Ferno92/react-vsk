@@ -1,0 +1,47 @@
+.Login {
+  margin-bottom: 60px;
+  .logo-container {
+    margin: 35px;
+    .login-logo {
+      width: 40px;
+      margin: 30px auto;
+      display: block;
+      width: 15vw;
+    }
+
+    .description {
+      margin-bottom: 10px;
+      text-align: justify;
+    }
+
+    .error-label {
+      color: red;
+    }
+  }
+  .enter-with {
+    margin-top: -16px;
+    background: #fff;
+    font-size: 20px;
+    width: fit-content;
+    margin: -16px auto 0px auto;
+    padding: 0 15px;
+  }
+
+  .button-container {
+    margin-top: 20px;
+    padding-bottom: 10px;
+  }
+
+  .social-container {
+    display: flex;
+    margin-top: 30px;
+
+    .social-buttons {
+      flex-grow: 1;
+      button {
+        margin: 0 auto;
+        display: block;
+      }
+    }
+  }
+}
