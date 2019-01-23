@@ -269,7 +269,7 @@ class Login extends React.Component {
           </div>
           <div className="social-buttons">
             <GoogleLogin
-              clientId={process.env.REACT_APP_GOOGLE_CLIENT_ID}
+              clientId="343378147790-1kena3ipfeao0cletlripd7vbae975dl.apps.googleusercontent.com"
               buttonText="LOGIN WITH GOOGLE"
               onSuccess={this.responseGoogle}
               onFailure={this.responseGoogle}

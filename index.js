@@ -25,9 +25,6 @@ app.get('/client/src/service-worker.js', (req, res) => {
 });
 
 const port = process.env.PORT || 5000;
-process.env.REACT_APP_GOOGLE_CLIENT_ID="343378147790-1kena3ipfeao0cletlripd7vbae975dl.apps.googleusercontent.com";
-process.env.REACT_APP_FIREBASE_API_KEY="AIzaSyDO4KLmlNjHJ88eV6bOpH2hHptrBkcD1ko";
-console.log('process ' + process.env.REACT_APP_GOOGLE_CLIENT_ID);
 
 app.listen(port);
 console.log('App is listening on port ' + port);
