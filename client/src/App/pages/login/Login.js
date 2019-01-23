@@ -4,6 +4,7 @@ import ls from "local-storage";
 import { firebaseConfig } from "../../App";
 import firebase from "firebase/app";
 import "firebase/database";
+import 'firebase/auth';
 import store from "../../store/store";
 import { updateLoggedUser } from "../../actions/actions";
 import "./Login.scss";
@@ -11,6 +12,8 @@ import FacebookLogin from "react-facebook-login";
 import TextField from "@material-ui/core/TextField";
 import Button from "@material-ui/core/Button";
 import Divider from "@material-ui/core/Divider";
+import FormControlLabel from "@material-ui/core/FormControlLabel";
+import Checkbox from "@material-ui/core/Checkbox";
 //https://medium.com/@siobhanpmahoney/local-storage-in-a-react-single-page-application-34ba30fc977d
 //https://medium.com/@rocksinghajay/login-with-facebook-and-google-in-reactjs-990d818d5dab
 //https://reacttraining.com/react-router/web/api/withRouter ?
@@ -20,16 +23,44 @@ class Login extends React.Component {
   state = {
     userError: false,
     passError: false,
-    username: "",
-    password: ""
+    email: "",
+    password: "",
+    showPassword: false
   };
 
   constructor(props, context) {
     super(props, context);
-    console.log(ls.get("user"));
     if (ls.get("user") !== null) {
       this.redirectToDashboard(false);
     }
+  }
+
+  componentDidMount(){
+    
+    if (!firebase.apps.length) {
+      firebase.initializeApp(firebaseConfig);
+    }
+    var self = this;
+    firebase.auth().onAuthStateChanged(function(user){
+      console.log("user on firebase: ", user);
+      if(user){
+        // User is signed in.
+
+        const userObj = {
+          email: user.email,
+          familyName: "",
+          givenName: "",
+          id: user.uid,
+          imageUrl: user.photoURL,
+          name: user.displayName ? user.displayName : user.email,
+          type: "firebase"
+        }
+        self.saveUser(userObj);
+      }else{
+        // User is signed out.
+      }
+    });
+    firebase.auth().signOut();//mock temp
   }
 
   componentWillUnmount() {
@@ -44,30 +75,45 @@ class Login extends React.Component {
     console.log(response);
     //TODO check error
     if (response.error === undefined) {
-      ls.set("user", response.profileObj);
+      const userObj = {
+        email: response.email,
+        familyName: response.familyName,
+        givenName: response.givenName,
+        id: response.googleId,
+        imageUrl: response.imageUrl,
+        name: response.displayName ? response.displayName : response.email,
+        type: "google"
+      }
+      this.saveUser(userObj);
+    }
+  };
+
+  saveUser = (user) =>{
+    ls.set("user", user);
       if (!firebase.apps.length) {
         firebase.initializeApp(firebaseConfig);
       }
 
       this.db = firebase.app().database();
 
-      this.userRef = this.db.ref("/users/" + response.profileObj.googleId);
+      this.userRef = this.db.ref("/users/" + user.id);
       var self = this;
       this.userRef.on("value", snapshot => {
         if (snapshot.val() === null) {
           console.log("null user, add info to db");
           const promise = self.userRef.set({
-            displayName: response.profileObj.name,
-            pictureUrl: response.profileObj.imageUrl
+            displayName: user.name,
+            pictureUrl: user.imageUrl
           });
           promise.then(() => {
-            store.dispatch(updateLoggedUser(true));
+            store.dispatch(updateLoggedUser(true)); //todo snackbar ok logged
             self.redirectToDashboard(true);
           });
+        }else{
+          self.redirectToDashboard(true);
         }
       });
-    }
-  };
+  }
 
   redirectToDashboard = hasFeedback => {
     if (hasFeedback) {
@@ -80,7 +126,7 @@ class Login extends React.Component {
     if (type === "user") {
       this.setState({
         ...this.state,
-        username: event.target.value,
+        email: event.target.value,
         userError: false
       });
     } else {
@@ -94,11 +140,13 @@ class Login extends React.Component {
 
   login = () => {
     if (this.validate()) {
+      firebase.auth().signInWithEmailAndPassword(this.state.email, this.state.password);
     }
   };
 
   register = () => {
     if (this.validate()) {
+      firebase.auth().createUserWithEmailAndPassword(this.state.email, this.state.password);
     }
   };
 
@@ -106,13 +154,13 @@ class Login extends React.Component {
     var isValid = false;
     var userError = false;
     var passError = false;
-    if (this.state.username.trim().length > 0) {
+    if (this.state.email.trim().length > 0 && this.validateEmail(this.state.email.trim())) {
       isValid = true;
     } else {
       userError = true;
     }
 
-    if (this.state.password.trim().length > 0) {
+    if (this.state.password.trim().length > 7 && /\d/.test(this.state.password.trim()) && /[A-Z]/.test(this.state.password.trim())) {
       //validate password with capital letters and numbers
       isValid = isValid ? true : false;
     } else {
@@ -127,19 +175,31 @@ class Login extends React.Component {
     return isValid;
   };
 
+  validateEmail = (email) => {
+    var re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+    return re.test(String(email).toLowerCase());
+}
+
+  onShowPassword = () => {
+    this.setState({
+      ...this.state,
+      showPassword: !this.state.showPassword
+    });
+  };
+
   render() {
     return (
       <div className="Login">
         <div className="logo-container">
           <img className="login-logo" alt="logo" src="/icon.png" />
           <div className="description">
-            Benvenuto! Registrati inserendo username e password che desideri
+            Benvenuto! Registrati inserendo email e password che desideri
             usare o effettua il login con le tue credenziali se ti sei già
             registrato.
           </div>
           <TextField
             id="user"
-            label="Username"
+            label="Email"
             margin="normal"
             variant="outlined"
             error={this.state.userError}
@@ -147,7 +207,7 @@ class Login extends React.Component {
             onChange={this.onChange.bind(this, "user")}
           />
           {this.state.userError && (
-            <div className="error-label">*Inserire username</div>
+            <div className="error-label">*Inserirsci una email valida</div>
           )}
           <TextField
             id="pass"
@@ -155,14 +215,29 @@ class Login extends React.Component {
             margin="normal"
             variant="outlined"
             error={this.state.passError}
-            type="password"
+            type={this.state.showPassword ? "normal" : "password"}
             autoComplete="current-password"
             style={{ width: "100%" }}
             onChange={this.onChange.bind(this, "pass")}
           />
           {this.state.passError && (
-            <div className="error-label">*Inserire password</div>
+            <div className="error-label">
+              *La password deve contenere almeno 8 caratteri, di cui almeno un
+              numero e una lettera maiuscola
+            </div>
           )}
+
+          <FormControlLabel
+            control={
+              <Checkbox
+                checked={this.state.showPassword}
+                onChange={this.onShowPassword}
+                value="show"
+                color="primary"                
+              />
+            }
+            label="Mostra password"
+          />
           <div className="button-container">
             <Button variant="contained" color="primary" onClick={this.login}>
               Entra
@@ -190,7 +265,7 @@ class Login extends React.Component {
           </div>
           <div className="social-buttons">
             <GoogleLogin
-              clientId="208284925648-u76mj4ulkproaqu8np57pv2444s8deuh.apps.googleusercontent.com"
+              clientId={process.env.REACT_APP_GOOGLE_CLIENT_ID}
               buttonText="LOGIN WITH GOOGLE"
               onSuccess={this.responseGoogle}
               onFailure={this.responseGoogle}

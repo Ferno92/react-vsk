@@ -91,7 +91,7 @@ class SearchLive extends React.Component {
     var self = this;
     setTimeout(function() {
       var user = ls.get("user");
-      if (user && owner.id === user.googleId) {
+      if (user && owner.id === user.id) {
         self.props.history.push("/match/" + id);
       } else {
         self.props.history.push("/match/" + id + "/" + owner.id);

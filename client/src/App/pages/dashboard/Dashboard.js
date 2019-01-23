@@ -30,6 +30,7 @@ class Dashboard extends React.Component {
     this.setState({ games: [] });
     var user = ls.get("user");
     if (user !== null) {
+      console.log(user);
       this.loggedIn = true;
       if (!firebase.apps.length) {
         firebase.initializeApp(firebaseConfig);
@@ -37,7 +38,7 @@ class Dashboard extends React.Component {
 
       this.db = firebase.app().database();
 
-      gamesRef = this.db.ref("/users/" + user.googleId + "/games");
+      gamesRef = this.db.ref("/users/" + user.id + "/games");
       gamesRef.on("value", snapshot => {
         console.log(snapshot.val());
 

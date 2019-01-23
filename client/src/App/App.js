@@ -38,7 +38,7 @@ export const theme = createMuiTheme({
 //   messagingSenderId: "589403062376"
 // };
 export const firebaseConfig = {
-  apiKey: "AIzaSyDO4KLmlNjHJ88eV6bOpH2hHptrBkcD1ko",
+  apiKey: process.env.REACT_APP_FIREBASE_API_KEY,
   authDomain: "react-pwa-2280e.firebaseapp.com",
   databaseURL: "https://react-pwa-2280e.firebaseio.com",
   projectId: "react-pwa-2280e",

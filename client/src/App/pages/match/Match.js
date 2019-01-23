@@ -81,8 +81,8 @@ class Match extends React.Component {
     store.dispatch(updateAppbar("visible", false));
     var user = ls.get("user");
     var userId = "";
-    if (user !== null && (this.props.match.params.owner === undefined || this.props.match.params.owner === user.googleId)) {
-      userId = user.googleId;
+    if (user !== null && (this.props.match.params.owner === undefined || this.props.match.params.owner === user.id)) {
+      userId = user.id;
     } else {
       userId = this.props.match.params.owner;
       this.setState({ ...this.state, spectator: true })
@@ -151,7 +151,7 @@ class Match extends React.Component {
       // same url
       url += this.props.match.url;
     } else {
-      url += this.props.match.url + "/" + ls.get("user").googleId;
+      url += this.props.match.url + "/" + ls.get("user").id;
     }
     var newVariable = window.navigator;
     if (newVariable && newVariable.share) {
