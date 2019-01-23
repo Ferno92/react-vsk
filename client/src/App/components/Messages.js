@@ -94,10 +94,24 @@ class CustomizedSnackbars extends React.Component {
     message: "",
     type: "success"
   };
+  storeUnsubscribe = null;
 
   constructor(){
     super();
-    store.subscribe(this.messageSubscriber.bind(this));
+    console.log("message constructor");
+    
+    this.storeUnsubscribe = store.subscribe(this.messageSubscriber.bind(this));
+  }
+
+  componentDidMount(){
+    this.messageSubscriber();
+  }
+
+  componentWillUnmount(){
+    
+    if (this.storeUnsubscribe !== null) {
+      this.storeUnsubscribe();
+    }
   }
 
   messageSubscriber(){

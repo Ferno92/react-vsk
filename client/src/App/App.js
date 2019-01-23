@@ -11,6 +11,8 @@ import Match from "./pages/match/Match";
 import SearchLive from "./pages/search-live/SearchLive";
 import store from "./store/store";
 import {updateLoggedUser} from "./actions/actions";
+import 'firebase/auth';
+import firebase from "firebase/app";
 
 export const theme = createMuiTheme({
   palette: {
@@ -70,6 +72,13 @@ class App extends Component {
   };
 
   logout = () => {
+    if(ls.get("user").type === "firebase"){
+      
+    if (!firebase.apps.length) {
+      firebase.initializeApp(firebaseConfig);
+    }
+      firebase.auth().signOut();//mock temp
+    }
     ls.set("user", null);
     var currentState = this.state;
     currentState.logged = false;

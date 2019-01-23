@@ -6,7 +6,7 @@ import firebase from "firebase/app";
 import "firebase/database";
 import 'firebase/auth';
 import store from "../../store/store";
-import { updateLoggedUser } from "../../actions/actions";
+import { updateLoggedUser, showMessageAction } from "../../actions/actions";
 import "./Login.scss";
 import FacebookLogin from "react-facebook-login";
 import TextField from "@material-ui/core/TextField";
@@ -29,6 +29,7 @@ class Login extends React.Component {
   };
 
   constructor(props, context) {
+     //TODO: IMPROVE SNACKBAR ABSTRACTING MESSAGES?
     super(props, context);
     if (ls.get("user") !== null) {
       this.redirectToDashboard(false);
@@ -60,7 +61,6 @@ class Login extends React.Component {
         // User is signed out.
       }
     });
-    firebase.auth().signOut();//mock temp
   }
 
   componentWillUnmount() {
@@ -106,11 +106,15 @@ class Login extends React.Component {
             pictureUrl: user.imageUrl
           });
           promise.then(() => {
-            store.dispatch(updateLoggedUser(true)); //todo snackbar ok logged
+            
+            store.dispatch(updateLoggedUser(true));
             self.redirectToDashboard(true);
+            store.dispatch(showMessageAction("success", "Login effettuato con successo"));
           });
         }else{
+          store.dispatch(updateLoggedUser(true));
           self.redirectToDashboard(true);
+          store.dispatch(showMessageAction("success", "Login effettuato con successo"));
         }
       });
   }
