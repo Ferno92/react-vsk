@@ -1,13 +1,48 @@
-.image{
+.profile {
+  position: relative;
+
+  .image {
     width: 30vw;
     height: 30vw;
     display: block;
     margin: 20px auto;
     border-radius: 50%;
     border: solid 2px;
-}
-.inputs{
+  }
+
+  .edit-fab {
+    position: absolute;
+    top: 20vw;
+    right: 33vw;
+  }
+
+  .inputs {
     margin: 25px auto !important;
     display: block !important;
     width: fit-content !important;
+  }
+  .expansion-panel {
+    margin: 0 auto;
+    width: fit-content;
+    margin-bottom: 30px;
+
+    .expansion-details {
+      display: block;
+    }
+  }
+
+  .teams,
+  .friends {
+    text-align: center;
+  }
+
+  .edit-save-container {
+    margin: 0 auto;
+    display: block;
+    margin-top: 30px;
+    width: fit-content;
+    .buttons {
+      margin: 0 15px;
+    }
+  }
 }

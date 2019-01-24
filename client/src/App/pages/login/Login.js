@@ -30,7 +30,8 @@ class Login extends React.Component {
   };
 
   constructor(props, context) {
-     //TODO: IMPROVE SNACKBAR ABSTRACTING MESSAGES?
+    //TODO: IMPROVE SNACKBAR ABSTRACTING MESSAGES?
+     //TODO: reset password
     super(props, context);
     if (ls.get("user") !== null) {
       this.redirectToDashboard(false);
