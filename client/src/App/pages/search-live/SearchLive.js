@@ -48,6 +48,7 @@ class SearchLive extends React.Component {
   componentDidMount() {
     store.dispatch(updateAppbar("fabVisible", false));
     store.dispatch(updateAppbar("visible", true));
+    store.dispatch(updateAppbar("searchButtonVisible", true));
 
     if (!firebase.apps.length) {
       firebase.initializeApp(firebaseConfig);

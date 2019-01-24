@@ -9,7 +9,7 @@ import MenuIcon from "@material-ui/icons/Menu";
 import AddIcon from "@material-ui/icons/Add";
 import Close from "@material-ui/icons/Close";
 import SearchIcon from "@material-ui/icons/Search";
-import MoreIcon from "@material-ui/icons/MoreVert";
+// import MoreIcon from "@material-ui/icons/MoreVert";
 import SwipeableDrawer from "@material-ui/core/SwipeableDrawer";
 import List from "@material-ui/core/List";
 import Divider from "@material-ui/core/Divider";
@@ -122,7 +122,8 @@ const mapStateToProps = state => {
     fabVisible: state.appBar.fabVisible,
     search: state.appBar.search,
     inputSearch: state.appBar.inputSearch,
-    loggedIn: state.loggedIn
+    loggedIn: state.loggedIn,
+    searchButtonVisible: state.appBar.searchButtonVisible
   };
 };
 
@@ -221,7 +222,10 @@ class BottomAppBar extends React.Component {
     const fullList = (
       <div className={classes.fullList}>
         <List>
-          <ListItem button key={username}>
+          <ListItem button key={username}
+          component={Link}
+          to="/profile"
+          selected={window.location.pathname === "/profile"}>
             <ListItemIcon>
               <img src={userPictureUrl} className="user-picture" />
             </ListItemIcon>
@@ -367,7 +371,7 @@ class BottomAppBar extends React.Component {
                 }}
               />
               <div>
-                {!this.props.fabVisible && (
+                {!this.props.fabVisible && this.props.searchButtonVisible && (
                   <IconButton
                     color="inherit"
                     onClick={this.openCloseSearch.bind(this)}

@@ -13,6 +13,7 @@ import store from "./store/store";
 import {updateLoggedUser} from "./actions/actions";
 import 'firebase/auth';
 import firebase from "firebase/app";
+import Profile from "./pages/profile/Profile";
 
 export const theme = createMuiTheme({
   palette: {
@@ -112,6 +113,7 @@ class App extends Component {
               />
               <Route path="/match/:id?/:owner?" component={Match} />
               <Route path="/search" component={SearchLive} />
+              <Route path="/profile" component={Profile} />
             </Switch>
           </MuiThemeProvider>
         </div>

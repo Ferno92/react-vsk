@@ -1,3 +1,22 @@
+.empty_games_container {
+  width: 100vw !important;
+  margin-top: 15vh;
+  
+  .empty-games-image{
+    height: 50vw;
+    width: 50vw;
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: cover;
+  }
+
+  .empty-games-description {
+    padding: 10px 30px;
+    text-align: center;
+    font-size: 20px;
+  }
+}
+
 .ask-login {
   position: absolute;
   top: 25%;

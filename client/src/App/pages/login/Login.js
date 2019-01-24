@@ -17,6 +17,7 @@ import Checkbox from "@material-ui/core/Checkbox";
 //https://medium.com/@siobhanpmahoney/local-storage-in-a-react-single-page-application-34ba30fc977d
 //https://medium.com/@rocksinghajay/login-with-facebook-and-google-in-reactjs-990d818d5dab
 //https://reacttraining.com/react-router/web/api/withRouter ?
+//https://www.robinwieruch.de/complete-firebase-authentication-react-tutorial/#firebase-authentication
 
 class Login extends React.Component {
   userRef = null;

@@ -8,7 +8,8 @@ export const initialState = {
     logoutDialogOpen: false,
     fabVisible: true,
     search: false,
-    inputSearch: ""
+    inputSearch: "",
+    searchButtonVisible: true
   },
   dashboard:{
     createMatchOpen: false

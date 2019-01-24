@@ -13,6 +13,7 @@ import * as moment from "moment";
 import Button from "@material-ui/core/Button";
 import "./Dashboard.scss";
 import { Link } from "react-router-dom";
+import Grid from "@material-ui/core/Grid";
 
 const mapStateToProps = state => {
   return {
@@ -118,7 +119,7 @@ class Dashboard extends React.Component {
   render() {
     return (
       <div style={{ marginBottom: "70px" }}>
-        {this.state != null && this.loggedIn
+        {this.state != null && this.loggedIn && this.state.games.length > 0
           ? this.state.games.map((game, index) => {
               return (
                 <Game
@@ -130,7 +131,13 @@ class Dashboard extends React.Component {
                 />
               );
             })
-          : ""}
+          : (this.state != null && this.loggedIn && this.state.games.length === 0 ?
+            (
+              <Grid container justify = "center" className="empty_games_container"> 
+              <div className="empty-games-image" style={{backgroundImage: "url(/images/volley_empty_list.png)"}}></div>
+              <div className="empty-games-description">Non hai partite salvate.. Incomincia creandone una o naviga nel menu per vedere le partite in corso!</div>
+            </Grid>)
+            : "")}
         {!this.loggedIn && (
           <div className="ask-login">
             <div className="ask-login-title">
