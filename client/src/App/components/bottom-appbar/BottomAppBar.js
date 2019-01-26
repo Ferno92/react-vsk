@@ -223,11 +223,14 @@ class BottomAppBar extends React.Component {
       <div className={classes.fullList}>
         <List>
           <ListItem button key={username}
-          component={Link}
-          to="/profile"
-          selected={window.location.pathname === "/profile"}>
+            component={Link}
+            to="/profile"
+            selected={window.location.pathname === "/profile"}>
             <ListItemIcon>
-              <img src={userPictureUrl} className="user-picture" />
+              <div src={userPictureUrl} className="user-picture"
+                style={{
+                  backgroundImage: "url(" + userPictureUrl + ")"
+                }}></div>
             </ListItemIcon>
             <ListItemText primary={username} />
           </ListItem>

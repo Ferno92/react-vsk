@@ -10,6 +10,8 @@ import "./Profile.scss";
 import ExpansionPanel from "@material-ui/core/ExpansionPanel";
 import ExpansionPanelSummary from "@material-ui/core/ExpansionPanelSummary";
 import ExpansionPanelDetails from "@material-ui/core/ExpansionPanelDetails";
+import Dialog from "@material-ui/core/Dialog";
+import CircularProgress from "@material-ui/core/CircularProgress";
 import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
 import { firebaseConfig } from "../../App";
 import firebase from "firebase/app";
@@ -31,7 +33,9 @@ class Profile extends React.Component {
     edit: false,
     password: "",
     confirmPass: "",
-    tempUser: {}
+    tempUser: {},
+    loaderVisible: false,
+    loaderCount: 0
   };
   db = null;
   unsubscribe = null;
@@ -54,7 +58,7 @@ class Profile extends React.Component {
 
         this.db = firebase.app().database();
         var self = this;
-        this.unsubscribe = firebase.auth().onAuthStateChanged(function(user) {
+        this.unsubscribe = firebase.auth().onAuthStateChanged(function (user) {
           console.log("user on firebase: ", user);
           if (user) {
             // User is signed in.
@@ -98,23 +102,31 @@ class Profile extends React.Component {
   save = () => {
     var self = this;
     var imageUrl = self.state.tempUser.imageUrl;
+    this.loadingImageDialog(true);
     if (this.state.tempUser.imageUrl !== this.state.user.imageUrl) {
       var imagesRef = firebase
         .storage()
         .ref()
         .child("usersImage/" + this.state.user.id + "/user.jpg");
-      imagesRef.put(this.imageFile).then(function(snapshot) {
+      var uploadTask = imagesRef.put(this.imageFile);
+      uploadTask.then(function (snapshot) {
         console.log("Uploaded a image file!");
 
         imagesRef
           .getDownloadURL()
-          .then(function(url) {
+          .then(function (url) {
             console.log(url);
+            self.setState({...self.state, tempUser: {...self.state.tempUser, imageUrl: url}});
             self.updateUserData(url);
           })
-          .catch(function(error) {
+          .catch(function (error) {
             console.log(error);
           });
+      });
+      uploadTask.on("state_changed", function (snapshot) {
+        var progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+        console.log('Upload is ' + progress + '% done');
+        self.setState({ ...self.state, loaderCount: progress });
       });
     } else {
       this.updateUserData(imageUrl);
@@ -130,7 +142,7 @@ class Profile extends React.Component {
         photoURL: imageUrl,
         email: self.state.tempUser.email
       })
-      .then(function() {
+      .then(function () {
         // Success.
         store.dispatch(showMessageAction("success", "Salvato!"));
         self.setState({
@@ -138,15 +150,18 @@ class Profile extends React.Component {
           edit: !self.state.edit,
           user: self.state.tempUser
         });
-        //TODO: UPDATE DB USERNAME & PHOTO
+        ls.set("user", self.state.tempUser);
         self.db
           .ref("/users/" + ls.get("user").id + "/displayName")
           .set(self.state.tempUser.name);
-        //   this.db.ref("/users/" + user.id + "/pictureUrl").set(this.state.tempUser.imageUrl);
+          self.db.ref("/users/" + user.id + "/pictureUrl").set(imageUrl);
+
+        self.loadingImageDialog(false);
       })
-      .catch(function(error) {
+      .catch(function (error) {
         // An error happened.
         console.log(error);
+        self.loadingImageDialog(false);
         store.dispatch(
           showMessageAction("error", "Errore, controlla la connessione..")
         );
@@ -184,7 +199,7 @@ class Profile extends React.Component {
     if (this.imageFile.type.indexOf("image/") !== -1) {
       var reader = new FileReader();
 
-      reader.onload = function(e) {
+      reader.onload = function (e) {
         console.log(e.target.result);
         self.setState({
           ...self.state,
@@ -197,6 +212,11 @@ class Profile extends React.Component {
       showMessageAction("error", "Seleziona un immagine.");
     }
   };
+
+  loadingImageDialog = (value) => {
+    this.setState({ ...this.state, loaderVisible: value });
+
+  }
 
   render() {
     const disabled = this.state.user.type !== "firebase" || !this.state.edit;
@@ -302,6 +322,12 @@ class Profile extends React.Component {
             </Button>
           )}
         </div>
+        <Dialog aria-labelledby="simple-dialog-title" open={this.state.loaderVisible}>
+        <div className="dialog-loader">
+          <CircularProgress className="loader"/>
+          <div className="laoder-description">Salvataggio dati in corso..</div>
+        </div>
+        </Dialog>
       </div>
     );
   }
