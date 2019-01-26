@@ -15,6 +15,7 @@ import { firebaseConfig } from "../../App";
 import firebase from "firebase/app";
 import "firebase/database";
 import "firebase/auth";
+import "firebase/storage";
 
 class Profile extends React.Component {
   state = {
@@ -34,6 +35,7 @@ class Profile extends React.Component {
   };
   db = null;
   unsubscribe = null;
+  imageFile = null;
 
   constructor() {
     super();
@@ -79,10 +81,10 @@ class Profile extends React.Component {
     }
   }
 
-  componentWillUnmount(){
-      if(this.unsubscribe !== null){
-          this.unsubscribe();
-      }
+  componentWillUnmount() {
+    if (this.unsubscribe !== null) {
+      this.unsubscribe();
+    }
   }
 
   onEdit = () => {
@@ -94,12 +96,38 @@ class Profile extends React.Component {
   };
 
   save = () => {
-    var user = firebase.auth().currentUser;
     var self = this;
+    var imageUrl = self.state.tempUser.imageUrl;
+    if (this.state.tempUser.imageUrl !== this.state.user.imageUrl) {
+      var imagesRef = firebase
+        .storage()
+        .ref()
+        .child("usersImage/" + this.state.user.id + "/user.jpg");
+      imagesRef.put(this.imageFile).then(function(snapshot) {
+        console.log("Uploaded a image file!");
+
+        imagesRef
+          .getDownloadURL()
+          .then(function(url) {
+            console.log(url);
+            self.updateUserData(url);
+          })
+          .catch(function(error) {
+            console.log(error);
+          });
+      });
+    } else {
+      this.updateUserData(imageUrl);
+    }
+  };
+
+  updateUserData = imageUrl => {
+    var self = this;
+    var user = firebase.auth().currentUser;
     user
       .updateProfile({
         displayName: self.state.tempUser.name,
-        photoURL: self.state.tempUser.imageUrl,
+        photoURL: imageUrl,
         email: self.state.tempUser.email
       })
       .then(function() {
@@ -145,15 +173,61 @@ class Profile extends React.Component {
     }
   };
 
+  uploadImage = () => {
+    var editFab = document.getElementsByClassName("hidden-input");
+    editFab[0].click();
+  };
+
+  inputImageCallback = evt => {
+    this.imageFile = evt.target.files[0];
+    var self = this;
+    if (this.imageFile.type.indexOf("image/") !== -1) {
+      var reader = new FileReader();
+
+      reader.onload = function(e) {
+        console.log(e.target.result);
+        self.setState({
+          ...self.state,
+          tempUser: { ...self.state.tempUser, imageUrl: e.target.result }
+        });
+      };
+
+      reader.readAsDataURL(this.imageFile);
+    } else {
+      showMessageAction("error", "Seleziona un immagine.");
+    }
+  };
+
   render() {
     const disabled = this.state.user.type !== "firebase" || !this.state.edit;
     console.log("disabled", disabled);
     return (
       <div className="profile">
-        <img className="image" src={this.state.user.imageUrl} />
+        <div
+          className="image"
+          style={{
+            backgroundImage:
+              "url(" +
+              (this.state.edit
+                ? this.state.tempUser.imageUrl
+                : this.state.user.imageUrl) +
+              ")"
+          }}
+        />
         {this.state.edit && (
-          <Fab color="primary" aria-label="Add" className="edit-fab">
+          <Fab
+            color="primary"
+            aria-label="Add"
+            className="edit-fab"
+            onClick={this.uploadImage.bind(this)}
+          >
             <Edit />
+            <input
+              className="hidden-input"
+              type="file"
+              style={{ display: "none" }}
+              onChange={this.inputImageCallback.bind(this)}
+            />
           </Fab>
         )}
         <TextField
