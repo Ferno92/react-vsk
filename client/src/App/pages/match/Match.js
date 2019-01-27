@@ -28,6 +28,7 @@ import Menu from '@material-ui/core/Menu';
 import MenuItem from '@material-ui/core/MenuItem';
 import MoreVertIcon from '@material-ui/icons/MoreVert';
 import MatchInfo from "../match-info/MatchInfo";
+import Chat from "../chat/Chat";
 
 const styles = theme => ({
   header: {
@@ -249,7 +250,9 @@ class Match extends React.Component {
                 <MatchInfo currentGame={this.state.currentGame} spectator={this.state.spectator} gameRef={this.gameRef}/>
             </TabContainer>
           <TabContainer dir={theme.direction}>Item Two</TabContainer>
-          <TabContainer dir={theme.direction}>Item Three</TabContainer>
+          <TabContainer dir={theme.direction}>
+                <Chat currentGame={this.state.currentGame} gameRef={this.gameRef} spectator={this.state.spectator}/>
+          </TabContainer>
         </SwipeableViews>
         <Dialog
           open={this.state.confirmDialogOpen}

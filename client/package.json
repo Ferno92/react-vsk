@@ -7,6 +7,7 @@
     "@material-ui/icons": "^3.0.1",
     "downshift": "^3.1.12",
     "firebase": "^5.7.2",
+    "image-compressor.js": "^1.1.4",
     "local-storage": "^1.4.2",
     "moment": "^2.23.0",
     "node-sass": "^4.11.0",

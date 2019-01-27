@@ -6,6 +6,7 @@ import TextField from "@material-ui/core/TextField";
 import Button from "@material-ui/core/Button";
 import Fab from "@material-ui/core/Fab";
 import Edit from "@material-ui/icons/Edit";
+import PhotoCamera from "@material-ui/icons/PhotoCamera";
 import "./Profile.scss";
 import ExpansionPanel from "@material-ui/core/ExpansionPanel";
 import ExpansionPanelSummary from "@material-ui/core/ExpansionPanelSummary";
@@ -18,6 +19,7 @@ import firebase from "firebase/app";
 import "firebase/database";
 import "firebase/auth";
 import "firebase/storage";
+import ImageCompressor from "image-compressor.js";
 
 class Profile extends React.Component {
   state = {
@@ -154,7 +156,7 @@ class Profile extends React.Component {
         self.db
           .ref("/users/" + ls.get("user").id + "/displayName")
           .set(self.state.tempUser.name);
-          self.db.ref("/users/" + user.id + "/pictureUrl").set(imageUrl);
+        self.db.ref("/users/" + ls.get("user").id + "/pictureUrl").set(imageUrl);
 
         self.loadingImageDialog(false);
       })
@@ -195,23 +197,30 @@ class Profile extends React.Component {
 
   inputImageCallback = evt => {
     this.imageFile = evt.target.files[0];
-    var self = this;
     if (this.imageFile.type.indexOf("image/") !== -1) {
-      var reader = new FileReader();
+      new ImageCompressor(this.imageFile, 
+        {quality: 0.5, success: this.imageCompressCallback});
 
-      reader.onload = function (e) {
-        console.log(e.target.result);
-        self.setState({
-          ...self.state,
-          tempUser: { ...self.state.tempUser, imageUrl: e.target.result }
-        });
-      };
-
-      reader.readAsDataURL(this.imageFile);
     } else {
       showMessageAction("error", "Seleziona un immagine.");
     }
   };
+
+  imageCompressCallback = (file) => {
+    this.imageFile = file;
+    var reader = new FileReader();
+    var self = this;
+
+    reader.onload = function (e) {
+      console.log(e.target.result);
+      self.setState({
+        ...self.state,
+        tempUser: { ...self.state.tempUser, imageUrl: e.target.result }
+      });
+    };
+
+    reader.readAsDataURL(this.imageFile);
+  }
 
   loadingImageDialog = (value) => {
     this.setState({ ...this.state, loaderVisible: value });
@@ -241,9 +250,10 @@ class Profile extends React.Component {
             className="edit-fab"
             onClick={this.uploadImage.bind(this)}
           >
-            <Edit />
+            <PhotoCamera />
             <input
               className="hidden-input"
+              accept="image/*"
               type="file"
               style={{ display: "none" }}
               onChange={this.inputImageCallback.bind(this)}

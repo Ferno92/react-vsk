@@ -78,14 +78,15 @@ class Login extends React.Component {
     //TODO check error
     if (response.error === undefined) {
       const userObj = {
-        email: response.email,
-        familyName: response.familyName,
-        givenName: response.givenName,
+        email: response.profileObj.email,
+        familyName: response.profileObj.familyName,
+        givenName: response.profileObj.givenName,
         id: response.googleId,
-        imageUrl: response.imageUrl,
-        name: response.displayName ? response.displayName : response.email,
+        imageUrl: response.profileObj.imageUrl,
+        name: response.profileObj.displayName ? response.profileObj.displayName : response.profileObj.email,
         type: "google"
       }
+      console.log(userObj);
       this.saveUser(userObj);
     }
   };
