@@ -4,7 +4,7 @@ import ls from "local-storage";
 import { firebaseConfig } from "../../App";
 import firebase from "firebase/app";
 import "firebase/database";
-import 'firebase/auth';
+import "firebase/auth";
 import store from "../../store/store";
 import { updateLoggedUser, showMessageAction } from "../../actions/actions";
 import "./Login.scss";
@@ -31,22 +31,21 @@ class Login extends React.Component {
 
   constructor(props, context) {
     //TODO: IMPROVE SNACKBAR ABSTRACTING MESSAGES?
-     //TODO: reset password
+    //TODO: reset password
     super(props, context);
     if (ls.get("user") !== null) {
       this.redirectToDashboard(false);
     }
   }
 
-  componentDidMount(){
-    
+  componentDidMount() {
     if (!firebase.apps.length) {
       firebase.initializeApp(firebaseConfig);
     }
     var self = this;
-    firebase.auth().onAuthStateChanged(function(user){
+    firebase.auth().onAuthStateChanged(function(user) {
       console.log("user on firebase: ", user);
-      if(user){
+      if (user) {
         // User is signed in.
 
         const userObj = {
@@ -57,9 +56,9 @@ class Login extends React.Component {
           imageUrl: user.photoURL,
           name: user.displayName ? user.displayName : user.email,
           type: "firebase"
-        }
+        };
         self.saveUser(userObj);
-      }else{
+      } else {
         // User is signed out.
       }
     });
@@ -71,10 +70,23 @@ class Login extends React.Component {
     }
   }
 
-  responseFacebook = response => {};
+  responseFacebook = response => {
+    //TODO check error
+    if (response.error === undefined) {
+      const userObj = {
+        email: response.email,
+        familyName: "",
+        givenName: "",
+        id: response.userID,
+        imageUrl: response.picture.data.url,
+        name: response.name ? response.name : response.email,
+        type: "facebook"
+      };
+      this.saveUser(userObj);
+    }
+  };
 
   responseGoogle = response => {
-    console.log(response);
     //TODO check error
     if (response.error === undefined) {
       const userObj = {
@@ -83,44 +95,48 @@ class Login extends React.Component {
         givenName: response.profileObj.givenName,
         id: response.googleId,
         imageUrl: response.profileObj.imageUrl,
-        name: response.profileObj.displayName ? response.profileObj.displayName : response.profileObj.email,
+        name: response.profileObj.displayName
+          ? response.profileObj.displayName
+          : response.profileObj.email,
         type: "google"
-      }
-      console.log(userObj);
+      };
       this.saveUser(userObj);
     }
   };
 
-  saveUser = (user) =>{
+  saveUser = user => {
     ls.set("user", user);
-      if (!firebase.apps.length) {
-        firebase.initializeApp(firebaseConfig);
-      }
+    if (!firebase.apps.length) {
+      firebase.initializeApp(firebaseConfig);
+    }
 
-      this.db = firebase.app().database();
+    this.db = firebase.app().database();
 
-      this.userRef = this.db.ref("/users/" + user.id);
-      var self = this;
-      this.userRef.on("value", snapshot => {
-        if (snapshot.val() === null) {
-          console.log("null user, add info to db");
-          const promise = self.userRef.set({
-            displayName: user.name,
-            pictureUrl: user.imageUrl
-          });
-          promise.then(() => {
-            
-            store.dispatch(updateLoggedUser(true));
-            self.redirectToDashboard(true);
-            store.dispatch(showMessageAction("success", "Login effettuato con successo"));
-          });
-        }else{
+    this.userRef = this.db.ref("/users/" + user.id);
+    var self = this;
+    this.userRef.on("value", snapshot => {
+      if (snapshot.val() === null) {
+        console.log("null user, add info to db");
+        const promise = self.userRef.set({
+          displayName: user.name,
+          pictureUrl: user.imageUrl
+        });
+        promise.then(() => {
           store.dispatch(updateLoggedUser(true));
           self.redirectToDashboard(true);
-          store.dispatch(showMessageAction("success", "Login effettuato con successo"));
-        }
-      });
-  }
+          store.dispatch(
+            showMessageAction("success", "Login effettuato con successo")
+          );
+        });
+      } else {
+        store.dispatch(updateLoggedUser(true));
+        self.redirectToDashboard(true);
+        store.dispatch(
+          showMessageAction("success", "Login effettuato con successo")
+        );
+      }
+    });
+  };
 
   redirectToDashboard = hasFeedback => {
     if (hasFeedback) {
@@ -147,13 +163,17 @@ class Login extends React.Component {
 
   login = () => {
     if (this.validate()) {
-      firebase.auth().signInWithEmailAndPassword(this.state.email, this.state.password);
+      firebase
+        .auth()
+        .signInWithEmailAndPassword(this.state.email, this.state.password);
     }
   };
 
   register = () => {
     if (this.validate()) {
-      firebase.auth().createUserWithEmailAndPassword(this.state.email, this.state.password);
+      firebase
+        .auth()
+        .createUserWithEmailAndPassword(this.state.email, this.state.password);
     }
   };
 
@@ -161,13 +181,20 @@ class Login extends React.Component {
     var isValid = false;
     var userError = false;
     var passError = false;
-    if (this.state.email.trim().length > 0 && this.validateEmail(this.state.email.trim())) {
+    if (
+      this.state.email.trim().length > 0 &&
+      this.validateEmail(this.state.email.trim())
+    ) {
       isValid = true;
     } else {
       userError = true;
     }
 
-    if (this.state.password.trim().length > 7 && /\d/.test(this.state.password.trim()) && /[A-Z]/.test(this.state.password.trim())) {
+    if (
+      this.state.password.trim().length > 7 &&
+      /\d/.test(this.state.password.trim()) &&
+      /[A-Z]/.test(this.state.password.trim())
+    ) {
       //validate password with capital letters and numbers
       isValid = isValid ? true : false;
     } else {
@@ -182,10 +209,10 @@ class Login extends React.Component {
     return isValid;
   };
 
-  validateEmail = (email) => {
+  validateEmail = email => {
     var re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
     return re.test(String(email).toLowerCase());
-}
+  };
 
   onShowPassword = () => {
     this.setState({
@@ -200,9 +227,8 @@ class Login extends React.Component {
         <div className="logo-container">
           <img className="login-logo" alt="logo" src="/icon.png" />
           <div className="description">
-            Benvenuto! Registrati inserendo email e password che desideri
-            usare o effettua il login con le tue credenziali se ti sei già
-            registrato.
+            Benvenuto! Registrati inserendo email e password che desideri usare
+            o effettua il login con le tue credenziali se ti sei già registrato.
           </div>
           <TextField
             id="user"
@@ -240,7 +266,7 @@ class Login extends React.Component {
                 checked={this.state.showPassword}
                 onChange={this.onShowPassword}
                 value="show"
-                color="primary"                
+                color="primary"
               />
             }
             label="Mostra password"
@@ -265,8 +291,8 @@ class Login extends React.Component {
         <div className="social-container">
           <div className="social-buttons">
             <FacebookLogin
-              appId="" //APP ID NOT CREATED YET
-              fields="name,email,picture"
+              appId="625220081265152"
+              fields="name,email,picture.width(500).height(500)"
               callback={this.responseFacebook}
             />
           </div>
