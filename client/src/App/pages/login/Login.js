@@ -165,7 +165,12 @@ class Login extends React.Component {
     if (this.validate()) {
       firebase
         .auth()
-        .signInWithEmailAndPassword(this.state.email, this.state.password);
+        .signInWithEmailAndPassword(this.state.email, this.state.password).catch(error =>{
+          console.log(error);
+          store.dispatch(
+            showMessageAction("error", "Email o password errata")
+          );
+        });
     }
   };
 
@@ -294,6 +299,7 @@ class Login extends React.Component {
               appId="625220081265152"
               fields="name,email,picture.width(500).height(500)"
               callback={this.responseFacebook}
+              auth_type="reauthenticate"
             />
           </div>
           <div className="social-buttons">

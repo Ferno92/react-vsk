@@ -42,6 +42,12 @@ class Profile extends React.Component {
   db = null;
   unsubscribe = null;
   imageFile = null;
+  saving = {
+    image: true,
+    name: true,
+    email: true,
+    password: true
+  };
 
   constructor() {
     super();
@@ -60,7 +66,7 @@ class Profile extends React.Component {
 
         this.db = firebase.app().database();
         var self = this;
-        this.unsubscribe = firebase.auth().onAuthStateChanged(function (user) {
+        this.unsubscribe = firebase.auth().onAuthStateChanged(function(user) {
           console.log("user on firebase: ", user);
           if (user) {
             // User is signed in.
@@ -102,51 +108,121 @@ class Profile extends React.Component {
   };
 
   save = () => {
-    var self = this;
-    var imageUrl = self.state.tempUser.imageUrl;
-    this.loadingImageDialog(true);
-    if (this.state.tempUser.imageUrl !== this.state.user.imageUrl) {
-      var imagesRef = firebase
-        .storage()
-        .ref()
-        .child("usersImage/" + this.state.user.id + "/user.jpg");
-      var uploadTask = imagesRef.put(this.imageFile);
-      uploadTask.then(function (snapshot) {
-        console.log("Uploaded a image file!");
-
-        imagesRef
-          .getDownloadURL()
-          .then(function (url) {
-            console.log(url);
-            self.setState({...self.state, tempUser: {...self.state.tempUser, imageUrl: url}});
-            self.updateUserData(url);
-          })
-          .catch(function (error) {
-            console.log(error);
-          });
-      });
-      uploadTask.on("state_changed", function (snapshot) {
-        var progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-        console.log('Upload is ' + progress + '% done');
-        self.setState({ ...self.state, loaderCount: progress });
-      });
-    } else {
-      this.updateUserData(imageUrl);
+    //TODO: check validate
+    if (this.isValid()) {
+      this.saving = {
+        image: true,
+        name: true,
+        email: true,
+        password: true
+      };
+      var self = this;
+      var imageUrl = self.state.tempUser.imageUrl;
+      this.loadingImageDialog(true);
+      if (this.state.tempUser.imageUrl !== this.state.user.imageUrl) {
+        var imagesRef = firebase
+          .storage()
+          .ref()
+          .child("usersImage/" + this.state.user.id + "/user.jpg");
+        var uploadTask = imagesRef.put(this.imageFile);
+        uploadTask.then(function(snapshot) {
+          imagesRef
+            .getDownloadURL()
+            .then(function(url) {
+              self.setState({
+                ...self.state,
+                tempUser: { ...self.state.tempUser, imageUrl: url }
+              });
+              self.updateUserData(url);
+            })
+            .catch(function(error) {
+              console.log(error);
+            });
+        });
+        uploadTask.on("state_changed", function(snapshot) {
+          var progress =
+            (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+          console.log("Upload is " + progress + "% done");
+          self.setState({ ...self.state, loaderCount: progress });
+        });
+      } else {
+        this.updateUserData(imageUrl);
+      }
     }
+  };
+
+  isValid = () => {
+    var valid = false;
+    if (this.state.password === this.state.confirmPass) {
+      var passwordNotValid = false;
+      if (
+        this.state.password.trim() !== "" &&
+        this.validatePasswordComplex(this.state.password.trim())
+      ) {
+        valid = true;
+      } else if (this.state.password.trim() !== "") {
+        //error please fill with valid password
+
+        store.dispatch(
+          showMessageAction(
+            "error",
+            "La password deve contenere almeno 8 caratteri, di cui almeno un numero e una lettera maiuscola"
+          )
+        );
+        passwordNotValid = true;
+      }
+      if (!passwordNotValid) {
+        if (
+          this.state.tempUser.name.trim() !== "" &&
+          this.state.tempUser.email.trim() !== "" &&
+          this.validateEmail(this.state.tempUser.email.trim())
+        ) {
+          valid = true;
+        } else {
+          //error please fill with valid email
+          store.dispatch(showMessageAction("error", "L'email non è valida"));
+
+          valid = false;
+        }
+      }
+    } else {
+      //error password not equal
+
+      store.dispatch(
+        showMessageAction("error", "La password di conferma è diversa")
+      );
+    }
+    return valid;
+  };
+
+  validateEmail = email => {
+    var re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+    return re.test(String(email).toLowerCase());
+  };
+
+  validatePasswordComplex = password => {
+    return (
+      password.trim().length > 7 &&
+      /\d/.test(password.trim()) &&
+      /[A-Z]/.test(password.trim())
+    );
   };
 
   updateUserData = imageUrl => {
     var self = this;
     var user = firebase.auth().currentUser;
+    this.saving.image = false;
+    this.saving.name = false;
     user
       .updateProfile({
         displayName: self.state.tempUser.name,
-        photoURL: imageUrl,
-        email: self.state.tempUser.email
+        photoURL: imageUrl
       })
-      .then(function () {
+      .then(function() {
         // Success.
-        store.dispatch(showMessageAction("success", "Salvato!"));
+        self.saving.image = true;
+        self.saving.name = true;
+        self.saveCallback();
         self.setState({
           ...self.state,
           edit: !self.state.edit,
@@ -156,11 +232,11 @@ class Profile extends React.Component {
         self.db
           .ref("/users/" + ls.get("user").id + "/displayName")
           .set(self.state.tempUser.name);
-        self.db.ref("/users/" + ls.get("user").id + "/pictureUrl").set(imageUrl);
-
-        self.loadingImageDialog(false);
+        self.db
+          .ref("/users/" + ls.get("user").id + "/pictureUrl")
+          .set(imageUrl);
       })
-      .catch(function (error) {
+      .catch(function(error) {
         // An error happened.
         console.log(error);
         self.loadingImageDialog(false);
@@ -168,10 +244,58 @@ class Profile extends React.Component {
           showMessageAction("error", "Errore, controlla la connessione..")
         );
       });
+    if (self.state.tempUser.password.trim() !== "") {
+      //update password
+      self.saving.password = false;
+      user
+        .updatePassword(self.state.tempUser.password)
+        .then(function() {
+          // Update successful.
+          self.saving.password = true;
+          self.saveCallback();
+        })
+        .catch(function(error) {
+          // An error happened.
+          console.log(error);
+          self.loadingImageDialog(false);
+          store.dispatch(
+            showMessageAction("error", "Errore, controlla la connessione..")
+          );
+        });
+    }
+    if (self.state.tempUser.email !== self.state.user.email) {
+      //update email
+      self.saving.email = false;
+      user
+        .updateEmail(self.state.tempUser.email)
+        .then(function() {
+          // Update successful.
+          self.saving.email = true;
+          self.saveCallback();
+        })
+        .catch(function(error) {
+          // An error happened.
+          self.loadingImageDialog(false);
+          store.dispatch(
+            showMessageAction("error", "Errore, controlla la connessione..")
+          );
+        });
+    }
+  };
+
+  saveCallback = () => {
+    if (
+      this.saving.image &&
+      this.saving.name &&
+      this.saving.email &&
+      this.saving.password
+    ) {
+      store.dispatch(showMessageAction("success", "Salvato!"));
+      this.loadingImageDialog(false);
+    }
   };
 
   handleChange = (type, event) => {
-    console.log(type, event.target.value);
     switch (type) {
       case "name":
         this.setState({
@@ -198,21 +322,21 @@ class Profile extends React.Component {
   inputImageCallback = evt => {
     this.imageFile = evt.target.files[0];
     if (this.imageFile.type.indexOf("image/") !== -1) {
-      new ImageCompressor(this.imageFile, 
-        {quality: 0.5, success: this.imageCompressCallback});
-
+      new ImageCompressor(this.imageFile, {
+        quality: 0.5,
+        success: this.imageCompressCallback
+      });
     } else {
-      showMessageAction("error", "Seleziona un immagine.");
+      store.dispatch(showMessageAction("error", "Seleziona un immagine."));
     }
   };
 
-  imageCompressCallback = (file) => {
+  imageCompressCallback = file => {
     this.imageFile = file;
     var reader = new FileReader();
     var self = this;
 
-    reader.onload = function (e) {
-      console.log(e.target.result);
+    reader.onload = function(e) {
       self.setState({
         ...self.state,
         tempUser: { ...self.state.tempUser, imageUrl: e.target.result }
@@ -220,16 +344,14 @@ class Profile extends React.Component {
     };
 
     reader.readAsDataURL(this.imageFile);
-  }
+  };
 
-  loadingImageDialog = (value) => {
+  loadingImageDialog = value => {
     this.setState({ ...this.state, loaderVisible: value });
-
-  }
+  };
 
   render() {
     const disabled = this.state.user.type !== "firebase" || !this.state.edit;
-    console.log("disabled", disabled);
     return (
       <div className="profile">
         <div
@@ -294,7 +416,8 @@ class Profile extends React.Component {
                 variant="outlined"
                 className="password inputs"
                 disabled={disabled}
-                value={this.state.password}
+                type="password"
+                value={this.state.edit ? this.state.tempUser.password : this.state.password}
                 onChange={this.handleChange.bind(this, "newPass")}
               />
               <TextField
@@ -302,7 +425,8 @@ class Profile extends React.Component {
                 margin="normal"
                 variant="outlined"
                 className="password-confirm inputs"
-                value={this.state.confirmPass}
+                type="password"
+                value={this.state.edit ? this.state.tempUser.confirmPass : this.state.confirmPass}
                 onChange={this.handleChange.bind(this, "confirmPass")}
               />
             </ExpansionPanelDetails>
@@ -332,11 +456,16 @@ class Profile extends React.Component {
             </Button>
           )}
         </div>
-        <Dialog aria-labelledby="simple-dialog-title" open={this.state.loaderVisible}>
-        <div className="dialog-loader">
-          <CircularProgress className="loader"/>
-          <div className="laoder-description">Salvataggio dati in corso..</div>
-        </div>
+        <Dialog
+          aria-labelledby="simple-dialog-title"
+          open={this.state.loaderVisible}
+        >
+          <div className="dialog-loader">
+            <CircularProgress className="loader" />
+            <div className="laoder-description">
+              Salvataggio dati in corso..
+            </div>
+          </div>
         </Dialog>
       </div>
     );
