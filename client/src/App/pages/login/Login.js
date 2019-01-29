@@ -97,7 +97,14 @@ class Login extends React.Component {
         imageUrl: response.profileObj.imageUrl,
         name: response.profileObj.displayName
           ? response.profileObj.displayName
-          : response.profileObj.email,
+          : response.profileObj.givenName +
+              " " +
+              response.profileObj.familyName ===
+            " "
+          ? response.profileObj.email
+          : response.profileObj.givenName +
+            " " +
+            response.profileObj.familyName,
         type: "google"
       };
       this.saveUser(userObj);
@@ -165,11 +172,10 @@ class Login extends React.Component {
     if (this.validate()) {
       firebase
         .auth()
-        .signInWithEmailAndPassword(this.state.email, this.state.password).catch(error =>{
+        .signInWithEmailAndPassword(this.state.email, this.state.password)
+        .catch(error => {
           console.log(error);
-          store.dispatch(
-            showMessageAction("error", "Email o password errata")
-          );
+          store.dispatch(showMessageAction("error", "Email o password errata"));
         });
     }
   };

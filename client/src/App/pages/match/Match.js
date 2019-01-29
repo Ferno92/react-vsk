@@ -169,6 +169,13 @@ class Match extends React.Component {
     }
   }
 
+  handleChangeIndex = (index, indexLatest, meta) => {
+    this.setState(prevState => ({
+      ...prevState,
+      value: index
+    }));
+  }
+
   render() {
     const { classes, theme } = this.props;
     const { anchorEl } = this.state;
@@ -251,7 +258,7 @@ class Match extends React.Component {
             </TabContainer>
           <TabContainer dir={theme.direction}>Item Two</TabContainer>
           <TabContainer dir={theme.direction}>
-                <Chat currentGame={this.state.currentGame} gameRef={this.gameRef} spectator={this.state.spectator}/>
+                <Chat currentGame={this.state.currentGame} gameRef={this.gameRef} spectator={this.state.spectator} isVisible={this.state.value === 2}/>
           </TabContainer>
         </SwipeableViews>
         <Dialog
