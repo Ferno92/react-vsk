@@ -1,16 +1,12 @@
 import React from "react";
 import PropTypes from "prop-types";
 import { withStyles } from "@material-ui/core/styles";
-import Tabs from "@material-ui/core/Tabs";
-import Tab from "@material-ui/core/Tab";
+import {Tabs, Tab, Button, AppBar, Toolbar, 
+  Typography, IconButton, Dialog, DialogActions, 
+  DialogContent, DialogContentText, DialogTitle, Menu, MenuItem, Badge} from "@material-ui/core";
 import ArrowBack from "@material-ui/icons/ArrowBack";
-import Button from "@material-ui/core/Button";
 import Delete from "@material-ui/icons/Delete";
 import Share from "@material-ui/icons/Share";
-import AppBar from "@material-ui/core/AppBar";
-import Toolbar from "@material-ui/core/Toolbar";
-import Typography from "@material-ui/core/Typography";
-import IconButton from "@material-ui/core/IconButton";
 import SwipeableViews from "react-swipeable-views";
 import store from "../../store/store";
 import { updateAppbar, updateCreateMatch } from "../../actions/actions";
@@ -19,14 +15,7 @@ import "firebase/database";
 import ls from "local-storage";
 import { firebaseConfig } from "../../App";
 import "./Match.scss";
-import Dialog from '@material-ui/core/Dialog';
-import DialogActions from '@material-ui/core/DialogActions';
-import DialogContent from '@material-ui/core/DialogContent';
-import DialogContentText from '@material-ui/core/DialogContentText';
-import DialogTitle from '@material-ui/core/DialogTitle';
-import Menu from '@material-ui/core/Menu';
-import MenuItem from '@material-ui/core/MenuItem';
-import MoreVertIcon from '@material-ui/icons/MoreVert';
+import MoreVertIcon from "@material-ui/icons/MoreVert";
 import MatchInfo from "../match-info/MatchInfo";
 import Chat from "../chat/Chat";
 
@@ -77,16 +66,19 @@ class Match extends React.Component {
   gameRef = null;
 
   componentDidMount() {
-
     store.dispatch(updateCreateMatch("save", false));
     store.dispatch(updateAppbar("visible", false));
     var user = ls.get("user");
     var userId = "";
-    if (user !== null && (this.props.match.params.owner === undefined || this.props.match.params.owner === user.id)) {
+    if (
+      user !== null &&
+      (this.props.match.params.owner === undefined ||
+        this.props.match.params.owner === user.id)
+    ) {
       userId = user.id;
     } else {
       userId = this.props.match.params.owner;
-      this.setState({ ...this.state, spectator: true })
+      this.setState({ ...this.state, spectator: true });
     }
     if (!firebase.apps.length) {
       firebase.initializeApp(firebaseConfig);
@@ -118,9 +110,9 @@ class Match extends React.Component {
   };
 
   onBack() {
-    if(window.history.length > 0){
+    if (window.history.length > 0) {
       window.history.back();
-    }else{
+    } else {
       this.props.history.push("/");
     }
   }
@@ -135,7 +127,6 @@ class Match extends React.Component {
       this.props.history.push("/");
     }
     this.setState({ ...this.state, confirmDialogOpen: false, anchorEl: null });
-
   }
 
   handleClickMenu = event => {
@@ -158,7 +149,10 @@ class Match extends React.Component {
     if (newVariable && newVariable.share) {
       newVariable
         .share({
-          title: this.state.currentGame.teamA + " vs " + this.state.currentGame.teamB,
+          title:
+            this.state.currentGame.teamA +
+            " vs " +
+            this.state.currentGame.teamB,
           text: "Segui la partita in diretta: ",
           url: url
         })
@@ -174,7 +168,7 @@ class Match extends React.Component {
       ...prevState,
       value: index
     }));
-  }
+  };
 
   render() {
     const { classes, theme } = this.props;
@@ -192,11 +186,15 @@ class Match extends React.Component {
             >
               <ArrowBack />
             </IconButton>
-            <Typography variant="h6" color="inherit" className={classes.grow + " title-ellipsis"}>
+            <Typography
+              variant="h6"
+              color="inherit"
+              className={classes.grow + " title-ellipsis"}
+            >
               {this.state.currentGame
                 ? this.state.currentGame.teamA +
-                " vs " +
-                this.state.currentGame.teamB
+                  " vs " +
+                  this.state.currentGame.teamB
                 : ""}
             </Typography>
             <IconButton
@@ -214,14 +212,17 @@ class Match extends React.Component {
               style={{ marginTop: "40px" }}
             >
               {!this.state.spectator && (
-                <MenuItem key={"deleteGame"} onClick={this.deleteGame.bind(this)}>
-                <Delete />
+                <MenuItem
+                  key={"deleteGame"}
+                  onClick={this.deleteGame.bind(this)}
+                >
+                  <Delete />
                   Elimina
                 </MenuItem>
               )}
 
               <MenuItem key={"shareGame"} onClick={this.share.bind(this)}>
-              <Share />
+                <Share />
                 Condividi
               </MenuItem>
             </Menu>
@@ -242,7 +243,11 @@ class Match extends React.Component {
               style={this.state.value !== 1 ? { color: "#808080" } : {}}
             />
             <Tab
-              label="Chat"
+              label={
+                <Badge color="secondary" badgeContent={4} className="badge">
+                  Chat
+                </Badge>
+              }
               style={this.state.value !== 2 ? { color: "#808080" } : {}}
             />
           </Tabs>
@@ -254,11 +259,21 @@ class Match extends React.Component {
           className="tab-container"
         >
           <TabContainer dir={theme.direction}>
-                <MatchInfo currentGame={this.state.currentGame} spectator={this.state.spectator} gameRef={this.gameRef}/>
-            </TabContainer>
+            <MatchInfo
+              currentGame={this.state.currentGame}
+              spectator={this.state.spectator}
+              gameRef={this.gameRef}
+            />
+          </TabContainer>
           <TabContainer dir={theme.direction}>Item Two</TabContainer>
           <TabContainer dir={theme.direction}>
-                <Chat currentGame={this.state.currentGame} gameRef={this.gameRef} spectator={this.state.spectator} isVisible={this.state.value === 2}/>
+            <Chat
+              currentGame={this.state.currentGame}
+              gameRef={this.gameRef}
+              spectator={this.state.spectator}
+              isVisible={this.state.value === 2}
+              ownerId={this.props.match.params.owner}
+            />
           </TabContainer>
         </SwipeableViews>
         <Dialog
@@ -274,10 +289,17 @@ class Match extends React.Component {
             </DialogContentText>
           </DialogContent>
           <DialogActions>
-            <Button onClick={this.handleCloseConfirmDialog.bind(this, false)} color="primary">
+            <Button
+              onClick={this.handleCloseConfirmDialog.bind(this, false)}
+              color="primary"
+            >
               No
             </Button>
-            <Button onClick={this.handleCloseConfirmDialog.bind(this, true)} color="primary" autoFocus>
+            <Button
+              onClick={this.handleCloseConfirmDialog.bind(this, true)}
+              color="primary"
+              autoFocus
+            >
               Si
             </Button>
           </DialogActions>

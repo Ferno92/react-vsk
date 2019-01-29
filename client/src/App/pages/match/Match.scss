@@ -1,8 +1,8 @@
-.tab-container{
+.tab-container {
   margin-top: 105px;
 }
 
-.title-ellipsis{
+.title-ellipsis {
   overflow: hidden;
   white-space: nowrap;
   text-overflow: ellipsis;
@@ -32,24 +32,30 @@
     text-align: center;
   }
 }
-.undo-container{
+.undo-container {
   width: fit-content;
   margin: 20px auto;
 }
-.set-list{
+.set-list {
   font-size: 18px;
-  .set-title{
+  .set-title {
     text-align: center;
   }
-  .flex-container {    
+  .flex-container {
     margin: 15px 0;
     .flex-child {
       text-align: center;
-      &.bold{
+      &.bold {
         font-weight: bold;
       }
     }
   }
+}
+
+.badge span {
+  height: 15px;
+  width: 15px;
+  right: -18px;
 }
 
 @media (max-width: 768px) {

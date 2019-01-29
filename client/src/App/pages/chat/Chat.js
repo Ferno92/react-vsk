@@ -15,23 +15,28 @@ class Chat extends React.Component {
     currentGame: null,
     gameRef: null,
     spectator: false,
-    ownerId: null,
     chats: [],
-    message: ""
+    message: "",
+    ownerId: ""
   };
   chatsRef = null;
 
   componentDidMount() {
-    moment.locale('it');
-    var userId = "";
-    if (this.state.spectator) {
-      userId = this.props.match.params.owner;
-    } else {
-      userId = ls.get("user").id;
-    }
-    this.setState({ ...this.state, ownerId: userId });
+    moment.locale("it");
     if (!firebase.apps.length) {
       firebase.initializeApp(firebaseConfig);
+    }
+
+    if (ls.get("user") === null && ls.get("anonymous") === null) {
+      var code = "";
+      var possible =
+        "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+
+      for (var i = 0; i < 5; i++)
+        code += possible.charAt(Math.floor(Math.random() * possible.length));
+
+      var color = "#" + Math.floor(Math.random() * 16777215).toString(16);
+      ls.set("anonymous", { code: code, color: color });
     }
 
     this.db = firebase.app().database();
@@ -54,7 +59,8 @@ class Chat extends React.Component {
       currentGame: nextProps.currentGame,
       spectator: nextProps.spectator,
       gameRef: nextProps.gameRef,
-      chats: data_list
+      chats: data_list,
+      ownerId: nextProps.ownerId
     });
   }
 
@@ -84,24 +90,29 @@ class Chat extends React.Component {
 
   send = () => {
     if (this.state.message.trim() !== "") {
+      var userId = "";
+      if (this.state.spectator) {
+        userId = this.state.ownerId;
+      } else {
+        userId = ls.get("user").id;
+      }
       this.chatsRef = this.db.ref(
-        "users/" +
-          this.state.ownerId +
-          "/games/" +
-          this.state.currentGame.id +
-          "/chats"
+        "users/" + userId + "/games/" + this.state.currentGame.id + "/chats"
       );
       const user = ls.get("user");
       const chatsNewItem = this.chatsRef.push({});
       var self = this;
+      console.log(ls.get("anonymous"));
       const chatsPromise = chatsNewItem
         .set({
-          name: user != null ? user.name : "Anonimo",
-          userId: user != null ? user.id : "",
-          pictureUrl: user != null ? user.imageUrl : "",
+          name: user != null ? user.name : "Anonimo(" + ls.get("anonymous").code +")",
+          userId: user != null ? user.id : ls.get("anonymous").code,
+          pictureUrl: user != null ? user.imageUrl : ls.get("anonymous").code,
           text: this.state.message,
           ms: moment(new Date()).valueOf(),
-          date: moment(new Date()).format("HH:mm")
+          date: moment(new Date()).format("HH:mm"),
+          isAnonymous: ls.get("user") === null,
+          color: ls.get("anonymous") ? ls.get("anonymous").color : ""
         })
         .then(() => {
           console.log("message added to the chat!");
@@ -120,7 +131,11 @@ class Chat extends React.Component {
         <div className="messages-container">
           {this.state != null && this.state.chats.length > 0
             ? this.state.chats.map((message, index) => {
-                var itsMe = message.userId === ls.get("user").id ? true : false;
+                var itsMe =
+                  ls.get("user") !== null &&
+                  message.userId === ls.get("user").id
+                    ? true
+                    : (ls.get("user") !== null ? false : (message.userId === ls.get("anonymous").code ? true : false) );
                 var previousMessage =
                   index > 0 ? this.state.chats[index - 1] : null;
                 var sameDate =
@@ -141,7 +156,7 @@ class Chat extends React.Component {
                   moment(message.ms).format("DD-MM-YYYY") !==
                     moment(previousMessage.ms).format("DD-MM-YYYY");
                 return (
-                  <div key={message.key} >
+                  <div key={message.key}>
                     {isNewDate && (
                       <div className="new-date">
                         {moment(message.ms).format("DD MMMM YYYY")}
@@ -152,7 +167,8 @@ class Chat extends React.Component {
                         <div
                           className={"user-image " + sameUser}
                           style={{
-                            backgroundImage: "url(" + message.pictureUrl + ")"
+                            backgroundImage: "url(" + message.pictureUrl + ")",
+                            backgroundColor: message.isAnonymous ? message.color : "transparent"
                           }}
                         />
                       </div>
