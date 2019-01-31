@@ -14,6 +14,13 @@ import {updateLoggedUser} from "./actions/actions";
 import 'firebase/auth';
 import firebase from "firebase/app";
 import Profile from "./pages/profile/Profile";
+import MyTeams from "./pages/my-teams/MyTeams";
+//font awesome region
+import { library } from '@fortawesome/fontawesome-svg-core'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { faTrophy } from '@fortawesome/free-solid-svg-icons'
+import EditTeam from "./pages/edit-team/EditTeam";
+//end font awesome region
 
 export const theme = createMuiTheme({
   palette: {
@@ -63,6 +70,7 @@ class App extends Component {
       this.state.logged = true;
       store.dispatch(updateLoggedUser(true));
     }
+    library.add(faTrophy);
   }
 
   loginSuccess = () => {
@@ -88,6 +96,7 @@ class App extends Component {
       "success",
       "Logout effettuato con successo!"
     );
+    // document.location.href="/"; TODO
   };
 
   render() {
@@ -114,6 +123,8 @@ class App extends Component {
               <Route path="/match/:id?/:owner?" component={Match} />
               <Route path="/search" component={SearchLive} />
               <Route path="/profile" component={Profile} />
+              <Route path="/myteams" component={MyTeams} />
+              <Route path="/team/:id" component={EditTeam} />
             </Switch>
           </MuiThemeProvider>
         </div>

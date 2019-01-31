@@ -1,0 +1,38 @@
+.team-card {
+  height: 110px;
+  margin: 15px;
+  cursor: pointer;
+  overflow: visible !important;
+  position: relative;
+  .logo-container {
+    display: table;
+    height: 57px;
+    .cell {
+      display: table-cell;
+      vertical-align: middle;
+      .logo {
+        font-size: 30px;
+        margin-right: 15px;
+        border-radius: 50%;
+        border: solid 2px;
+        width: 50px;
+        height: 50px;
+        text-align: center;
+        line-height: 50px;
+      }
+    }
+  }
+  .team-name {
+    font-size: 24px;
+  }
+  .team-players {
+    font-size: 14px;
+  }
+  .trophy-icon {
+    font-size: 30px;
+  }
+  .win-number{
+    text-align: center;
+    font-size: 24px;
+  }
+}

@@ -222,15 +222,21 @@ class BottomAppBar extends React.Component {
     const fullList = (
       <div className={classes.fullList}>
         <List>
-          <ListItem button key={username}
+          <ListItem
+            button
+            key={username}
             component={Link}
             to="/profile"
-            selected={window.location.pathname === "/profile"}>
+            selected={window.location.pathname === "/profile"}
+          >
             <ListItemIcon>
-              <div src={userPictureUrl} className="user-picture"
+              <div
+                src={userPictureUrl}
+                className="user-picture"
                 style={{
                   backgroundImage: "url(" + userPictureUrl + ")"
-                }}></div>
+                }}
+              />
             </ListItemIcon>
             <ListItemText primary={username} />
           </ListItem>
@@ -250,7 +256,13 @@ class BottomAppBar extends React.Component {
             <ListItemText primary={"Homepage"} />
           </ListItem>
 
-          <ListItem button key={"Teams"}>
+          <ListItem
+            button
+            key={"Teams"}
+            component={Link}
+            to="/myteams"
+            selected={window.location.pathname === "/myteams"}
+          >
             <ListItemIcon>
               <Group />
             </ListItemIcon>

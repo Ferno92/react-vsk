@@ -1,9 +1,23 @@
 import React from "react";
 import PropTypes from "prop-types";
 import { withStyles } from "@material-ui/core/styles";
-import {Tabs, Tab, Button, AppBar, Toolbar, 
-  Typography, IconButton, Dialog, DialogActions, 
-  DialogContent, DialogContentText, DialogTitle, Menu, MenuItem, Badge} from "@material-ui/core";
+import {
+  Tabs,
+  Tab,
+  Button,
+  AppBar,
+  Toolbar,
+  Typography,
+  IconButton,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle,
+  Menu,
+  MenuItem,
+  Badge
+} from "@material-ui/core";
 import ArrowBack from "@material-ui/icons/ArrowBack";
 import Delete from "@material-ui/icons/Delete";
 import Share from "@material-ui/icons/Share";
@@ -61,7 +75,8 @@ class Match extends React.Component {
     currentGame: null,
     confirmDialogOpen: false,
     spectator: false,
-    anchorEl: null
+    anchorEl: null,
+    chatBadge: 0
   };
   gameRef = null;
 
@@ -164,10 +179,34 @@ class Match extends React.Component {
   }
 
   handleChangeIndex = (index, indexLatest, meta) => {
+    var badge = this.state.chatBadge;
+    if (index === 2) {
+      badge = 0;
+    }
     this.setState(prevState => ({
       ...prevState,
-      value: index
+      value: index,
+      chatBadge: badge
     }));
+  };
+
+  onReceiveMessage = () => {
+    if (this.state.value !== 2) {
+      this.setState({ ...this.state, chatBadge: this.state.chatBadge + 1 });
+    }
+  };
+
+  onClickTab = tab => {
+    switch (tab) {
+      case "chat":
+        this.setState(prevState => ({
+          ...prevState,
+          chatBadge: 0
+        }));
+        break;
+      default:
+        break;
+    }
   };
 
   render() {
@@ -244,10 +283,19 @@ class Match extends React.Component {
             />
             <Tab
               label={
-                <Badge color="secondary" badgeContent={4} className="badge">
-                  Chat
-                </Badge>
+                this.state.chatBadge > 0 ? (
+                  <Badge
+                    color="secondary"
+                    badgeContent={this.state.chatBadge}
+                    className="badge"
+                  >
+                    Chat
+                  </Badge>
+                ) : (
+                  "Chat"
+                )
               }
+              onClick={this.onClickTab.bind(this, "chat")}
               style={this.state.value !== 2 ? { color: "#808080" } : {}}
             />
           </Tabs>
@@ -273,6 +321,7 @@ class Match extends React.Component {
               spectator={this.state.spectator}
               isVisible={this.state.value === 2}
               ownerId={this.props.match.params.owner}
+              onReceiveMessage={this.onReceiveMessage.bind(this)}
             />
           </TabContainer>
         </SwipeableViews>

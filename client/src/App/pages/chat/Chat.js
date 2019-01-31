@@ -5,7 +5,7 @@ import ls from "local-storage";
 import { firebaseConfig } from "../../App";
 import "./Chat.scss";
 import TextField from "@material-ui/core/TextField";
-import { Button, Fab } from "@material-ui/core";
+import { Fab } from "@material-ui/core";
 import { Send } from "@material-ui/icons";
 import moment from "moment";
 import "moment/locale/it";
@@ -15,7 +15,7 @@ class Chat extends React.Component {
     currentGame: null,
     gameRef: null,
     spectator: false,
-    chats: [],
+    chats: null,
     message: "",
     ownerId: ""
   };
@@ -53,6 +53,9 @@ class Chat extends React.Component {
     }
     if (nextProps.isVisible) {
       this.scrollChatToBottom();
+    }
+    if(this.state.chats !== null && this.state.chats.length < data_list.length){
+      this.props.onReceiveMessage();
     }
     this.setState({
       ...this.state,
@@ -102,7 +105,6 @@ class Chat extends React.Component {
       const user = ls.get("user");
       const chatsNewItem = this.chatsRef.push({});
       var self = this;
-      console.log(ls.get("anonymous"));
       const chatsPromise = chatsNewItem
         .set({
           name: user != null ? user.name : "Anonimo(" + ls.get("anonymous").code +")",
@@ -115,7 +117,6 @@ class Chat extends React.Component {
           color: ls.get("anonymous") ? ls.get("anonymous").color : ""
         })
         .then(() => {
-          console.log("message added to the chat!");
           self.setState({ ...self.state, message: "" });
           self.scrollChatToBottom();
         })
@@ -129,7 +130,7 @@ class Chat extends React.Component {
     return (
       <div className="chat-page">
         <div className="messages-container">
-          {this.state != null && this.state.chats.length > 0
+          {this.state != null && this.state.chats != null && this.state.chats.length > 0
             ? this.state.chats.map((message, index) => {
                 var itsMe =
                   ls.get("user") !== null &&
@@ -208,6 +209,8 @@ class Chat extends React.Component {
             margin="normal"
             variant="outlined"
             className="textarea"
+            multiline
+            rowsMax="4"
             value={this.state.message}
             onChange={this.handleWriteMessage.bind(this)}
             onKeyDown={this.onKeyDown.bind(this)}
