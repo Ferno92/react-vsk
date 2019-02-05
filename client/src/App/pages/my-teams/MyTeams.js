@@ -55,6 +55,7 @@ class MyTeams extends React.Component {
   render() {
     return (
       <div className="my-teams">
+      <h1 style={{textAlign: "center"}}>Le mie squadre:</h1>
         {this.state !== null &&
           this.state.teams.map((team, index) => {
             return <TeamCard key={team.id} team={team} opening={false} onClick={this.onClickTeam.bind(this, team.id)} index={index}/>;

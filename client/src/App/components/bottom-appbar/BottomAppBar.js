@@ -19,18 +19,13 @@ import ListItemText from "@material-ui/core/ListItemText";
 import { Home, Group, Flag, ExitToApp } from "@material-ui/icons";
 import { Link } from "react-router-dom";
 import ls from "local-storage";
-import Dialog from "@material-ui/core/Dialog";
-import DialogActions from "@material-ui/core/DialogActions";
-import DialogContent from "@material-ui/core/DialogContent";
-import DialogContentText from "@material-ui/core/DialogContentText";
-import DialogTitle from "@material-ui/core/DialogTitle";
-import Button from "@material-ui/core/Button";
 import store from "../../store/store.js";
 import { updateAppbar, showCreateMatch } from "../../actions/actions";
 import { connect } from "react-redux";
 import Slide from "@material-ui/core/Slide";
 import TextField from "@material-ui/core/TextField";
 import "./BottomAppBar.scss";
+import YesNoDialog from "../yesNoDialog/YesNoDialog";
 
 const styles = theme => ({
   text: {
@@ -311,27 +306,7 @@ class BottomAppBar extends React.Component {
         </SwipeableDrawer>
 
         {/* logout dialog */}
-        <Dialog
-          open={store.getState().appBar.logoutDialogOpen}
-          onClose={this.toggleLogoutDialog}
-          aria-labelledby="alert-dialog-title"
-          aria-describedby="alert-dialog-description"
-        >
-          <DialogTitle id="alert-dialog-title">{"Logout"}</DialogTitle>
-          <DialogContent>
-            <DialogContentText id="alert-dialog-description">
-              Sei sicuro di voler effettuare il logout?
-            </DialogContentText>
-          </DialogContent>
-          <DialogActions>
-            <Button onClick={this.toggleLogoutDialog} color="primary">
-              No
-            </Button>
-            <Button onClick={this.logoutUser} color="primary" autoFocus>
-              Si
-            </Button>
-          </DialogActions>
-        </Dialog>
+        <YesNoDialog open={store.getState().appBar.logoutDialogOpen} noAction={this.toggleLogoutDialog} yesAction={this.logoutUser} dialogText={"Sei sicuro di voler effettuare il logout?"}/>
 
         {/* bottom app bar */}
         <Slide

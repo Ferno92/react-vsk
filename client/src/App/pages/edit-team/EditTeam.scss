@@ -1,0 +1,79 @@
+.team-info {
+  margin-top: 60px;
+  padding: 10px;
+  .player-card {
+    margin: 15px 0;
+    width: 100%;
+    &:hover {
+      box-shadow: 0 14px 28px rgba(0, 0, 0, 0.25),
+        0 10px 10px rgba(0, 0, 0, 0.22);
+    }
+    .player-name {
+      height: 100%;
+      margin-left: 10px;
+      font-size: 16px;
+      font-weight: 600;
+      &.name-with-stats {
+        width: calc(100% - 145px);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+    }
+
+    .player-role {
+      margin-left: 10px;
+      margin-top: 5px;
+    }
+
+    .player-number {
+      border: 2px solid;
+      border-radius: 50%;
+      height: 35px;
+      width: 35px;
+      text-align: center;
+      line-height: 35px;
+    }
+    .stat-container {
+      margin-left: 10px;
+      .stat-title {
+        text-align: center;
+      }
+      .stat-point {
+        text-align: center;
+        &.positive {
+          color: green;
+        }
+        &.negative {
+          color: red;
+        }
+      }
+    }
+  }
+}
+
+.number-edit-circle {
+  border-radius: 50%;
+  height: 100px;
+  width: 100px;
+  border: solid 2px;
+  margin: 60px auto;
+  .number-edit {
+    margin-top: 30px;
+    margin: 30px 20px;
+    input {
+      font-size: 24px;
+      text-align: center;
+    }
+  }
+}
+
+.edit-save-container {
+  margin: 0 auto;
+  display: block;
+  margin-top: 30px;
+  width: fit-content;
+  .buttons {
+    margin: 0 15px;
+  }
+}
