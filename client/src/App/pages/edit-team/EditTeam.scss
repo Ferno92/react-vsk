@@ -1,6 +1,29 @@
 .team-info {
   margin-top: 60px;
   padding: 10px;
+
+  .team-title {
+    text-align: center;
+  }
+
+  .team-image {
+    border: 2px solid;
+    border-radius: 50%;
+    width: 30vw;
+    height: 30vw;
+    margin: 0px auto 40px auto;
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-position: center;
+    position: relative;
+    .edit-fab {
+      position: absolute;
+      top: 20vw;
+      right: -2vw;
+    }
+  }
+  
+
   .player-card {
     margin: 15px 0;
     width: 100%;
@@ -49,6 +72,53 @@
         }
       }
     }
+  }
+
+  .formation-card{
+    .court-container{
+      position: relative;
+      width: 76vw;
+      height: 36vw;
+      .avatar{
+        position: absolute;
+      }
+      .avatar-0{
+        top: 0;
+        left: 10%;
+      }
+      .avatar-1{
+        top: 0;
+        left: 45%;
+      }
+      .avatar-2{
+        top: 0;
+        left: 78%;
+      }
+      .avatar-3{
+        top: 40%;
+        left: 10%;
+      }
+      .avatar-4{
+        top: 40%;
+        left: 45%;
+      }
+      .avatar-5{
+        top: 40%;
+        left: 78%;
+      }
+    }
+    .chip {
+      width: 145px;
+      justify-content: end;
+      margin: 5px;
+      span{
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        max-width: 110px;
+        display: inline;
+      }
+  }
   }
 }
 

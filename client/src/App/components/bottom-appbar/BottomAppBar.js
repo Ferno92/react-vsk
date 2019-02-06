@@ -261,7 +261,7 @@ class BottomAppBar extends React.Component {
             <ListItemIcon>
               <Group />
             </ListItemIcon>
-            <ListItemText primary={"Le tue squadre"} />
+            <ListItemText primary={"Le mie squadre"} />
           </ListItem>
 
           <ListItem

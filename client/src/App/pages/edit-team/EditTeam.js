@@ -4,7 +4,9 @@ import {
   PersonAdd,
   Close,
   GifOutlined,
-  Delete
+  Delete,
+  PhotoCamera,
+  GroupAdd
 } from "@material-ui/icons";
 import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
 import {
@@ -24,17 +26,25 @@ import {
   Slide,
   FormControlLabel,
   Checkbox,
-  FormGroup
+  FormGroup,
+  Fab,
+  Chip,
+  Avatar
 } from "@material-ui/core";
 import { withStyles } from "@material-ui/core/styles";
 import store from "../../store/store";
-import { updateAppbar, updateCreateMatch, showMessageAction } from "../../actions/actions";
+import {
+  updateAppbar,
+  updateCreateMatch,
+  showMessageAction
+} from "../../actions/actions";
 import firebase from "firebase/app";
 import "firebase/database";
 import { firebaseConfig, newGuid } from "../../App";
 import ls from "local-storage";
 import "./EditTeam.scss";
 import YesNoDialog from "../../components/yesNoDialog/YesNoDialog";
+import ImageCompressor from "image-compressor.js";
 
 const styles = theme => ({
   grow: {
@@ -74,6 +84,15 @@ class EditTeam extends React.Component {
       self.setState({ ...self.state, team: snapshot.val() });
       self.teamRef.off("value");
     });
+
+    // const Http = new XMLHttpRequest();
+    // const url =
+    //   "https://www.cpvolley.it/csi-forli/campionato/1412/misto-open-promozione";
+    // Http.open("GET", url);
+    // Http.send();
+    // Http.onreadystatechange = e => {
+    //   console.log(Http.responseText);
+    // };
   }
 
   componentWillUnmount() {
@@ -116,7 +135,7 @@ class EditTeam extends React.Component {
   };
 
   onSaveEditPlayer = () => {
-    if(this.isValid()){
+    if (this.isValid()) {
       var tempPlayers = this.state.team.players.slice();
       for (var i = 0; i < tempPlayers.length; i++) {
         if (tempPlayers[i].id === this.state.tempEditingPlayer.id) {
@@ -128,44 +147,42 @@ class EditTeam extends React.Component {
         }
       }
       var isNew = false;
-      if(this.state.editingPlayer.id === ""){
+      if (this.state.editingPlayer.id === "") {
         isNew = true;
       }
-      if(isNew){
+      if (isNew) {
         tempPlayers.push({
           name: this.state.tempEditingPlayer.name,
           number: this.state.tempEditingPlayer.number,
           id: newGuid(),
           roles: this.state.tempEditingPlayer.roles
-        })
+        });
       }
       var tempTeam = JSON.parse(JSON.stringify(this.state.team));
       tempTeam.players = tempPlayers;
-      var newEditPlayer = JSON.parse(JSON.stringify(this.state.tempEditingPlayer));
+      var newEditPlayer = JSON.parse(
+        JSON.stringify(this.state.tempEditingPlayer)
+      );
       newEditPlayer.onEdit = false;
       this.setState(oldState => ({
         ...oldState,
         team: tempTeam,
-        editingPlayer: newEditPlayer
+        editingPlayer: isNew ? null : newEditPlayer,
+        editPlayerDialogOpen: isNew ? false : true
       }));
-        this.teamRef.set(tempTeam);
-      if(isNew){
-        this.onCloseEditPlayer();
-      }
-      store.dispatch(
-        showMessageAction("success", "Salvato")
-      );
-    }else{      
-      store.dispatch(
-        showMessageAction("error", "Dati mancanti!")
-      );
+      this.teamRef.set(tempTeam);
+      store.dispatch(showMessageAction("success", "Salvato"));
+    } else {
+      store.dispatch(showMessageAction("error", "Dati mancanti!"));
     }
-    
   };
 
-  isValid = () =>{
-    return this.state.tempEditingPlayer.name.trim() !== "" && this.state.tempEditingPlayer.number !== "";
-  }
+  isValid = () => {
+    return (
+      this.state.tempEditingPlayer.name.trim() !== "" &&
+      this.state.tempEditingPlayer.number !== ""
+    );
+  };
 
   onChangePlayerInfo = (type, evt) => {
     switch (type) {
@@ -201,15 +218,17 @@ class EditTeam extends React.Component {
       }
     }
     tempPlayers.splice(index, 1);
-
-    this.setState({
-      ...this.state,
-      team: { ...this.state.team, players: tempPlayers },
+    var tempTeam = JSON.parse(JSON.stringify(this.state.team));
+    tempTeam.players = tempPlayers;
+    this.setState(oldState => ({
+      ...oldState,
+      team: tempTeam,
       editPlayerDialogOpen: false,
       deleteDialogOpen: false
-    });
-    this.teamRef.set(this.state.team);
-       
+    }));
+    console.log(tempTeam);
+    this.teamRef.set(tempTeam);
+
     store.dispatch(
       showMessageAction("success", "Giocatore eliminato dalla squadra")
     );
@@ -277,13 +296,68 @@ class EditTeam extends React.Component {
     });
   };
 
-  cancel = () =>{
-    if(this.state.editingPlayer.id === ""){
+  cancel = () => {
+    if (this.state.editingPlayer.id === "") {
       this.onCloseEditPlayer();
-    }else{
+    } else {
       this.setOnEditPlayer();
     }
-  }
+  };
+
+  uploadImage = () => {
+    var editFab = document.getElementsByClassName("hidden-input");
+    editFab[0].click();
+  };
+
+  inputImageCallback = evt => {
+    this.imageFile = evt.target.files[0];
+    if (this.imageFile.type.indexOf("image/") !== -1) {
+      new ImageCompressor(this.imageFile, {
+        quality: 0.5,
+        success: this.imageCompressCallback
+      });
+    } else {
+      store.dispatch(showMessageAction("error", "Seleziona un immagine."));
+    }
+  };
+
+  imageCompressCallback = file => {
+    this.imageFile = file;
+    var reader = new FileReader();
+    var self = this;
+
+    reader.onload = function(e) {
+      self.setState({
+        ...self.state,
+        team: { ...self.state.team, pictureUrl: e.target.result }
+      });
+      var imagesRef = firebase
+        .storage()
+        .ref()
+        .child("teamImage/" + self.state.team.id + "/team.jpg");
+      var uploadTask = imagesRef.put(self.imageFile);
+      uploadTask.then(function(snapshot) {
+        imagesRef
+          .getDownloadURL()
+          .then(function(url) {
+            self.setState({
+              ...self.state,
+              team: { ...self.state.team, pictureUrl: url }
+            });
+            var tempTeam = JSON.parse(JSON.stringify(self.state.team));
+            tempTeam.pictureUrl = url;
+            self.teamRef.set(tempTeam);
+          })
+          .catch(function(error) {
+            console.log(error);
+          });
+      });
+    };
+
+    reader.readAsDataURL(this.imageFile);
+  };
+
+  addFormation = () => {};
 
   render() {
     const { classes, theme } = this.props;
@@ -292,6 +366,13 @@ class EditTeam extends React.Component {
       this.state.team !== null &&
       this.state.team.players !== null
         ? this.state.team.players
+        : [];
+    var formations =
+      this.state !== null &&
+      this.state.team !== null &&
+      this.state.team.formations !== null &&
+      this.state.team.formations !== undefined
+        ? this.state.team.formations
         : [];
     players.sort(function(a, b) {
       return parseInt(a.number) - parseInt(b.number);
@@ -317,38 +398,38 @@ class EditTeam extends React.Component {
             >
               {this.state.team ? this.state.team.name : ""}
             </Typography>
-            {/* <IconButton
-            color="inherit"
-            aria-label="Menu"
-            onClick={this.handleClickMenu.bind(this)}
-          >
-            <MoreVertIcon />
-          </IconButton>
-          <Menu
-            id="long-menu"
-            anchorEl={anchorEl}
-            open={openMenu}
-            onClose={this.handleCloseMenu}
-            style={{ marginTop: "40px" }}
-          >
-            {!this.state.spectator && (
-              <MenuItem
-                key={"deleteGame"}
-                onClick={this.deleteGame.bind(this)}
-              >
-                <Delete />
-                Elimina
-              </MenuItem>
-            )}
-
-            <MenuItem key={"shareGame"} onClick={this.share.bind(this)}>
-              <Share />
-              Condividi
-            </MenuItem>
-          </Menu> */}
           </Toolbar>
         </AppBar>
         <div className="team-info">
+          <h1 className="team-title">
+            {this.state.team ? this.state.team.name : ""}
+          </h1>
+          <div
+            className="team-image"
+            style={{
+              backgroundImage:
+                "url(" +
+                (this.state.team ? this.state.team.pictureUrl : "") +
+                ")"
+            }}
+          >
+            <Fab
+              color="primary"
+              aria-label="Add"
+              className="edit-fab"
+              onClick={this.uploadImage.bind(this)}
+            >
+              <PhotoCamera />
+              <input
+                className="hidden-input"
+                accept="image/*"
+                type="file"
+                style={{ display: "none" }}
+                onChange={this.inputImageCallback.bind(this)}
+              />
+            </Fab>
+          </div>
+
           <ExpansionPanel className="expansion-panel">
             <ExpansionPanelSummary expandIcon={<ExpandMoreIcon />}>
               Giocatori ({players.length})
@@ -395,6 +476,77 @@ class EditTeam extends React.Component {
               })}
             </ExpansionPanelDetails>
           </ExpansionPanel>
+
+          <ExpansionPanel className="expansion-panel">
+            <ExpansionPanelSummary expandIcon={<ExpandMoreIcon />}>
+              Formazioni ({formations.length})
+            </ExpansionPanelSummary>
+            <ExpansionPanelDetails
+              className="expansion-details"
+              style={{ display: "block" }}
+            >
+              <div style={{ margin: "0 auto", width: "fit-content" }}>
+                <Button onClick={this.addFormation.bind(this, null)}>
+                  <GroupAdd /> Aggiungi Formazione
+                </Button>
+              </div>
+              {formations.map((formation, index) => {
+                // formation.players.sort(function(a, b) {
+                //   return a.number - b.number;
+                // });
+                return (
+                  <Card className="formation-card" key={index}>
+                    <CardActionArea
+                      onClick={this.addFormation.bind(this, formation)}
+                    >
+                      <CardContent className="card-content">
+                        <div className="court-container">
+                          {formation.players.map((item, pIndex) => {
+                            //finche player number < 6, loop con filter che prende l'index === position
+                            var player = null;
+                            for (
+                              var i = 0;
+                              i < this.state.team.players.length;
+                              i++
+                            ) {
+                              if (this.state.team.players[i].id === item.id) {
+                                player = this.state.team.players[i];
+                              }
+                            }
+                            return (
+                              <Avatar key={player.id} className={"avatar avatar-" + pIndex}>{player.number}</Avatar>
+                            );
+                          })}
+                        </div>
+                        <div>
+                          {formation.players.map((item, pIndex) => {
+                            var player = null;
+                            for (
+                              var i = 0;
+                              i < this.state.team.players.length;
+                              i++
+                            ) {
+                              if (this.state.team.players[i].id === item.id) {
+                                player = this.state.team.players[i];
+                              }
+                            }
+                            return (
+                              <Chip
+                                className="chip"
+                                key={player.id}
+                                label={player.name}
+                                avatar={<Avatar>{player.number}</Avatar>}
+                              />
+                            );
+                          })}
+                        </div>
+                      </CardContent>
+                    </CardActionArea>
+                  </Card>
+                );
+              })}
+            </ExpansionPanelDetails>
+          </ExpansionPanel>
         </div>
         {/* Dialog edit */}
         <Dialog
@@ -413,7 +565,9 @@ class EditTeam extends React.Component {
                 <Close />
               </IconButton>
               <Typography variant="h6" color="inherit" style={{ flex: 1 }}>
-                {this.state.editingPlayer && this.state.editingPlayer.id !== "" ? "Modifica " : "Crea nuovo giocatore"}
+                {this.state.editingPlayer && this.state.editingPlayer.id !== ""
+                  ? "Modifica "
+                  : "Crea nuovo giocatore"}
                 {this.state.editingPlayer ? this.state.editingPlayer.name : ""}
               </Typography>
               {this.state.editingPlayer && this.state.editingPlayer.id !== "" && (

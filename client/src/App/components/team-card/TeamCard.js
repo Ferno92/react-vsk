@@ -6,7 +6,7 @@ import CardContent from "@material-ui/core/CardContent";
 import CardActionArea from "@material-ui/core/CardActionArea";
 import Grow from "@material-ui/core/Grow";
 import "./TeamCard.scss";
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 const styles = {
   card: {
@@ -34,7 +34,7 @@ class TeamCard extends React.Component {
   }
 
   onClickTeam() {
-    this.setState({...this.state, opening: true });
+    this.setState({ ...this.state, opening: true });
     this.props.onClick(this.props.team.id);
   }
 
@@ -55,21 +55,39 @@ class TeamCard extends React.Component {
                 onClick={this.onClickTeam.bind(this)}
               >
                 <div className="logo-container float-left">
-                <div className="cell">
-                    <div className="logo">{this.props.team.logo == undefined ? this.props.team.name.charAt(0).toUpperCase() : ''}</div>
+                  <div className="cell">
+                    <div
+                      className="logo"
+                      style={{
+                        backgroundImage:
+                          "url(" +
+                          (this.props.team.pictureUrl
+                            ? this.props.team.pictureUrl
+                            : "") +
+                          ")"
+                      }}
+                    >
+                      {this.props.team.pictureUrl === undefined
+                        ? this.props.team.name.charAt(0).toUpperCase()
+                        : ""}
+                    </div>
+                  </div>
                 </div>
-              </div>
-              <div className="float-left">
-                <div className="team-name">{this.props.team.name}</div>
-                <div className="team-players">{(this.props.team.players == undefined ? 0: this.props.team.players.length) + " giocatori"} </div>
-              </div>
-              <div className="float-right">
-                <div> 
-                    <FontAwesomeIcon icon="trophy" className="trophy-icon"/>
+                <div className="float-left">
+                  <div className="team-name">{this.props.team.name}</div>
+                  <div className="team-players">
+                    {(this.props.team.players === undefined
+                      ? 0
+                      : this.props.team.players.length) + " giocatori"}{" "}
+                  </div>
                 </div>
-                <div className="win-number">{this.props.team.win}</div>
-              </div>
-              <div className="clear"></div>
+                <div className="float-right">
+                  <div>
+                    <FontAwesomeIcon icon="trophy" className="trophy-icon" />
+                  </div>
+                  <div className="win-number">{this.props.team.win}</div>
+                </div>
+                <div className="clear" />
               </div>
             </CardContent>
           </CardActionArea>
