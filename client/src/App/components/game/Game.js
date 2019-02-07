@@ -86,7 +86,7 @@ class Game extends React.Component {
                     className={
                       "float-left relevant-text" +
                       (this.props.game.resultA > this.props.game.resultB
-                        ? "winner"
+                        ? " winner"
                         : "") +
                       (this.state.opening ? " opening" : "")
                     }
@@ -97,7 +97,7 @@ class Game extends React.Component {
                     className={
                       "float-right relevant-text" +
                       (this.props.game.resultA > this.props.game.resultB
-                        ? "winner"
+                        ? " winner"
                         : "")
                     }
                   >
@@ -109,7 +109,7 @@ class Game extends React.Component {
                     className={
                       "float-left relevant-text" +
                       (this.props.game.resultB > this.props.game.resultA
-                        ? "winner"
+                        ? " winner"
                         : "") +
                       (this.state.opening ? " opening" : "")
                     }
@@ -120,7 +120,7 @@ class Game extends React.Component {
                     className={
                       "float-right relevant-text" +
                       (this.props.game.resultB > this.props.game.resultA
-                        ? "winner"
+                        ? " winner"
                         : "")
                     }
                   >

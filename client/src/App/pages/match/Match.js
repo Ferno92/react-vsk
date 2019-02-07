@@ -76,7 +76,8 @@ class Match extends React.Component {
     confirmDialogOpen: false,
     spectator: false,
     anchorEl: null,
-    chatBadge: 0
+    chatBadge: 0,
+    gameUrl: ""
   };
   gameRef = null;
 
@@ -100,14 +101,13 @@ class Match extends React.Component {
     }
 
     this.db = firebase.app().database();
-
-    this.gameRef = this.db.ref(
-      "users/" + userId + "/games/" + this.props.match.params.id
-    );
+    var url = "users/" + userId + "/games/" + this.props.match.params.id
+    this.gameRef = this.db.ref(url);
     this.gameRef.on("value", snapshot => {
       this.setState(prevState => ({
         ...prevState,
-        currentGame: snapshot.val()
+        currentGame: snapshot.val(),
+        gameUrl: url
       }));
       console.log("game from db", this.state.currentGame);
     });
@@ -158,7 +158,7 @@ class Match extends React.Component {
       // same url
       url += this.props.match.url;
     } else {
-      url += this.props.match.url + "/" + ls.get("user").id;
+      url += this.props.match.url + "/" + ls.get("user").id; //TODO: or anonymous
     }
     var newVariable = window.navigator;
     if (newVariable && newVariable.share) {
@@ -311,6 +311,7 @@ class Match extends React.Component {
               currentGame={this.state.currentGame}
               spectator={this.state.spectator}
               gameRef={this.gameRef}
+              gameUrl={this.state.gameUrl}
             />
           </TabContainer>
           <TabContainer dir={theme.direction}>Item Two</TabContainer>

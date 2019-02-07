@@ -45,6 +45,7 @@ import ls from "local-storage";
 import "./EditTeam.scss";
 import YesNoDialog from "../../components/yesNoDialog/YesNoDialog";
 import ImageCompressor from "image-compressor.js";
+import EditFormationDialog from "../../components/edit-formation-dialog/EditFormationDialog";
 
 const styles = theme => ({
   grow: {
@@ -62,7 +63,9 @@ class EditTeam extends React.Component {
     editingPlayer: null,
     editPlayerDialogOpen: false,
     tempEditingPlayer: null,
-    deleteDialogOpen: false
+    deleteDialogOpen: false,
+    currentEditFormation: null,
+    editFormationOpen: false
   };
   teamRef = null;
 
@@ -357,7 +360,20 @@ class EditTeam extends React.Component {
     reader.readAsDataURL(this.imageFile);
   };
 
-  addFormation = () => {};
+  addFormation = formation => {
+    this.setState({
+      ...this.state,
+      currentEditFormation: formation,
+      editFormationOpen: true
+    });
+  };
+
+  toggleEditFormation = () => {
+    this.setState({
+      ...this.state,
+      editFormationOpen: !this.state.editFormationOpen
+    });
+  };
 
   render() {
     const { classes, theme } = this.props;
@@ -477,7 +493,7 @@ class EditTeam extends React.Component {
             </ExpansionPanelDetails>
           </ExpansionPanel>
 
-          <ExpansionPanel className="expansion-panel">
+          <ExpansionPanel className="expansion-panel" color="primary">
             <ExpansionPanelSummary expandIcon={<ExpandMoreIcon />}>
               Formazioni ({formations.length})
             </ExpansionPanelSummary>
@@ -501,6 +517,7 @@ class EditTeam extends React.Component {
                     >
                       <CardContent className="card-content">
                         <div className="court-container">
+                          <div className="court-line" />
                           {formation.players.map((item, pIndex) => {
                             //finche player number < 6, loop con filter che prende l'index === position
                             var player = null;
@@ -514,7 +531,12 @@ class EditTeam extends React.Component {
                               }
                             }
                             return (
-                              <Avatar key={player.id} className={"avatar avatar-" + pIndex}>{player.number}</Avatar>
+                              <Avatar
+                                key={player.id}
+                                className={"avatar avatar-" + item.position}
+                              >
+                                {player.number}
+                              </Avatar>
                             );
                           })}
                         </div>
@@ -547,6 +569,12 @@ class EditTeam extends React.Component {
               })}
             </ExpansionPanelDetails>
           </ExpansionPanel>
+          <EditFormationDialog
+            open={this.state.editFormationOpen}
+            formation={this.state.currentEditFormation}
+            closeEditFormation={this.toggleEditFormation.bind(this)}
+            playersList={players}
+          />
         </div>
         {/* Dialog edit */}
         <Dialog

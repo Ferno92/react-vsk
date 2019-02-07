@@ -9,43 +9,47 @@ import Paper from '@material-ui/core/Paper';
 import MenuItem from '@material-ui/core/MenuItem';
 import store from "../../store/store.js";
 import { updateCreateMatch } from "../../actions/actions";
+import firebase from "firebase/app";
+import "firebase/database";
+import ls from "local-storage";
+import { firebaseConfig } from "../../App";
 
-const suggestions = [
-  { label: 'Afghanistan' },
-  { label: 'Aland Islands' },
-  { label: 'Albania' },
-  { label: 'Algeria' },
-  { label: 'American Samoa' },
-  { label: 'Andorra' },
-  { label: 'Angola' },
-  { label: 'Anguilla' },
-  { label: 'Antarctica' },
-  { label: 'Antigua and Barbuda' },
-  { label: 'Argentina' },
-  { label: 'Armenia' },
-  { label: 'Aruba' },
-  { label: 'Australia' },
-  { label: 'Austria' },
-  { label: 'Azerbaijan' },
-  { label: 'Bahamas' },
-  { label: 'Bahrain' },
-  { label: 'Bangladesh' },
-  { label: 'Barbados' },
-  { label: 'Belarus' },
-  { label: 'Belgium' },
-  { label: 'Belize' },
-  { label: 'Benin' },
-  { label: 'Bermuda' },
-  { label: 'Bhutan' },
-  { label: 'Bolivia, Plurinational State of' },
-  { label: 'Bonaire, Sint Eustatius and Saba' },
-  { label: 'Bosnia and Herzegovina' },
-  { label: 'Botswana' },
-  { label: 'Bouvet Island' },
-  { label: 'Brazil' },
-  { label: 'British Indian Ocean Territory' },
-  { label: 'Brunei Darussalam' },
-];
+// const suggestions = [
+//   { label: 'Afghanistan' },
+//   { label: 'Aland Islands' },
+//   { label: 'Albania' },
+//   { label: 'Algeria' },
+//   { label: 'American Samoa' },
+//   { label: 'Andorra' },
+//   { label: 'Angola' },
+//   { label: 'Anguilla' },
+//   { label: 'Antarctica' },
+//   { label: 'Antigua and Barbuda' },
+//   { label: 'Argentina' },
+//   { label: 'Armenia' },
+//   { label: 'Aruba' },
+//   { label: 'Australia' },
+//   { label: 'Austria' },
+//   { label: 'Azerbaijan' },
+//   { label: 'Bahamas' },
+//   { label: 'Bahrain' },
+//   { label: 'Bangladesh' },
+//   { label: 'Barbados' },
+//   { label: 'Belarus' },
+//   { label: 'Belgium' },
+//   { label: 'Belize' },
+//   { label: 'Benin' },
+//   { label: 'Bermuda' },
+//   { label: 'Bhutan' },
+//   { label: 'Bolivia, Plurinational State of' },
+//   { label: 'Bonaire, Sint Eustatius and Saba' },
+//   { label: 'Bosnia and Herzegovina' },
+//   { label: 'Botswana' },
+//   { label: 'Bouvet Island' },
+//   { label: 'Brazil' },
+//   { label: 'British Indian Ocean Territory' },
+//   { label: 'Brunei Darussalam' },
+// ];
 
 function renderInput(inputProps) {
   const { InputProps, classes, ref, ...other } = inputProps;
@@ -95,7 +99,8 @@ renderSuggestion.propTypes = {
   suggestion: PropTypes.shape({ label: PropTypes.string }).isRequired,
 };
 
-function getSuggestions(value) {
+function getSuggestions(value, suggestions) {
+  console.log("suggestions", suggestions);
   const inputValue = deburr(value.trim()).toLowerCase();
   const inputLength = inputValue.length;
   let count = 0;
@@ -118,7 +123,31 @@ class DownshiftMultiple extends React.Component {
   state = {
     inputValue: undefined,
     selectedItem: [],
+    suggestions: []
   };
+  teamsRef = null;
+
+  componentDidMount(){
+    if (!firebase.apps.length) {
+      firebase.initializeApp(firebaseConfig);
+    }
+
+    this.db = firebase.app().database();
+    this.teamsRef = this.db.ref("users/" + ls.get("user").id + "/teams");
+    var self = this;
+    this.teamsRef.on("value", (snapshot) => {
+      
+      var data_list = [];
+      for (var property in snapshot.val()) {
+        if (snapshot.val().hasOwnProperty(property)) {
+          var team = snapshot.val()[property];
+          team.key = property;
+          data_list.push({label: team.name});
+        }
+      }
+      self.setState({...self.state, suggestions: data_list});
+    })
+  }
 
   handleKeyDown = event => {
     const { inputValue, selectedItem } = this.state;
@@ -161,6 +190,7 @@ class DownshiftMultiple extends React.Component {
     const { inputValue, selectedItem } = this.state;
     // console.log(this.props);
 
+    console.log("state suggestions", this.state.suggestions);
     return (
       <Downshift
         id="downshift-multiple"
@@ -189,7 +219,7 @@ class DownshiftMultiple extends React.Component {
             })}
             {isOpen ? (
               <Paper className={classes.paper} square>
-                {getSuggestions(inputValue2).map((suggestion, index) =>
+                {getSuggestions(inputValue2, this.state.suggestions).map((suggestion, index) =>
                   renderSuggestion({
                     suggestion,
                     index,
