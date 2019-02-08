@@ -1,6 +1,11 @@
 .edit-formation-dialog {
   padding: 15px;
 
+  .name.inputs {
+    width: 100%;
+    margin-bottom: 20px;
+  }
+
   .court {
     position: relative;
     width: 100%;
@@ -13,6 +18,12 @@
       .avatar {
         margin: 0 auto;
         background: #000;
+        overflow: visible;
+        .badge span {
+          background: red;
+          top: -8px;
+          right: -15px;
+        }
       }
     }
 
@@ -41,7 +52,7 @@
       left: 69%;
     }
   }
-  
+
   .chip {
     width: 185px;
     justify-content: end;
@@ -54,5 +65,13 @@
       max-width: 110px;
       display: inline;
     }
+  }
+
+  .delete{
+    background-color: red;
+    margin: 30px auto;
+    display: block;
+    padding: 8px 16px;
+    color: #fff;
   }
 }

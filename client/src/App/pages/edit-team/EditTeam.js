@@ -6,7 +6,9 @@ import {
   GifOutlined,
   Delete,
   PhotoCamera,
-  GroupAdd
+  GroupAdd,
+  Edit,
+  Done
 } from "@material-ui/icons";
 import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
 import {
@@ -65,7 +67,8 @@ class EditTeam extends React.Component {
     tempEditingPlayer: null,
     deleteDialogOpen: false,
     currentEditFormation: null,
-    editFormationOpen: false
+    editFormationOpen: false,
+    editName: false
   };
   teamRef = null;
 
@@ -368,12 +371,76 @@ class EditTeam extends React.Component {
     });
   };
 
-  toggleEditFormation = () => {
+  closeEditFormation = () => {
     this.setState({
       ...this.state,
-      editFormationOpen: !this.state.editFormationOpen
+      editFormationOpen: !this.state.editFormationOpen,
+      currentEditFormation: null
     });
   };
+
+  editName = () => {
+    this.setState({ ...this.state, editName: !this.state.editName });
+  };
+
+  saveName = () => {
+    this.teamRef.set(this.state.team);
+    this.editName();
+  };
+
+  onChangeName = evt => {
+    this.setState({
+      ...this.state,
+      team: { ...this.state.team, name: evt.target.value }
+    });
+  };
+
+  saveFormation = (formation) =>{
+    
+    var tempTeam = JSON.parse(JSON.stringify(this.state.team));
+    var index = -1;
+    tempTeam.formations.forEach((item, i) =>{
+      if(item.id === formation.id){
+        index = i;
+      }
+    });
+    if(index >= 0){
+      tempTeam.formations[index] = formation;
+    }else{
+      tempTeam.formations.push(formation);
+    }
+    this.teamRef.set(tempTeam);
+    this.setState({
+      ...this.state,
+      editFormationOpen: !this.state.editFormationOpen,
+      currentEditFormation: null,
+      team: {...this.state.team, formations: tempTeam.formations}
+    });
+    
+    store.dispatch(showMessageAction("success", "Formazione salvata"));
+  }
+
+  deleteFormation = (formation) =>{
+    
+    var tempTeam = JSON.parse(JSON.stringify(this.state.team));
+    var index = -1;
+    tempTeam.formations.forEach((item, i) =>{
+      if(item.id === formation.id){
+        index = i;
+      }
+    });
+    if(index >= 0){
+      tempTeam.formations.splice(index, 1);
+      this.teamRef.set(tempTeam);
+      this.setState({
+        ...this.state,
+        editFormationOpen: !this.state.editFormationOpen,
+        currentEditFormation: null,
+        team: {...this.state.team, formations: tempTeam.formations}
+      });
+      store.dispatch(showMessageAction("success", "Formazione eliminata"));
+    }
+  }
 
   render() {
     const { classes, theme } = this.props;
@@ -417,9 +484,38 @@ class EditTeam extends React.Component {
           </Toolbar>
         </AppBar>
         <div className="team-info">
-          <h1 className="team-title">
-            {this.state.team ? this.state.team.name : ""}
-          </h1>
+          {!this.state.editName && (
+            <h1 className="team-title">
+              {this.state.team ? this.state.team.name : ""}
+              <Button
+                variant="outlined"
+                className="edit-team-name"
+                onClick={this.editName.bind(this)}
+              >
+                <Edit />
+              </Button>
+            </h1>
+          )}
+
+          {this.state.editName && (
+            <div>
+              <TextField
+                label="Nome squadra"
+                margin="normal"
+                variant="outlined"
+                className="name inputs"
+                value={this.state.team ? this.state.team.name : ""}
+                onChange={this.onChangeName.bind(this)}
+              />
+              <Button
+                variant="outlined"
+                className="edit-team-name save"
+                onClick={this.saveName.bind(this)}
+              >
+                <Done />
+              </Button>
+            </div>
+          )}
           <div
             className="team-image"
             style={{
@@ -495,14 +591,17 @@ class EditTeam extends React.Component {
 
           <ExpansionPanel className="expansion-panel" color="primary">
             <ExpansionPanelSummary expandIcon={<ExpandMoreIcon />}>
-              Formazioni ({formations.length})
+              Formazioni salvate ({formations.length})
             </ExpansionPanelSummary>
             <ExpansionPanelDetails
               className="expansion-details"
               style={{ display: "block" }}
             >
               <div style={{ margin: "0 auto", width: "fit-content" }}>
-                <Button onClick={this.addFormation.bind(this, null)}>
+                <Button
+                  onClick={this.addFormation.bind(this, null)}
+                  style={{ marginBottom: "5px" }}
+                >
                   <GroupAdd /> Aggiungi Formazione
                 </Button>
               </div>
@@ -516,11 +615,12 @@ class EditTeam extends React.Component {
                       onClick={this.addFormation.bind(this, formation)}
                     >
                       <CardContent className="card-content">
+                        <div className="formation-name">{formation.name}</div>
                         <div className="court-container">
                           <div className="court-line" />
                           {formation.players.map((item, pIndex) => {
                             //finche player number < 6, loop con filter che prende l'index === position
-                            var player = null;
+                            var player = {id: "", number: ""};
                             for (
                               var i = 0;
                               i < this.state.team.players.length;
@@ -542,7 +642,7 @@ class EditTeam extends React.Component {
                         </div>
                         <div>
                           {formation.players.map((item, pIndex) => {
-                            var player = null;
+                            var player = {id: "", number: "", name: ""};
                             for (
                               var i = 0;
                               i < this.state.team.players.length;
@@ -572,8 +672,10 @@ class EditTeam extends React.Component {
           <EditFormationDialog
             open={this.state.editFormationOpen}
             formation={this.state.currentEditFormation}
-            closeEditFormation={this.toggleEditFormation.bind(this)}
+            closeEditFormation={this.closeEditFormation.bind(this)}
             playersList={players}
+            saveFormation={this.saveFormation}
+            deleteFormation={this.deleteFormation}
           />
         </div>
         {/* Dialog edit */}

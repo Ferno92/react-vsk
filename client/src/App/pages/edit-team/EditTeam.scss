@@ -5,6 +5,22 @@
   .team-title {
     text-align: center;
   }
+  .name.inputs {
+    width: calc(100% - 60px);
+  }
+  .edit-team-name {
+    border-radius: 50%;
+    min-width: auto;
+    padding: 8px;
+    margin-left: 10px;
+    &.save {
+      margin-top: 22px;
+    }
+  }
+
+  .name.inputs {
+    width: calc(100% - 60px);
+  }
 
   .team-image {
     border: 2px solid;
@@ -77,11 +93,19 @@
   }
 
   .formation-card {
+    margin: 15px 0;
+    .formation-name {
+      text-align: center;
+      font-size: 16px;
+      font-weight: bold;
+      margin-bottom: 10px;
+    }
     .court-container {
       position: relative;
       width: 100%;
       height: 36vw;
       border: solid 1px;
+      margin-bottom: 15px;
       .court-line {
         position: absolute;
         top: 45%;
