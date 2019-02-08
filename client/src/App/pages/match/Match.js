@@ -32,6 +32,7 @@ import "./Match.scss";
 import MoreVertIcon from "@material-ui/icons/MoreVert";
 import MatchInfo from "../match-info/MatchInfo";
 import Chat from "../chat/Chat";
+import MatchFormation from "../match-formation/MatchFormation";
 
 const styles = theme => ({
   header: {
@@ -314,7 +315,11 @@ class Match extends React.Component {
               gameUrl={this.state.gameUrl}
             />
           </TabContainer>
-          <TabContainer dir={theme.direction}>Item Two</TabContainer>
+          <TabContainer dir={theme.direction}>
+              <MatchFormation
+              gameRef={this.gameRef}
+              currentGame={this.state.currentGame} />
+          </TabContainer>
           <TabContainer dir={theme.direction}>
             <Chat
               currentGame={this.state.currentGame}

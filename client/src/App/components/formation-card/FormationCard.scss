@@ -1,0 +1,63 @@
+
+  .formation-card {
+    margin: 15px 0;
+    .formation-name {
+      text-align: center;
+      font-size: 16px;
+      font-weight: bold;
+      margin-bottom: 10px;
+    }
+    .court-container {
+      position: relative;
+      width: 100%;
+      height: 36vw;
+      border: solid 1px;
+      margin-bottom: 15px;
+      .court-line {
+        position: absolute;
+        top: 45%;
+        border-top: solid 1px;
+        width: 100%;
+      }
+      .avatar {
+        position: absolute;
+      }
+      .avatar-4 {
+        top: 10%;
+        left: 10%;
+      }
+      .avatar-3 {
+        top: 10%;
+        left: 45%;
+      }
+      .avatar-2 {
+        top: 10%;
+        left: 78%;
+      }
+      .avatar-5 {
+        top: 60%;
+        left: 10%;
+      }
+      .avatar-6 {
+        top: 60%;
+        left: 45%;
+      }
+      .avatar-1 {
+        top: 60%;
+        left: 78%;
+      }
+    }
+    .chip {
+      width: 185px;
+      justify-content: end;
+      margin: 5px;
+      max-width: 46%;
+      span {
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        max-width: 110px;
+        display: inline;
+      }
+    }
+  }

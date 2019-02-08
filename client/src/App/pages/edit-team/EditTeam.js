@@ -3,7 +3,6 @@ import {
   ArrowBack,
   PersonAdd,
   Close,
-  GifOutlined,
   Delete,
   PhotoCamera,
   GroupAdd,
@@ -29,9 +28,7 @@ import {
   FormControlLabel,
   Checkbox,
   FormGroup,
-  Fab,
-  Chip,
-  Avatar
+  Fab
 } from "@material-ui/core";
 import { withStyles } from "@material-ui/core/styles";
 import store from "../../store/store";
@@ -48,6 +45,7 @@ import "./EditTeam.scss";
 import YesNoDialog from "../../components/yesNoDialog/YesNoDialog";
 import ImageCompressor from "image-compressor.js";
 import EditFormationDialog from "../../components/edit-formation-dialog/EditFormationDialog";
+import FormationCard from "../../components/formation-card/FormationCard";
 
 const styles = theme => ({
   grow: {
@@ -395,18 +393,17 @@ class EditTeam extends React.Component {
     });
   };
 
-  saveFormation = (formation) =>{
-    
+  saveFormation = formation => {
     var tempTeam = JSON.parse(JSON.stringify(this.state.team));
     var index = -1;
-    tempTeam.formations.forEach((item, i) =>{
-      if(item.id === formation.id){
+    tempTeam.formations.forEach((item, i) => {
+      if (item.id === formation.id) {
         index = i;
       }
     });
-    if(index >= 0){
+    if (index >= 0) {
       tempTeam.formations[index] = formation;
-    }else{
+    } else {
       tempTeam.formations.push(formation);
     }
     this.teamRef.set(tempTeam);
@@ -414,33 +411,32 @@ class EditTeam extends React.Component {
       ...this.state,
       editFormationOpen: !this.state.editFormationOpen,
       currentEditFormation: null,
-      team: {...this.state.team, formations: tempTeam.formations}
+      team: { ...this.state.team, formations: tempTeam.formations }
     });
-    
-    store.dispatch(showMessageAction("success", "Formazione salvata"));
-  }
 
-  deleteFormation = (formation) =>{
-    
+    store.dispatch(showMessageAction("success", "Formazione salvata"));
+  };
+
+  deleteFormation = formation => {
     var tempTeam = JSON.parse(JSON.stringify(this.state.team));
     var index = -1;
-    tempTeam.formations.forEach((item, i) =>{
-      if(item.id === formation.id){
+    tempTeam.formations.forEach((item, i) => {
+      if (item.id === formation.id) {
         index = i;
       }
     });
-    if(index >= 0){
+    if (index >= 0) {
       tempTeam.formations.splice(index, 1);
       this.teamRef.set(tempTeam);
       this.setState({
         ...this.state,
         editFormationOpen: !this.state.editFormationOpen,
         currentEditFormation: null,
-        team: {...this.state.team, formations: tempTeam.formations}
+        team: { ...this.state.team, formations: tempTeam.formations }
       });
       store.dispatch(showMessageAction("success", "Formazione eliminata"));
     }
-  }
+  };
 
   render() {
     const { classes, theme } = this.props;
@@ -610,61 +606,12 @@ class EditTeam extends React.Component {
                 //   return a.number - b.number;
                 // });
                 return (
-                  <Card className="formation-card" key={index}>
-                    <CardActionArea
-                      onClick={this.addFormation.bind(this, formation)}
-                    >
-                      <CardContent className="card-content">
-                        <div className="formation-name">{formation.name}</div>
-                        <div className="court-container">
-                          <div className="court-line" />
-                          {formation.players.map((item, pIndex) => {
-                            //finche player number < 6, loop con filter che prende l'index === position
-                            var player = {id: "", number: ""};
-                            for (
-                              var i = 0;
-                              i < this.state.team.players.length;
-                              i++
-                            ) {
-                              if (this.state.team.players[i].id === item.id) {
-                                player = this.state.team.players[i];
-                              }
-                            }
-                            return (
-                              <Avatar
-                                key={player.id}
-                                className={"avatar avatar-" + item.position}
-                              >
-                                {player.number}
-                              </Avatar>
-                            );
-                          })}
-                        </div>
-                        <div>
-                          {formation.players.map((item, pIndex) => {
-                            var player = {id: "", number: "", name: ""};
-                            for (
-                              var i = 0;
-                              i < this.state.team.players.length;
-                              i++
-                            ) {
-                              if (this.state.team.players[i].id === item.id) {
-                                player = this.state.team.players[i];
-                              }
-                            }
-                            return (
-                              <Chip
-                                className="chip"
-                                key={player.id}
-                                label={player.name}
-                                avatar={<Avatar>{player.number}</Avatar>}
-                              />
-                            );
-                          })}
-                        </div>
-                      </CardContent>
-                    </CardActionArea>
-                  </Card>
+                  <FormationCard
+                    formation={formation}
+                    addFormation={this.addFormation}
+                    key = {index}
+                    players={this.state.team.players}
+                  />
                 );
               })}
             </ExpansionPanelDetails>
