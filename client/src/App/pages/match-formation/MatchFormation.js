@@ -10,24 +10,18 @@ import store from "../../store/store";
 import { updateAppbar, updateCreateMatch } from "../../actions/actions";
 import FormationCard from "../../components/formation-card/FormationCard";
 import "./MatchFormation.scss";
+import CourtAndChip from "../../components/court-and-chip/CourtAndChip";
 
 class MatchFormation extends React.Component {
   state = {
     team: null,
     teamsList: [],
     formation: null,
-    gameRef: null,
     configured: false
   };
   teamsRef = null;
 
-  constructor() {
-    super();
-
-  }
-
   componentDidMount() {
-      
     if (!firebase.apps.length) {
       firebase.initializeApp(firebaseConfig);
     }
@@ -56,15 +50,18 @@ class MatchFormation extends React.Component {
     }
   }
 
-  componentWillReceiveProps(nextProps){
-      
+  componentWillReceiveProps(nextProps) {
     if (nextProps.currentGame && this.state.team === null) {
       this.setState({
         team:
-        nextProps.currentGame.team === undefined ? null : nextProps.currentGame.team,
-        configured: nextProps.currentGame.team !== null,
+          nextProps.currentGame.team === undefined
+            ? null
+            : nextProps.currentGame.team,
+        configured: nextProps.currentGame.team !== null && nextProps.currentGame.team !== undefined,
         formation:
-        nextProps.currentGame.formation === undefined ? null : nextProps.currentGame.formation,
+          nextProps.currentGame.formation === undefined
+            ? null
+            : nextProps.currentGame.formation
       });
     }
   }
@@ -94,25 +91,33 @@ class MatchFormation extends React.Component {
   startTracking = () => {
     var game = this.props.currentGame;
     game.team = this.state.team.id;
-    game.formation = this.state.formation.id;
+    game.formation = this.state.formation;
     this.props.gameRef.set(game);
-    this.setState({ ...this.state, configured: true });
+    this.setState({ ...this.state, configured: true, team: this.state.team.id });
   };
 
+  rotateFormation = () =>{
+      var tempPlayers = this.state.formation.players.slice();
+      var self = this;
+      tempPlayers.forEach((player) =>{
+        player.position = self.getNewPosition(player.position);
+      });
+      this.setState({...this.state, formation: {...this.state.formation, players: tempPlayers}});
+  }
+
+  getNewPosition = (oldPos) =>{
+    return oldPos - 1 < 1 ? 6 : oldPos - 1;
+  }
+
   render() {
-    var currentFormation = null;
-    if(this.state.configured){
-        var self = this;
-        this.state.teamsList.forEach((team) => {
-            if(team.id === self.state.team){
-                team.formations.forEach((formation) => {
-                    if(formation.id === self.state.formation){
-                        currentFormation = formation;
-                        console.log(currentFormation);
-                    }
-                })
-            }
-        })
+    var currentTeam = null;
+    if (this.state.configured) {
+      var self = this;
+      this.state.teamsList.forEach(team => {
+        if (team.id === self.state.team) {
+            currentTeam = team;
+        }
+      });
     }
 
     return (
@@ -207,9 +212,19 @@ class MatchFormation extends React.Component {
             )}
           </div>
         )}
-        {this.state.configured && (
-          <div className="configured">Configurato correttamente</div>
-
+        {this.state.configured && currentTeam !== null && (
+          <div>
+              <Button variant="outlined" onClick={this.rotateFormation.bind(this)}>Rotate</Button>
+            <CourtAndChip
+              editingPosition={-1}
+              removeFromCourt={function(){}}
+              addPlayer={function(){}}
+              choosePlayer={function(){}}
+              formation={this.state.formation}
+              playersList={currentTeam.players}
+              readOnly={true}
+            />
+          </div>
         )}
       </div>
     );
