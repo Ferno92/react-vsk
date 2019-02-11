@@ -320,7 +320,8 @@ class Match extends React.Component {
               gameRef={this.gameRef}
               currentGame={this.state.currentGame}
               spectator={this.state.spectator}
-              owner={this.props.match.params.owner} />
+              owner={this.props.match.params.owner}
+              tab={this.state.value} />
           </TabContainer>
           <TabContainer dir={theme.direction}>
             <Chat

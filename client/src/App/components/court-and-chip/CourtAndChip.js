@@ -71,7 +71,6 @@ class CourtAndChip extends React.Component {
   };
 
   choosePlayer = (player, formation) => {
-    console.log("choosePlayer", player);
     var courtPos = this.getCourtPositions(formation);
     courtPos[this.props.editingPosition - 1] = {
       id: player.id,
@@ -141,6 +140,7 @@ class CourtAndChip extends React.Component {
         </div>
         
         <div style={{ marginTop: "15px" }}>
+        <div>Panchina:</div>
           {filteredPlayersList.map((player, index) => {
             var chipEdit = (
               <Chip

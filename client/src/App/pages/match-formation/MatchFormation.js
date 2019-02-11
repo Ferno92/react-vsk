@@ -17,7 +17,10 @@ class MatchFormation extends React.Component {
     team: null,
     teamsList: [],
     formation: null,
-    configured: false
+    configured: false,
+    isOwnerMe: false,
+    readOnly: true,
+    editingPosition: -1
   };
   teamsRef = null;
 
@@ -30,12 +33,13 @@ class MatchFormation extends React.Component {
 
     var user = ls.get("user");
     var userId = "";
+    var isOwnerMe = false;
     if (
       user !== null &&
-      (this.props.owner === undefined ||
-        this.props.owner === user.id)
+      (this.props.owner === undefined || this.props.owner === user.id)
     ) {
       userId = user.id;
+      isOwnerMe = true;
     } else {
       userId = this.props.owner;
     }
@@ -51,7 +55,11 @@ class MatchFormation extends React.Component {
           data_list.push(team);
         }
       }
-      self.setState({ ...self.state, teamsList: data_list });
+      self.setState({
+        ...self.state,
+        teamsList: data_list,
+        isOwnerMe: isOwnerMe
+      });
     });
   }
 
@@ -68,11 +76,20 @@ class MatchFormation extends React.Component {
           nextProps.currentGame.team === undefined
             ? null
             : nextProps.currentGame.team,
-        configured: nextProps.currentGame.team !== null && nextProps.currentGame.team !== undefined,
+        configured:
+          nextProps.currentGame.team !== null &&
+          nextProps.currentGame.team !== undefined,
         formation:
           nextProps.currentGame.formation === undefined
             ? null
-            : nextProps.currentGame.formation
+            : nextProps.currentGame.formation,
+        readOnly: this.state.readOnly ? true : (nextProps.tab !== 1 ? true : this.state.readOnly)
+      });
+    } else if (nextProps.currentGame.formation) {
+      this.setState({
+        ...this.state,
+        formation: nextProps.currentGame.formation,
+        readOnly: this.state.readOnly ? true : (nextProps.tab !== 1 ? true : this.state.readOnly)
       });
     }
   }
@@ -104,21 +121,69 @@ class MatchFormation extends React.Component {
     game.team = this.state.team.id;
     game.formation = this.state.formation;
     this.props.gameRef.set(game);
-    this.setState({ ...this.state, configured: true, team: this.state.team.id });
+    this.setState({
+      ...this.state,
+      configured: true,
+      team: this.state.team.id
+    });
   };
 
-  rotateFormation = () =>{
-      var tempPlayers = this.state.formation.players.slice();
-      var self = this;
-      tempPlayers.forEach((player) =>{
-        player.position = self.getNewPosition(player.position);
-      });
-      this.setState({...this.state, formation: {...this.state.formation, players: tempPlayers}});
-  }
+  rotateFormation = () => {
+    var tempPlayers = this.state.formation.players.slice();
+    var self = this;
+    tempPlayers.forEach(player => {
+      player.position = self.getNewPosition(player.position);
+    });
+    //  this.setState({...this.state, formation: {...this.state.formation, players: tempPlayers}});
 
-  getNewPosition = (oldPos) =>{
+    var game = this.props.currentGame;
+    game.formation.players = tempPlayers;
+    this.props.gameRef.set(game);
+  };
+
+  getNewPosition = oldPos => {
     return oldPos - 1 < 1 ? 6 : oldPos - 1;
-  }
+  };
+
+  switchPlayer = () => {
+    this.setState({ ...this.state, readOnly: !this.state.readOnly });
+  };
+
+  addPlayer = player => {
+    this.setState({
+      ...this.state,
+      editingPosition: this.state.editingPosition >= 0 ? -1 : player.position
+    });
+  };
+
+  removeFromCourt = player => {
+    var formationPlayers = this.state.formation.players.slice();
+    var index = -1;
+    formationPlayers.forEach((p, i) => {
+      if (p.id === player.id) {
+        index = i;
+      }
+    });
+    formationPlayers.splice(index, 1);
+    var game = this.props.currentGame;
+    game.formation.players = formationPlayers;
+    this.props.gameRef.set(game);
+  };
+
+  choosePlayerCallback = (players, editingPosition) => {
+    var self = this;
+    this.setState(
+      {
+        ...this.state,
+        editingPosition: editingPosition
+      },
+      () => {
+        var game = self.props.currentGame;
+        game.formation.players = players;
+        self.props.gameRef.set(game);
+      }
+    );
+  };
 
   render() {
     var currentTeam = null;
@@ -126,7 +191,7 @@ class MatchFormation extends React.Component {
       var self = this;
       this.state.teamsList.forEach(team => {
         if (team.id === self.state.team) {
-            currentTeam = team;
+          currentTeam = team;
         }
       });
     }
@@ -225,15 +290,36 @@ class MatchFormation extends React.Component {
         )}
         {this.state.configured && currentTeam !== null && (
           <div>
-              <Button variant="outlined" onClick={this.rotateFormation.bind(this)}>Rotate</Button>
+            {this.state.isOwnerMe && (
+              <div className="edit-buttons">
+                <Button
+                  variant="outlined"
+                  onClick={this.rotateFormation.bind(this)}
+                  color="primary"
+                >
+                  Ruota formazione
+                </Button>
+
+                <Button
+                  variant={this.state.readOnly ? "outlined" : "contained"}
+                  onClick={this.switchPlayer.bind(this)}
+                  color="primary"
+                >
+                  {this.state.readOnly
+                    ? "Sostituisci giocatore"
+                    : "Fine modifiche"}
+                </Button>
+              </div>
+            )}
+
             <CourtAndChip
-              editingPosition={-1}
-              removeFromCourt={function(){}}
-              addPlayer={function(){}}
+              editingPosition={this.state.editingPosition}
+              removeFromCourt={this.removeFromCourt}
+              addPlayer={this.addPlayer}
               formation={this.state.formation}
               playersList={currentTeam.players}
-              readOnly={true}
-              choosePlayerCallback={function(){}}
+              readOnly={this.state.readOnly}
+              choosePlayerCallback={this.choosePlayerCallback}
             />
           </div>
         )}

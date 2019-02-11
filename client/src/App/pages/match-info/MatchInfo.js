@@ -10,7 +10,14 @@ import firebase from "firebase/app";
 import "firebase/database";
 import ls from "local-storage";
 import { firebaseConfig } from "../../App";
-import { DialogTitle, Dialog, Chip, Avatar } from "@material-ui/core";
+import {
+  DialogTitle,
+  Dialog,
+  Chip,
+  Avatar,
+  Switch,
+  FormControlLabel
+} from "@material-ui/core";
 
 class MatchInfo extends React.Component {
   state = {
@@ -23,20 +30,24 @@ class MatchInfo extends React.Component {
     gameRef: null,
     gameUrl: "",
     audience: [],
-    showAudience: false
+    showAudience: false,
+    scoutEnabled: false
   };
   audienceRef = null;
-
-  constructor(props) {
-    super(props);
-  }
 
   add(team) {
     var setsMissing = {
       a: team === "resultA" ? 1 : 0,
       b: team === "resultA" ? 0 : 1,
+      hasBall: team === "resultA" ? "a" : "b",
       history: []
     };
+    var isBallChanged = this.isBallChanged(
+      this.state.currentGame.sets
+        ? this.state.currentGame.sets[this.state.currentGame.sets.length - 1]
+        : null,
+      team
+    );
     var currentGame = {
       ...this.state.currentGame,
       sets: this.state.currentGame.sets
@@ -49,21 +60,27 @@ class MatchInfo extends React.Component {
               [team === "resultA" ? "a" : "b"]:
                 this.state.currentGame.sets[
                   this.state.currentGame.sets.length - 1
-                ][team === "resultA" ? "a" : "b"] + 1
+                ][team === "resultA" ? "a" : "b"] + 1,
+              hasBall: team === "resultA" ? "a" : "b"
             }
           }
         : [setsMissing]
     };
+    var bluePrintFormation = this.printFormation();
     if (
       currentGame.sets[Object.keys(currentGame.sets).length - 1].history !==
       undefined
     ) {
       currentGame.sets[Object.keys(currentGame.sets).length - 1].history.push(
-        team === "resultA" ? { a: "x", b: "-" } : { a: "-", b: "x" }
+        team === "resultA"
+          ? { a: "x", b: "-", formation: bluePrintFormation }
+          : { a: "-", b: "x", formation: bluePrintFormation }
       );
     } else {
       currentGame.sets[Object.keys(currentGame.sets).length - 1].history = [
-        team === "resultA" ? { a: "x", b: "-" } : { a: "-", b: "x" }
+        team === "resultA"
+          ? { a: "x", b: "-", formation: bluePrintFormation }
+          : { a: "-", b: "x", formation: bluePrintFormation }
       ];
     }
 
@@ -84,13 +101,59 @@ class MatchInfo extends React.Component {
         currentGame.sets[Object.keys(currentGame.sets).length] = { a: 0, b: 0 };
       }
     }
+    if (currentGame.formation && isBallChanged) {
+      currentGame.formation.players = this.rotateFormation(
+        currentGame.formation,
+        false
+      );
+    }
     this.state.gameRef.update(currentGame);
   }
+
+  printFormation = () => {
+    var print = [];
+    if (this.state.currentGame.formation) {
+      this.state.currentGame.formation.players.forEach(player => {
+        print.push(player.id);
+      });
+    }
+    return print;
+  };
+
+  rotateFormation = (formation, old) => {
+    var tempPlayers = formation.players.slice();
+    var self = this;
+    tempPlayers.forEach(player => {
+      if (old) {
+        player.position = self.getOldPosition(player.position);
+      } else {
+        player.position = self.getNewPosition(player.position);
+      }
+    });
+    return tempPlayers;
+  };
+
+  getNewPosition = oldPos => {
+    return oldPos - 1 < 1 ? 6 : oldPos - 1;
+  };
+
+  getOldPosition = oldPos => {
+    return oldPos + 1 > 6 ? 1 : oldPos + 1;
+  };
+
+  isBallChanged = (currentSet, team) => {
+    return currentSet
+      ? currentSet.hasBall === "b" && team !== "resultB"
+        ? true
+        : false
+      : true;
+  };
 
   remove(team) {
     var setsMissing = {
       a: 0,
-      b: 0
+      b: 0,
+      hasBall: null
     };
     var currentGame = {
       ...this.state.currentGame,
@@ -113,12 +176,36 @@ class MatchInfo extends React.Component {
           }
         : [setsMissing]
     };
-    this.removeLastHistoryFor(currentGame, team);
-
+    var penultimo = this.removeLastHistoryFor(currentGame, team);
+    if (
+      (penultimo.a !== "x" && team === "resultA") ||
+      (penultimo.b !== "x" && team === "resultB")
+    ) {
+      currentGame.formation.players = this.rotateFormation(
+        currentGame.formation,
+        true
+      );
+    }
+    if (
+      Object.keys(currentGame.sets).length - 1 >= 0 &&
+      currentGame.sets[Object.keys(currentGame.sets).length - 1].history
+        .length > 0
+    ) {
+      currentGame.sets[Object.keys(currentGame.sets).length - 1].hasBall =
+        currentGame.sets[Object.keys(currentGame.sets).length - 1].history[
+          currentGame.sets[Object.keys(currentGame.sets).length - 1].history
+            .length - 1
+        ].a === "x"
+          ? "a"
+          : "b";
+    } else {
+      currentGame.sets[Object.keys(currentGame.sets).length - 1].hasBall = null;
+    }
     this.state.gameRef.update(currentGame);
   }
 
   removeLastHistoryFor(currentGame, team) {
+    var penultimo = null;
     if (
       currentGame.sets[Object.keys(currentGame.sets).length - 1].history !==
       undefined
@@ -141,7 +228,12 @@ class MatchInfo extends React.Component {
               i
             ].b === "x")
         ) {
-          foundIndex = i;
+          if (i > 0 && foundIndex === -1) {
+            penultimo =
+              currentGame.sets[Object.keys(currentGame.sets).length - 1]
+                .history[i - 1];
+            foundIndex = i;
+          }
         }
       }
       if (foundIndex > -1) {
@@ -150,6 +242,7 @@ class MatchInfo extends React.Component {
         ].history.splice(foundIndex, 1);
       }
     }
+    return penultimo;
   }
 
   undo() {
@@ -231,12 +324,10 @@ class MatchInfo extends React.Component {
       var userId = ls.get("user")
         ? ls.get("user").id
         : ls.get("anonymous").code;
-        var name = ls.get("user")
-          ? ls.get("user").name
-          : "anonymous" + ls.get("anonymous").code;
-          var picture = ls.get("user")
-            ? ls.get("user").imageUrl
-            : null;
+      var name = ls.get("user")
+        ? ls.get("user").name
+        : "anonymous" + ls.get("anonymous").code;
+      var picture = ls.get("user") ? ls.get("user").imageUrl : null;
       var audienceWithoutMe = audience.slice();
       if (self.getAudienceIndex(audience, userId) >= 0) {
         audienceWithoutMe.splice(self.getAudienceIndex(audience, userId), 1);
@@ -265,10 +356,26 @@ class MatchInfo extends React.Component {
     this.setState({ ...this.state, showAudience: show });
   };
 
+  onChangeScout = () => {
+    this.setState({ ...this.state, scoutEnabled: !this.state.scoutEnabled });
+  };
+
   render() {
-    const { classes, theme } = this.props;
     return (
       <div>
+        {/*!this.state.spectator && (
+          <FormControlLabel
+            control={
+              <Switch
+                checked={this.state.scoutEnabled}
+                onChange={this.onChangeScout.bind(this)}
+                value="scout"
+                color="primary"
+              />
+            }
+            label="Abilita scout"
+          />
+          )*/}
         {this.state.currentGame && this.state.currentGame.live && (
           <div className="flex-container set-info">
             <div className="flex-child-bigger">
@@ -361,7 +468,7 @@ class MatchInfo extends React.Component {
             onClick={
               this.state.audience.length > 0
                 ? this.showAudience.bind(this, true)
-                : function(){}
+                : function() {}
             }
           >
             Spettatori: {this.state.audience.length}

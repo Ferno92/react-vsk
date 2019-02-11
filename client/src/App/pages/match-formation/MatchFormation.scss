@@ -1,7 +1,20 @@
+.creation-info {
+  margin: 10px auto;
+  .chip {
+    margin-left: 20px;
+  }
+}
 
-.creation-info{
-    margin: 10px auto;
-    .chip {
-        margin-left: 20px;
+.edit-buttons {
+  display: flex;
+  margin-bottom: 10px;
+  button {
+    flex-grow: 1;
+    &:first-child {
+      margin-right: 5px;
     }
+    &:last-child {
+      margin-left: 5px;
+    }
+  }
 }

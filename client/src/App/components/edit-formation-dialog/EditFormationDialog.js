@@ -6,14 +6,10 @@ import {
   Toolbar,
   IconButton,
   Button,
-  TextField,
-  DialogTitle,
-  DialogContent,
-  DialogContentText,
-  DialogActions
+  TextField
 } from "@material-ui/core";
 import Typography from "@material-ui/core/Typography";
-import { Close, Add, Done } from "@material-ui/icons";
+import { Close} from "@material-ui/icons";
 import "./EditFormationDialog.scss";
 import { newGuid } from "../../App";
 import CourtAndChip from "../court-and-chip/CourtAndChip";
@@ -23,14 +19,6 @@ function Transition(props) {
   return <Slide direction="up" {...props} />;
 }
 
-const styles = {
-  appBar: {
-    position: "relative"
-  },
-  flex: {
-    flex: 1
-  }
-};
 
 class EditFormationDialog extends React.Component {
   state = {
