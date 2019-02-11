@@ -318,7 +318,9 @@ class Match extends React.Component {
           <TabContainer dir={theme.direction}>
               <MatchFormation
               gameRef={this.gameRef}
-              currentGame={this.state.currentGame} />
+              currentGame={this.state.currentGame}
+              spectator={this.state.spectator}
+              owner={this.props.match.params.owner} />
           </TabContainer>
           <TabContainer dir={theme.direction}>
             <Chat

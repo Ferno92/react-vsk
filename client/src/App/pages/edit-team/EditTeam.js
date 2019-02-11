@@ -782,6 +782,7 @@ class EditTeam extends React.Component {
           noAction={this.toggleDeleteDialog}
           yesAction={this.deletePlayer}
           dialogText={"Sei sicuro di voler eliminare questo giocatore?"}
+          dialogTitle={"Elimina giocatore"}
         />
       </div>
     );

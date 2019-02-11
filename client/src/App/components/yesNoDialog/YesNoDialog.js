@@ -10,7 +10,7 @@ class YesNoDialog extends React.Component{
             aria-labelledby="alert-dialog-title"
             aria-describedby="alert-dialog-description"
           >
-            <DialogTitle id="alert-dialog-title">{"Logout"}</DialogTitle>
+            <DialogTitle id="alert-dialog-title">{this.props.dialogTitle}</DialogTitle>
             <DialogContent>
               <DialogContentText id="alert-dialog-description">
                 {this.props.dialogText}

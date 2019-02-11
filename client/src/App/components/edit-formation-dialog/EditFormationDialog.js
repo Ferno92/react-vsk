@@ -17,6 +17,7 @@ import { Close, Add, Done } from "@material-ui/icons";
 import "./EditFormationDialog.scss";
 import { newGuid } from "../../App";
 import CourtAndChip from "../court-and-chip/CourtAndChip";
+import YesNoDialog from "../yesNoDialog/YesNoDialog";
 
 function Transition(props) {
   return <Slide direction="up" {...props} />;
@@ -70,26 +71,6 @@ class EditFormationDialog extends React.Component {
     });
   };
 
-  choosePlayer = player => {
-    console.log("choosePlayer", player);
-    var courtPos = this.getCourtPositions();
-    courtPos[this.state.editingPosition - 1] = {
-      id: player.id,
-      position: this.state.editingPosition
-    };
-    var temp = [];
-    courtPos.forEach(pos => {
-      if (pos.id !== "") {
-        temp.push(pos);
-      }
-    });
-    this.setState({
-      ...this.state,
-      formation: { ...this.state.formation, players: temp },
-      editingPosition: -1
-    });
-  };
-
   removeFromCourt = player => {
     var formationPlayers = this.state.formation.players.slice();
     console.log(formationPlayers.indexOf(player));
@@ -118,8 +99,17 @@ class EditFormationDialog extends React.Component {
   };
 
   deleteFormation = () => {
-    this.props.deleteFormation(this.state.formation);
-    this.setState({ ...this.state, askDelete: false });
+    this.setState({ ...this.state, askDelete: false }, () => {
+      this.props.deleteFormation(this.state.formation);
+    });
+  };
+
+  choosePlayerCallback = (players, editingPosition) => {
+    this.setState({
+      ...this.state,
+      formation: { ...this.state.formation, players: players },
+      editingPosition: editingPosition
+    });
   };
 
   render() {
@@ -177,10 +167,10 @@ class EditFormationDialog extends React.Component {
             editingPosition={this.state.editingPosition}
             removeFromCourt={this.removeFromCourt}
             addPlayer={this.addPlayer}
-            choosePlayer={this.choosePlayer}
             formation={this.state.formation}
             playersList={this.state.playersList}
             readOnly={false}
+            choosePlayerCallback={this.choosePlayerCallback}
           />
 
           {!this.state.isNew && (
@@ -189,34 +179,16 @@ class EditFormationDialog extends React.Component {
             </Button>
           )}
         </div>
-        <Dialog
+
+        {/* logout dialog */}
+        <YesNoDialog
           open={this.state.askDelete}
-          onClose={this.askDeleteFormation.bind(this)}
-          aria-labelledby="alert-dialog-title"
-          aria-describedby="alert-dialog-description"
-        >
-          <DialogTitle id="alert-dialog-title">{"Elimina partita"}</DialogTitle>
-          <DialogContent>
-            <DialogContentText id="alert-dialog-description">
-              Sei sicuro di voler eliminare la formazione?
-            </DialogContentText>
-          </DialogContent>
-          <DialogActions>
-            <Button
-              onClick={this.askDeleteFormation.bind(this)}
-              color="primary"
-            >
-              No
-            </Button>
-            <Button
-              onClick={this.deleteFormation.bind(this)}
-              color="primary"
-              autoFocus
-            >
-              Si
-            </Button>
-          </DialogActions>
-        </Dialog>
+          noAction={this.askDeleteFormation}
+          yesAction={this.deleteFormation}
+          dialogText={"Sei sicuro di voler eliminare la formazione?"}
+          dialogTitle={"Elimina formazione"}
+        />
+
       </Dialog>
     );
   }

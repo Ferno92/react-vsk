@@ -28,7 +28,18 @@ class MatchFormation extends React.Component {
 
     this.db = firebase.app().database();
 
-    this.teamsRef = this.db.ref("users/" + ls.get("user").id + "/teams");
+    var user = ls.get("user");
+    var userId = "";
+    if (
+      user !== null &&
+      (this.props.owner === undefined ||
+        this.props.owner === user.id)
+    ) {
+      userId = user.id;
+    } else {
+      userId = this.props.owner;
+    }
+    this.teamsRef = this.db.ref("users/" + userId + "/teams");
     var self = this;
     this.teamsRef.on("value", snapshot => {
       console.log("teams", snapshot.val());
@@ -219,10 +230,10 @@ class MatchFormation extends React.Component {
               editingPosition={-1}
               removeFromCourt={function(){}}
               addPlayer={function(){}}
-              choosePlayer={function(){}}
               formation={this.state.formation}
               playersList={currentTeam.players}
               readOnly={true}
+              choosePlayerCallback={function(){}}
             />
           </div>
         )}

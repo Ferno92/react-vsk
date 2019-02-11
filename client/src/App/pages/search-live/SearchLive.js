@@ -102,7 +102,7 @@ class SearchLive extends React.Component {
 
   render() {
     return (
-      <div>
+      <div style={{marginBottom: "70px"}}>
         <h1 className="search-title">Partite in corso:</h1>
 
         {this.state != null

@@ -16,30 +16,34 @@ class MyTeams extends React.Component {
   };
 
   componentDidMount() {
-    store.dispatch(updateAppbar("fabVisible", false));
-    if (!store.getState().appBar.visible) {
-      store.dispatch(updateAppbar("visible", true));
-    }
-    if (!firebase.apps.length) {
-      firebase.initializeApp(firebaseConfig);
-    }
-
-    this.db = firebase.app().database();
-
-    this.teamsRef = this.db.ref("users/" + ls.get("user").id + "/teams");
-    var self = this;
-    this.teamsRef.on("value", snapshot => {
-      console.log("teams", snapshot.val());
-      var data_list = [];
-      for (var property in snapshot.val()) {
-        if (snapshot.val().hasOwnProperty(property)) {
-          var team = snapshot.val()[property];
-          team.key = property;
-          data_list.push(team);
-        }
+    if (ls.get("user") === null) {
+      this.props.history.push("/");
+    } else {
+      store.dispatch(updateAppbar("fabVisible", false));
+      if (!store.getState().appBar.visible) {
+        store.dispatch(updateAppbar("visible", true));
       }
-      self.setState({ ...self.state, teams: data_list });
-    });
+      if (!firebase.apps.length) {
+        firebase.initializeApp(firebaseConfig);
+      }
+
+      this.db = firebase.app().database();
+
+      this.teamsRef = this.db.ref("users/" + ls.get("user").id + "/teams");
+      var self = this;
+      this.teamsRef.on("value", snapshot => {
+        console.log("teams", snapshot.val());
+        var data_list = [];
+        for (var property in snapshot.val()) {
+          if (snapshot.val().hasOwnProperty(property)) {
+            var team = snapshot.val()[property];
+            team.key = property;
+            data_list.push(team);
+          }
+        }
+        self.setState({ ...self.state, teams: data_list });
+      });
+    }
   }
 
   componentWillUnmount() {
@@ -48,17 +52,25 @@ class MyTeams extends React.Component {
     }
   }
 
-  onClickTeam = (id) =>{
+  onClickTeam = id => {
     this.props.history.push("/team/" + id);
-  }
+  };
 
   render() {
     return (
       <div className="my-teams">
-      <h1 style={{textAlign: "center"}}>Le mie squadre:</h1>
+        <h1 style={{ textAlign: "center" }}>Le mie squadre:</h1>
         {this.state !== null &&
           this.state.teams.map((team, index) => {
-            return <TeamCard key={team.id} team={team} opening={false} onClick={this.onClickTeam.bind(this, team.id)} index={index}/>;
+            return (
+              <TeamCard
+                key={team.id}
+                team={team}
+                opening={false}
+                onClick={this.onClickTeam.bind(this, team.id)}
+                index={index}
+              />
+            );
           })}
       </div>
     );

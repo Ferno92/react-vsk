@@ -2,10 +2,9 @@ import React from "react";
 import { Button, Avatar, Badge, Fab, Chip } from "@material-ui/core";
 import { Close, Add, Done } from "@material-ui/icons";
 import "./CourtAndChip.scss";
+import FlipMove from "react-flip-move";
 
 class CourtAndChip extends React.Component {
-
-
   getCourtPositions = formation => {
     var courtPositions = [];
     var index = 0;
@@ -71,6 +70,22 @@ class CourtAndChip extends React.Component {
     return playersList;
   };
 
+  choosePlayer = (player, formation) => {
+    console.log("choosePlayer", player);
+    var courtPos = this.getCourtPositions(formation);
+    courtPos[this.props.editingPosition - 1] = {
+      id: player.id,
+      position: this.props.editingPosition
+    };
+    var temp = [];
+    courtPos.forEach(pos => {
+      if (pos.id !== "") {
+        temp.push(pos);
+      }
+    });
+    this.props.choosePlayerCallback(temp, -1);
+  };
+
   render() {
     var courtPositions = this.getCourtPositions(this.props.formation);
 
@@ -78,10 +93,11 @@ class CourtAndChip extends React.Component {
     return (
       <div>
         <div className="court">
+        <FlipMove className="flipmove">
           {courtPositions.map((player, index) => {
             return (
               <div
-                key={index}
+              key={player.id !== "" ? player.id : "flip-" + index}
                 className={"position position-" + player.position}
               >
                 {player.number !== "" && !this.props.readOnly ? (
@@ -121,7 +137,9 @@ class CourtAndChip extends React.Component {
               </div>
             );
           })}
+          </FlipMove>
         </div>
+        
         <div style={{ marginTop: "15px" }}>
           {filteredPlayersList.map((player, index) => {
             var chipEdit = (
@@ -131,7 +149,7 @@ class CourtAndChip extends React.Component {
                 label={player.name}
                 avatar={<Avatar>{player.number}</Avatar>}
                 deleteIcon={<Done />}
-                onDelete={this.props.choosePlayer.bind(this, player)}
+                onDelete={this.choosePlayer.bind(this, player, this.props.formation)}
               />
             );
             var chip = (

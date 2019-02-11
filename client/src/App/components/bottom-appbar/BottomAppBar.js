@@ -306,7 +306,13 @@ class BottomAppBar extends React.Component {
         </SwipeableDrawer>
 
         {/* logout dialog */}
-        <YesNoDialog open={store.getState().appBar.logoutDialogOpen} noAction={this.toggleLogoutDialog} yesAction={this.logoutUser} dialogText={"Sei sicuro di voler effettuare il logout?"}/>
+        <YesNoDialog
+          open={store.getState().appBar.logoutDialogOpen}
+          noAction={this.toggleLogoutDialog}
+          yesAction={this.logoutUser}
+          dialogText={"Sei sicuro di voler effettuare il logout?"}
+          dialogTitle={"Logout"}
+        />
 
         {/* bottom app bar */}
         <Slide
