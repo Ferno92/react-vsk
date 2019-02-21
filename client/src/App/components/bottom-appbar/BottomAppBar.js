@@ -330,7 +330,7 @@ class BottomAppBar extends React.Component {
               >
                 <MenuIcon />
               </IconButton>
-              {this.props.fabVisible && this.props.loggedIn && (
+              {!this.props.search && this.props.fabVisible && this.props.loggedIn && (
                 <Fab
                   color="secondary"
                   aria-label="Add"
@@ -367,7 +367,7 @@ class BottomAppBar extends React.Component {
                 }}
               />
               <div>
-                {!this.props.fabVisible && this.props.searchButtonVisible && (
+                {this.props.searchButtonVisible && (
                   <IconButton
                     color="inherit"
                     onClick={this.openCloseSearch.bind(this)}

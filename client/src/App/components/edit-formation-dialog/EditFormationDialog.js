@@ -130,15 +130,17 @@ class EditFormationDialog extends React.Component {
             >
               Modifica formazione
             </Typography>
-            <Button
-              color="inherit"
-              onClick={this.props.saveFormation.bind(
-                this,
-                this.state.formation
-              )}
-            >
-              Salva
-            </Button>
+            {!this.props.readOnly && 
+              <Button
+                color="inherit"
+                onClick={this.props.saveFormation.bind(
+                  this,
+                  this.state.formation
+                )}
+              >
+                Salva
+              </Button>
+            }
           </Toolbar>
         </AppBar>
 
@@ -150,6 +152,7 @@ class EditFormationDialog extends React.Component {
             className="name inputs"
             value={this.state.formation ? this.state.formation.name : ""}
             onChange={this.onChangeName.bind(this)}
+            disabled={this.props.readOnly}
           />
           <CourtAndChip
             editingPosition={this.state.editingPosition}
@@ -157,11 +160,11 @@ class EditFormationDialog extends React.Component {
             addPlayer={this.addPlayer}
             formation={this.state.formation}
             playersList={this.state.playersList}
-            readOnly={false}
+            readOnly={this.props.readOnly}
             choosePlayerCallback={this.choosePlayerCallback}
           />
 
-          {!this.state.isNew && (
+          {!this.props.readOnly && !this.state.isNew && (
             <Button className="delete" onClick={this.askDeleteFormation}>
               Elimina formazione
             </Button>

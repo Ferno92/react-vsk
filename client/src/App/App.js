@@ -131,7 +131,7 @@ class App extends Component {
               <Route path="/search" component={SearchLive} />
               <Route path="/profile" component={Profile} />
               <Route path="/myteams" component={MyTeams} />
-              <Route path="/team/:id" component={EditTeam} />
+              <Route path="/team/:id?/:owner?" component={EditTeam} />
             </Switch>
           </MuiThemeProvider>
         </div>

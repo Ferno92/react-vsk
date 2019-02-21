@@ -32,7 +32,7 @@ const styles = theme => ({
   }
 });
 class SearchLive extends React.Component {
-  gamesRef = null;
+  usersRef = null;
   state = {
     live: [],
     filter: ""
@@ -56,8 +56,8 @@ class SearchLive extends React.Component {
     this.db = firebase.app().database();
 
     //var games = this.db.ref("/" + user.googleId + "/games");
-    this.gamesRef = this.db.ref("/users");
-    this.gamesRef.on("value", snapshot => {
+    this.usersRef = this.db.ref("/users");
+    this.usersRef.on("value", snapshot => {
       var live = [];
       for (var item in snapshot.val()) {
         var user = snapshot.val()[item];
@@ -76,7 +76,6 @@ class SearchLive extends React.Component {
         }
       }
       this.setState({ ...this.state, live: live });
-      console.log(live);
     });
 
     
@@ -84,7 +83,7 @@ class SearchLive extends React.Component {
   }
   
   componentWillUnmount(){
-    this.gamesRef.off('value');
+    this.usersRef.off('value');
     this.filterUnsubscribe();
   }
 

@@ -7,7 +7,8 @@ import {
   PhotoCamera,
   GroupAdd,
   Edit,
-  Done
+  Done,
+  ErrorOutline
 } from "@material-ui/icons";
 import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
 import {
@@ -66,7 +67,8 @@ class EditTeam extends React.Component {
     deleteDialogOpen: false,
     currentEditFormation: null,
     editFormationOpen: false,
-    editName: false
+    editName: false,
+    readOnly: true
   };
   teamRef = null;
 
@@ -78,14 +80,21 @@ class EditTeam extends React.Component {
     }
 
     this.db = firebase.app().database();
-
+    var userId = ls.get("user").id;
+    if (this.props.match.params.owner) {
+      userId = this.props.match.params.owner;
+    }
     this.teamRef = this.db.ref(
-      "users/" + ls.get("user").id + "/teams/" + this.props.match.params.id
+      "users/" + userId + "/teams/" + this.props.match.params.id
     );
     var self = this;
     this.teamRef.on("value", snapshot => {
       console.log("team", snapshot.val());
-      self.setState({ ...self.state, team: snapshot.val() });
+      self.setState({
+        ...self.state,
+        team: snapshot.val(),
+        readOnly: this.props.match.params.owner !== undefined
+      });
       self.teamRef.off("value");
     });
 
@@ -439,7 +448,7 @@ class EditTeam extends React.Component {
   };
 
   render() {
-    const { classes, theme } = this.props;
+    const { classes } = this.props;
     var players =
       this.state !== null &&
       this.state.team !== null &&
@@ -480,16 +489,23 @@ class EditTeam extends React.Component {
           </Toolbar>
         </AppBar>
         <div className="team-info">
+          {this.state.readOnly && (
+            <div className="no-contributor-message">
+              Non sei ancora un collaboratore o sei stato rimosso
+            </div>
+          )}
           {!this.state.editName && (
             <h1 className="team-title">
               {this.state.team ? this.state.team.name : ""}
-              <Button
-                variant="outlined"
-                className="edit-team-name"
-                onClick={this.editName.bind(this)}
-              >
-                <Edit />
-              </Button>
+              {!this.state.readOnly && (
+                <Button
+                  variant="outlined"
+                  className="edit-team-name"
+                  onClick={this.editName.bind(this)}
+                >
+                  <Edit />
+                </Button>
+              )}
             </h1>
           )}
 
@@ -521,21 +537,23 @@ class EditTeam extends React.Component {
                 ")"
             }}
           >
-            <Fab
-              color="primary"
-              aria-label="Add"
-              className="edit-fab"
-              onClick={this.uploadImage.bind(this)}
-            >
-              <PhotoCamera />
-              <input
-                className="hidden-input"
-                accept="image/*"
-                type="file"
-                style={{ display: "none" }}
-                onChange={this.inputImageCallback.bind(this)}
-              />
-            </Fab>
+            {!this.state.readOnly && (
+              <Fab
+                color="primary"
+                aria-label="Add"
+                className="edit-fab"
+                onClick={this.uploadImage.bind(this)}
+              >
+                <PhotoCamera />
+                <input
+                  className="hidden-input"
+                  accept="image/*"
+                  type="file"
+                  style={{ display: "none" }}
+                  onChange={this.inputImageCallback.bind(this)}
+                />
+              </Fab>
+            )}
           </div>
 
           <ExpansionPanel className="expansion-panel">
@@ -546,11 +564,13 @@ class EditTeam extends React.Component {
               className="expansion-details"
               style={{ display: "block" }}
             >
-              <div style={{ margin: "0 auto", width: "fit-content" }}>
-                <Button onClick={this.addPlayer.bind(this, null)}>
-                  <PersonAdd /> Aggiungi giocatore
-                </Button>
-              </div>
+              {!this.state.readOnly && (
+                <div style={{ margin: "0 auto", width: "fit-content" }}>
+                  <Button onClick={this.addPlayer.bind(this, null)}>
+                    <PersonAdd /> Aggiungi giocatore
+                  </Button>
+                </div>
+              )}
 
               {players.map((player, index) => {
                 return (
@@ -594,12 +614,14 @@ class EditTeam extends React.Component {
               style={{ display: "block" }}
             >
               <div style={{ margin: "0 auto", width: "fit-content" }}>
-                <Button
-                  onClick={this.addFormation.bind(this, null)}
-                  style={{ marginBottom: "5px" }}
-                >
-                  <GroupAdd /> Aggiungi Formazione
-                </Button>
+                {!this.state.readOnly && (
+                  <Button
+                    onClick={this.addFormation.bind(this, null)}
+                    style={{ marginBottom: "5px" }}
+                  >
+                    <GroupAdd /> Aggiungi Formazione
+                  </Button>
+                )}
               </div>
               {formations.map((formation, index) => {
                 // formation.players.sort(function(a, b) {
@@ -609,12 +631,21 @@ class EditTeam extends React.Component {
                   <FormationCard
                     formation={formation}
                     addFormation={this.addFormation}
-                    key = {index}
+                    key={index}
                     players={this.state.team.players}
                   />
                 );
               })}
             </ExpansionPanelDetails>
+          </ExpansionPanel>
+          <ExpansionPanel className="expansion-panel" color="primary">
+            <ExpansionPanelSummary expandIcon={<ExpandMoreIcon />}>
+              Collaboratori ({0})
+            </ExpansionPanelSummary>
+            <ExpansionPanelDetails
+              className="expansion-details"
+              style={{ display: "block" }}
+            />
           </ExpansionPanel>
           <EditFormationDialog
             open={this.state.editFormationOpen}
@@ -623,6 +654,7 @@ class EditTeam extends React.Component {
             playersList={players}
             saveFormation={this.saveFormation}
             deleteFormation={this.deleteFormation}
+            readOnly={this.state.readOnly}
           />
         </div>
         {/* Dialog edit */}
@@ -647,15 +679,17 @@ class EditTeam extends React.Component {
                   : "Crea nuovo giocatore"}
                 {this.state.editingPlayer ? this.state.editingPlayer.name : ""}
               </Typography>
-              {this.state.editingPlayer && this.state.editingPlayer.id !== "" && (
-                <IconButton
-                  color="inherit"
-                  onClick={this.toggleDeleteDialog.bind(this)}
-                  aria-label="Delete"
-                >
-                  <Delete />
-                </IconButton>
-              )}
+              {!this.state.readOnly &&
+                this.state.editingPlayer &&
+                this.state.editingPlayer.id !== "" && (
+                  <IconButton
+                    color="inherit"
+                    onClick={this.toggleDeleteDialog.bind(this)}
+                    aria-label="Delete"
+                  >
+                    <Delete />
+                  </IconButton>
+                )}
             </Toolbar>
           </AppBar>
           <div style={{ padding: "30px" }}>
@@ -762,18 +796,20 @@ class EditTeam extends React.Component {
                   Annulla
                 </Button>
               )}
-              <Button
-                variant={"contained"}
-                color="primary"
-                onClick={
-                  onEditPlayer
-                    ? this.onSaveEditPlayer.bind(this)
-                    : this.setOnEditPlayer.bind(this)
-                }
-                className="buttons"
-              >
-                {onEditPlayer ? "Salva" : "Modifica"}
-              </Button>
+              {!this.state.readOnly && (
+                <Button
+                  variant={"contained"}
+                  color="primary"
+                  onClick={
+                    onEditPlayer
+                      ? this.onSaveEditPlayer.bind(this)
+                      : this.setOnEditPlayer.bind(this)
+                  }
+                  className="buttons"
+                >
+                  {onEditPlayer ? "Salva" : "Modifica"}
+                </Button>
+              )}
             </div>
           </div>
         </Dialog>

@@ -35,11 +35,11 @@ export default (state, action) => {
           on: true
         }
       };
-      case "UPDATE_LOGGED_USER":
+    case "UPDATE_LOGGED_USER":
       return {
         ...state,
         loggedIn: action.loggedIn
-      }
+      };
     case "UPDATE_HISTORY":
       var currentHistory = { ...state.history };
       var doNothing = false;
@@ -52,14 +52,15 @@ export default (state, action) => {
             //sposto l'ultimo elemento nei past nel current
             currentHistory.present =
               currentHistory.past[currentHistory.past.length - 1];
-            if(currentHistory.present !== "dashboard"){
+            if (currentHistory.present !== "dashboard") {
               //elimino dai past l'ultimo elemento
               currentHistory.past.splice(currentHistory.past.length - 1, 1);
-            }else{
+            } else {
               //pulisco past
               currentHistory.past = [];
             }
-          } else if (currentHistory.present !== "dashboard") { //come push di dashboard
+          } else if (currentHistory.present !== "dashboard") {
+            //come push di dashboard
             //pulisco past
             currentHistory.past = [];
             //pulisco future
@@ -75,12 +76,15 @@ export default (state, action) => {
           if (action.page !== currentHistory.present) {
             //pulisco future
             currentHistory.future = [];
-            if(action.page === "dashboard"){
+            if (action.page === "dashboard") {
               //pulisco past
               currentHistory.past = [];
-            }else{
+            } else {
               // sposto il current nei past
-              if(currentHistory.present !== null && currentHistory.present !== "createMatch"){
+              if (
+                currentHistory.present !== null &&
+                currentHistory.present !== "createMatch"
+              ) {
                 currentHistory.past.push(currentHistory.present);
               }
             }
@@ -106,6 +110,9 @@ export default (state, action) => {
           break;
         case "doNothing":
           doNothing = action.page;
+          break;
+        default:
+          break;
       }
       currentHistory = { ...currentHistory, doNothing: doNothing };
       return {

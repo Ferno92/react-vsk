@@ -14,6 +14,7 @@ import Button from "@material-ui/core/Button";
 import "./Dashboard.scss";
 import { Link } from "react-router-dom";
 import Grid from "@material-ui/core/Grid";
+import { Divider } from "@material-ui/core";
 
 const mapStateToProps = state => {
   return {
@@ -49,6 +50,7 @@ class Dashboard extends React.Component {
           data_list.push(childData);
         });
         console.log("data_list", data_list);
+        data_list.reverse();
         this.setState({ games: data_list });
       });
     }
@@ -117,33 +119,80 @@ class Dashboard extends React.Component {
   }
 
   render() {
+    var gameLive = [];
+    var gameEnded = [];
+
+    if (this.state != null && this.loggedIn) {
+      this.state.games.forEach((game, index) => {
+        if (game.live) {
+          gameLive.push(game);
+        } else {
+          gameEnded.push(game);
+        }
+      });
+    }
+    console.log(gameLive.length, gameEnded.length);
+
     return (
       <div style={{ marginBottom: "70px" }}>
-        {this.state != null && this.loggedIn && this.state.games.length > 0
-          ? this.state.games.map((game, index) => {
-              return (
-                <Game
-                  key={game.id}
-                  game={game}
-                  index={index}
-                  onClick={this.openGame.bind(this)}
-                  opening={false}
-                />
-              );
-            })
-          : (this.state != null && this.loggedIn && this.state.games.length === 0 ?
-            (
-              <Grid container justify = "center" className="empty_games_container"> 
-              <div className="empty-games-image" style={{backgroundImage: "url(/images/volley_empty_list.png)"}}></div>
-              <div className="empty-games-description">Non hai partite salvate.. Incomincia creandone una o naviga nel menu per vedere le partite in corso!</div>
-            </Grid>)
-            : "")}
+        {this.state != null && this.loggedIn && this.state.games.length > 0 && (
+          <h1 style={{ textAlign: "center" }}>Le mie partite:</h1>
+        )}
+
+        {/* game live list */}
+        {gameLive.length > 0 && (<div className="titles">Partite in corso</div>)}
+        {gameLive.map((game, index) => {
+            console.log("gameLive.forEach", game, this);
+            return (
+              <Game
+                key={game.id}
+                game={game}
+                index={index}
+                onClick={this.openGame.bind(this)}
+                opening={false}
+              />
+            );
+          }
+          )
+        }
+
+        {/* game ended list */}
+        {gameEnded.length > 0 && <div className="titles">Partite terminate</div>}
+        {gameEnded.length > 0 &&
+          gameEnded.map((game, index) => {
+            return (
+              <Game
+                key={game.id}
+                game={game}
+                index={index}
+                onClick={this.openGame.bind(this)}
+                opening={false}
+              />
+            );
+          })}
+
+        {/* no game in list */}
+        {this.state != null && this.loggedIn && this.state.games.length === 0 && (
+          <Grid container justify="center" className="empty_games_container">
+            <div
+              className="empty-games-image"
+              style={{ backgroundImage: "url(/images/volley_empty_list.png)" }}
+            />
+            <div className="empty-games-description">
+              Non hai partite salvate.. Incomincia creandone una o naviga nel
+              menu per vedere le partite in corso!
+            </div>
+          </Grid>
+        )}
+
+        {/* not logged in */}
         {!this.loggedIn && (
           <div className="ask-login">
             <div className="ask-login-title">
               Effettua il login per accedere a più funzionalità!
             </div>
-            <Button className="to-login"
+            <Button
+              className="to-login"
               variant="contained"
               color="primary"
               key={"Login"}
