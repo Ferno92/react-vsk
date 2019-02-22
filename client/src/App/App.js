@@ -10,16 +10,17 @@ import ls from "local-storage";
 import Match from "./pages/match/Match";
 import SearchLive from "./pages/search-live/SearchLive";
 import store from "./store/store";
-import {updateLoggedUser} from "./actions/actions";
-import 'firebase/auth';
+import { updateLoggedUser } from "./actions/actions";
+import "firebase/auth";
 import firebase from "firebase/app";
 import Profile from "./pages/profile/Profile";
 import MyTeams from "./pages/my-teams/MyTeams";
 //font awesome region
-import { library } from '@fortawesome/fontawesome-svg-core'
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faTrophy } from '@fortawesome/free-solid-svg-icons'
+import { library } from "@fortawesome/fontawesome-svg-core";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faTrophy } from "@fortawesome/free-solid-svg-icons";
 import EditTeam from "./pages/edit-team/EditTeam";
+import TeamService from "./service/TeamService";
 //end font awesome region
 
 export const theme = createMuiTheme({
@@ -54,15 +55,17 @@ export const firebaseConfig = {
   projectId: "react-pwa-2280e",
   storageBucket: "react-pwa-2280e.appspot.com",
   messagingSenderId: "522350313041"
-
 };
 
 export const newGuid = () => {
-  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
-      var r = Math.random()*16|0, v = c == 'x' ? r : (r&0x3|0x8);
-      return v.toString(16);
+  return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, function(c) {
+    var r = (Math.random() * 16) | 0,
+      v = c == "x" ? r : (r & 0x3) | 0x8;
+    return v.toString(16);
   });
 };
+
+export var teamService = null;
 
 class App extends Component {
   child = null;
@@ -80,6 +83,15 @@ class App extends Component {
     library.add(faTrophy);
   }
 
+  componentDidMount() {
+    teamService = new TeamService();
+    teamService.init();
+  }
+
+  componentWillUnmount() {
+    teamService.clear();
+  }
+
   loginSuccess = () => {
     this.child.current.showMessage("success", "Login effettuato con successo!");
     var currentState = this.state;
@@ -88,12 +100,11 @@ class App extends Component {
   };
 
   logout = () => {
-    if(ls.get("user").type === "firebase"){
-      
-    if (!firebase.apps.length) {
-      firebase.initializeApp(firebaseConfig);
-    }
-      firebase.auth().signOut();//mock temp
+    if (ls.get("user").type === "firebase") {
+      if (!firebase.apps.length) {
+        firebase.initializeApp(firebaseConfig);
+      }
+      firebase.auth().signOut(); //mock temp
     }
     ls.set("user", null);
     var currentState = this.state;
@@ -117,7 +128,7 @@ class App extends Component {
               logout={this.logout}
               navigationMenuOpen={false}
               logoutDialogOpen={false}
-              hideAppBar ={false}
+              hideAppBar={false}
             />
             <Switch>
               <Route exact path="/" component={Dashboard} />

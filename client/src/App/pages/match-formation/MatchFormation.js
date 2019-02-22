@@ -11,6 +11,7 @@ import { updateAppbar, updateCreateMatch } from "../../actions/actions";
 import FormationCard from "../../components/formation-card/FormationCard";
 import "./MatchFormation.scss";
 import CourtAndChip from "../../components/court-and-chip/CourtAndChip";
+import { teamService } from "../../App";
 
 class MatchFormation extends React.Component {
   state = {
@@ -43,24 +44,19 @@ class MatchFormation extends React.Component {
     } else {
       userId = this.props.owner;
     }
-    this.teamsRef = this.db.ref("users/" + userId + "/teams");
     var self = this;
-    this.teamsRef.on("value", snapshot => {
-      console.log("teams", snapshot.val());
-      var data_list = [];
-      for (var property in snapshot.val()) {
-        if (snapshot.val().hasOwnProperty(property)) {
-          var team = snapshot.val()[property];
-          team.key = property;
-          data_list.push(team);
-        }
-      }
+
+    teamService.getAllTeams(teams => {
+
       self.setState({
         ...self.state,
-        teamsList: data_list,
+        teamsList: teams,
         isOwnerMe: isOwnerMe
       });
-    });
+    }, userId);
+
+    // this.teamsRef = this.db.ref("users/" + userId + "/teams");
+    // this.teamsRef.on("value", );
   }
 
   componentWillUnmount() {
@@ -70,7 +66,8 @@ class MatchFormation extends React.Component {
   }
 
   componentWillReceiveProps(nextProps) {
-    if (nextProps.currentGame && this.state.team === null) {
+    console.log("componentWillReceiveProps", nextProps.currentGame, this.state.team);
+    if (nextProps.currentGame && (this.state.team === null || !this.state.configured)) {
       this.setState({
         team:
           nextProps.currentGame.team === undefined
@@ -83,13 +80,21 @@ class MatchFormation extends React.Component {
           nextProps.currentGame.formation === undefined
             ? null
             : nextProps.currentGame.formation,
-        readOnly: this.state.readOnly ? true : (nextProps.tab !== 1 ? true : this.state.readOnly)
+        readOnly: this.state.readOnly
+          ? true
+          : nextProps.tab !== 1
+          ? true
+          : this.state.readOnly
       });
     } else if (nextProps.currentGame.formation) {
       this.setState({
         ...this.state,
         formation: nextProps.currentGame.formation,
-        readOnly: this.state.readOnly ? true : (nextProps.tab !== 1 ? true : this.state.readOnly)
+        readOnly: this.state.readOnly
+          ? true
+          : nextProps.tab !== 1
+          ? true
+          : this.state.readOnly
       });
     }
   }
@@ -123,7 +128,6 @@ class MatchFormation extends React.Component {
     this.props.gameRef.set(game);
     this.setState({
       ...this.state,
-      configured: true,
       team: this.state.team.id
     });
   };
