@@ -47,6 +47,7 @@ import YesNoDialog from "../../components/yesNoDialog/YesNoDialog";
 import ImageCompressor from "image-compressor.js";
 import EditFormationDialog from "../../components/edit-formation-dialog/EditFormationDialog";
 import FormationCard from "../../components/formation-card/FormationCard";
+import ContributorCard from "../../components/contributor-card/ContributorCard";
 
 const styles = theme => ({
   grow: {
@@ -68,9 +69,20 @@ class EditTeam extends React.Component {
     currentEditFormation: null,
     editFormationOpen: false,
     editName: false,
-    readOnly: true
+    readOnly: true,
+    contributors: {
+      asking: [],
+      accepted: []
+    },
+    usersInfoList: [],
+    deleteDialogTitle: "",
+    deleteDialogText: "",
+    dialogOptions: null,
+    dialogType: ""
   };
   teamRef = null;
+  contributorsRef = null;
+  usersRef = null;
 
   componentDidMount() {
     store.dispatch(updateCreateMatch("save", false));
@@ -92,10 +104,26 @@ class EditTeam extends React.Component {
       console.log("team", snapshot.val());
       self.setState({
         ...self.state,
-        team: snapshot.val(),
-        readOnly: this.props.match.params.owner !== undefined
+        team: snapshot.val()
       });
       self.teamRef.off("value");
+    });
+
+    this.initContributors(userId);
+
+    this.usersRef = this.db.ref("users");
+    this.usersRef.on("value", snapshot => {
+      var tempArray = [];
+      snapshot.forEach(childSnapshot => {
+        var user = childSnapshot.val();
+        tempArray.push({
+          image: user.pictureUrl,
+          name: user.displayName,
+          id: childSnapshot.key
+        });
+      });
+      console.log(tempArray);
+      self.setState({ usersInfoList: tempArray });
     });
 
     // const Http = new XMLHttpRequest();
@@ -112,7 +140,47 @@ class EditTeam extends React.Component {
     if (this.teamRef !== null) {
       this.teamRef.off("value");
     }
+    if (this.contributorsRef !== null) {
+      this.contributorsRef.off("value");
+    }
+    if (this.usersRef !== null) {
+      this.usersRef.off("value");
+    }
   }
+
+  initContributors = userId => {
+    if (this.contributorsRef === null) {
+      this.contributorsRef = this.db.ref(
+        "users/" +
+          userId +
+          "/teams/" +
+          this.props.match.params.id +
+          "/contributors"
+      );
+      var self = this;
+      this.contributorsRef.on("value", snapshot => {
+        var contributors = {
+          asking: snapshot.val()
+            ? snapshot.val().asking
+              ? snapshot.val().asking
+              : []
+            : [],
+          accepted: snapshot.val()
+            ? snapshot.val().accepted
+              ? snapshot.val().accepted
+              : []
+            : []
+        };
+        console.log("contributors", contributors);
+        self.setState({
+          contributors: contributors,
+          readOnly:
+            this.props.match.params.owner !== undefined &&
+            contributors.accepted.indexOf(ls.get("user").id) === -1
+        });
+      });
+    }
+  };
 
   onBack() {
     if (window.history.length > 0) {
@@ -302,10 +370,14 @@ class EditTeam extends React.Component {
     });
   };
 
-  toggleDeleteDialog = () => {
+  toggleDeleteDialog = (title, text, dialog, options) => {
     this.setState({
       ...this.state,
-      deleteDialogOpen: !this.state.deleteDialogOpen
+      deleteDialogOpen: !this.state.deleteDialogOpen,
+      deleteDialogTitle: title ? title : "",
+      deleteDialogText: text ? text : "",
+      dialogType: dialog,
+      dialogOptions: options
     });
   };
 
@@ -447,8 +519,55 @@ class EditTeam extends React.Component {
     }
   };
 
+  askContribution = () => {
+    var asking = this.state.contributors.asking.slice();
+    asking.push(ls.get("user").id);
+
+    this.contributorsRef.set({
+      asking: asking,
+      accepted: this.state.contributors.accepted
+    });
+  };
+
+  acceptContributor = id => {
+    var asking = this.state.contributors.asking.slice();
+    asking.splice(asking.indexOf(id), 1);
+    var accepted = this.state.contributors.accepted.slice();
+    accepted.push(id);
+    this.contributorsRef.set({
+      asking: asking,
+      accepted: accepted
+    });
+  };
+  removeContributor = options => {
+    var asking = this.state.contributors.asking.slice();
+    var accepted = this.state.contributors.accepted.slice();
+    if (options.isAsking) {
+      asking.splice(asking.indexOf(options.id), 1);
+    } else {
+      accepted.splice(accepted.indexOf(options.id), 1);
+    }
+
+    this.contributorsRef.set({
+      asking: asking,
+      accepted: accepted
+    });
+    this.setState({
+      deleteDialogOpen: false
+    });
+  };
+
+  dialogYesAction = () => {
+    if (this.state.dialogType === "delete") {
+      this.deletePlayer();
+    } else if (this.state.dialogType === "remove-contributor") {
+      this.removeContributor(this.state.dialogOptions);
+    }
+  };
+
   render() {
     const { classes } = this.props;
+    const { usersInfoList } = this.state;
     var players =
       this.state !== null &&
       this.state.team !== null &&
@@ -468,6 +587,12 @@ class EditTeam extends React.Component {
     var onEditPlayer = this.state.editingPlayer
       ? this.state.editingPlayer.onEdit
       : false;
+
+    var isOwner =
+      this.props.match.params.owner === undefined ||
+      this.props.match.params.owner === ls.get("user").id;
+    var isAsking =
+      this.state.contributors.asking.indexOf(ls.get("user").id) >= 0;
     return (
       <div>
         <AppBar position="fixed" color="primary">
@@ -489,10 +614,18 @@ class EditTeam extends React.Component {
           </Toolbar>
         </AppBar>
         <div className="team-info">
-          {this.state.readOnly && (
-            <div className="no-contributor-message">
-              Non sei ancora un collaboratore o sei stato rimosso
-            </div>
+          {this.state.team !== null && this.state.readOnly ? (
+            isAsking ? (
+              <div className="asking-message">
+                La tua richiesta di collaborazione è stata inviata
+              </div>
+            ) : (
+              <div className="no-contributor-message">
+                Non sei ancora un collaboratore o sei stato rimosso
+              </div>
+            )
+          ) : (
+            ""
           )}
           {!this.state.editName && (
             <h1 className="team-title">
@@ -640,13 +773,102 @@ class EditTeam extends React.Component {
           </ExpansionPanel>
           <ExpansionPanel className="expansion-panel" color="primary">
             <ExpansionPanelSummary expandIcon={<ExpandMoreIcon />}>
-              Collaboratori ({0})
+              Collaboratori ({this.state.contributors.accepted.length})
             </ExpansionPanelSummary>
             <ExpansionPanelDetails
               className="expansion-details"
               style={{ display: "block" }}
-            />
+            >
+              {this.state.contributors.accepted.map((accepted, index) => {
+                var users = usersInfoList.filter(usersInfo => {
+                  return usersInfo.id === accepted;
+                });
+                var user = null;
+                if (users.length > 0) {
+                  user = users[0];
+                }
+                return user !== null ? (
+                  <ContributorCard
+                    key={accepted}
+                    image={user.image}
+                    name={user.name}
+                    isAsking={false}
+                    acceptContributor={this.acceptContributor.bind(
+                      this,
+                      accepted
+                    )}
+                    removeContributor={this.toggleDeleteDialog.bind(
+                      this,
+                      "Rimuovi collaboratore",
+                      "Sei sicuro di voler rimuovere questo collaboratore?",
+                      "remove-contributor",
+                      { id: accepted, isAsking: false }
+                    )}
+                  />
+                ) : (
+                  ""
+                );
+              })}
+            </ExpansionPanelDetails>
           </ExpansionPanel>
+          {isOwner && (
+            <ExpansionPanel className="expansion-panel" color="primary">
+              <ExpansionPanelSummary expandIcon={<ExpandMoreIcon />}>
+                Richieste ({this.state.contributors.asking.length})
+              </ExpansionPanelSummary>
+              <ExpansionPanelDetails
+                className="expansion-details"
+                style={{ display: "block" }}
+              >
+                {this.state.contributors.asking.map((asking, index) => {
+                  var users = usersInfoList.filter(usersInfo => {
+                    return usersInfo.id === asking;
+                  });
+                  var user = null;
+                  if (users.length > 0) {
+                    user = users[0];
+                  }
+                  return user !== null ? (
+                    <ContributorCard
+                      key={asking}
+                      image={user.image}
+                      name={user.name}
+                      isAsking={true}
+                      acceptContributor={this.acceptContributor.bind(
+                        this,
+                        asking
+                      )}
+                      removeContributor={this.toggleDeleteDialog.bind(
+                        this,
+                        "Rimuovi collaboratore",
+                        "Sei sicuro di voler rimuovere questo collaboratore?",
+                        "remove-contributor",
+                        { id: asking, isAsking: true }
+                      )}
+                    />
+                  ) : (
+                    ""
+                  );
+                })}
+              </ExpansionPanelDetails>
+            </ExpansionPanel>
+          )}
+
+          {this.state.team !== null &&
+            !isAsking &&
+            !isOwner &&
+            this.state.readOnly && (
+              <Button
+                className="ask-contribution"
+                variant="contained"
+                color="primary"
+                onClick={this.askContribution.bind(this)}
+              >
+                Richiedi collaborazione
+              </Button>
+            )}
+
+          {/* EditFormationDialog */}
           <EditFormationDialog
             open={this.state.editFormationOpen}
             formation={this.state.currentEditFormation}
@@ -684,7 +906,12 @@ class EditTeam extends React.Component {
                 this.state.editingPlayer.id !== "" && (
                   <IconButton
                     color="inherit"
-                    onClick={this.toggleDeleteDialog.bind(this)}
+                    onClick={this.toggleDeleteDialog.bind(
+                      this,
+                      "Elimina giocatore",
+                      "Sei sicuro di voler eliminare questo giocatore?",
+                      "delete"
+                    )}
                     aria-label="Delete"
                   >
                     <Delete />
@@ -815,10 +1042,10 @@ class EditTeam extends React.Component {
         </Dialog>
         <YesNoDialog
           open={this.state.deleteDialogOpen}
-          noAction={this.toggleDeleteDialog}
-          yesAction={this.deletePlayer}
-          dialogText={"Sei sicuro di voler eliminare questo giocatore?"}
-          dialogTitle={"Elimina giocatore"}
+          noAction={this.toggleDeleteDialog.bind(this, "", "", "", null)}
+          yesAction={this.dialogYesAction}
+          dialogText={this.state.deleteDialogText}
+          dialogTitle={this.state.deleteDialogTitle}
         />
       </div>
     );

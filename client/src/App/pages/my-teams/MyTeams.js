@@ -75,6 +75,9 @@ class MyTeams extends React.Component {
     if (this.teamsRef) {
       this.teamsRef.off("value");
     }
+    if (this.usersRef) {
+      this.usersRef.off("value");
+    }
     
     if (this.storeUnsubscribe !== null) {
       this.storeUnsubscribe();
@@ -89,7 +92,7 @@ class MyTeams extends React.Component {
   }
 
   onClickTeam = (id, ownerId) => {
-    this.props.history.push("/team/" + id + "/" + ownerId);
+    this.props.history.push("/team/" + id + (ownerId !== null ? ("/" + ownerId) : ""));
   };
 
   render() {
