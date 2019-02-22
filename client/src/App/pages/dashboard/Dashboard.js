@@ -53,6 +53,8 @@ class Dashboard extends React.Component {
         data_list.reverse();
         this.setState({ games: data_list });
       });
+    }else{
+      store.dispatch(updateAppbar("fabVisible", false));
     }
 
     if (!store.getState().appBar.visible) {
@@ -63,6 +65,7 @@ class Dashboard extends React.Component {
       store.dispatch(updateAppbar("searchInput", ""));
       store.dispatch(updateAppbar("fabVisible", true));
     }
+    store.dispatch(updateAppbar("searchButtonVisible", false));
 
     this.storeUnsubscribe = store.subscribe(this.goToNewMatch.bind(this));
 

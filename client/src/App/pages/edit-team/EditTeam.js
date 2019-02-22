@@ -804,6 +804,7 @@ class EditTeam extends React.Component {
                       "remove-contributor",
                       { id: accepted, isAsking: false }
                     )}
+                    owner={isOwner}
                   />
                 ) : (
                   ""
@@ -845,6 +846,7 @@ class EditTeam extends React.Component {
                         "remove-contributor",
                         { id: asking, isAsking: true }
                       )}
+                      owner={isOwner}
                     />
                   ) : (
                     ""

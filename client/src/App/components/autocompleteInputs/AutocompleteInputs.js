@@ -1,12 +1,12 @@
-import React from 'react';
-import PropTypes from 'prop-types';
-import deburr from 'lodash/deburr';
-import keycode from 'keycode';
-import Downshift from 'downshift';
-import { withStyles } from '@material-ui/core/styles';
-import TextField from '@material-ui/core/TextField';
-import Paper from '@material-ui/core/Paper';
-import MenuItem from '@material-ui/core/MenuItem';
+import React from "react";
+import PropTypes from "prop-types";
+import deburr from "lodash/deburr";
+import keycode from "keycode";
+import Downshift from "downshift";
+import { withStyles } from "@material-ui/core/styles";
+import TextField from "@material-ui/core/TextField";
+import Paper from "@material-ui/core/Paper";
+import MenuItem from "@material-ui/core/MenuItem";
 import store from "../../store/store.js";
 import { updateCreateMatch } from "../../actions/actions";
 import firebase from "firebase/app";
@@ -55,27 +55,33 @@ function renderInput(inputProps) {
   const { InputProps, classes, ref, ...other } = inputProps;
   return (
     <TextField
-    id="outlined"
-    label={InputProps.label}
-    margin="normal"
-    variant="outlined"
-    style={{width: "100%"}}
+      id="outlined"
+      label={InputProps.label}
+      margin="normal"
+      variant="outlined"
+      style={{ width: "100%" }}
       InputProps={{
         inputRef: ref,
         classes: {
           root: classes.inputRoot,
-          input: classes.inputInput,
+          input: classes.inputInput
         },
-        ...InputProps,
+        ...InputProps
       }}
       {...other}
     />
   );
 }
 
-function renderSuggestion({ suggestion, index, itemProps, highlightedIndex, selectedItem }) {
+function renderSuggestion({
+  suggestion,
+  index,
+  itemProps,
+  highlightedIndex,
+  selectedItem
+}) {
   const isHighlighted = highlightedIndex === index;
-  const isSelected = (selectedItem || '').indexOf(suggestion.label) > -1;
+  const isSelected = (selectedItem || "").indexOf(suggestion.label) > -1;
 
   return (
     <MenuItem
@@ -84,7 +90,7 @@ function renderSuggestion({ suggestion, index, itemProps, highlightedIndex, sele
       selected={isHighlighted}
       component="div"
       style={{
-        fontWeight: isSelected ? 500 : 400,
+        fontWeight: isSelected ? 500 : 400
       }}
     >
       {suggestion.label}
@@ -96,7 +102,7 @@ renderSuggestion.propTypes = {
   index: PropTypes.number,
   itemProps: PropTypes.object,
   selectedItem: PropTypes.string,
-  suggestion: PropTypes.shape({ label: PropTypes.string }).isRequired,
+  suggestion: PropTypes.shape({ label: PropTypes.string }).isRequired
 };
 
 function getSuggestions(value, suggestions) {
@@ -109,7 +115,8 @@ function getSuggestions(value, suggestions) {
     ? []
     : suggestions.filter(suggestion => {
         const keep =
-          count < 5 && suggestion.label.slice(0, inputLength).toLowerCase() === inputValue;
+          count < 5 &&
+          suggestion.label.slice(0, inputLength).toLowerCase() === inputValue;
 
         if (keep) {
           count += 1;
@@ -125,42 +132,69 @@ class DownshiftMultiple extends React.Component {
     selectedItem: [],
     suggestions: []
   };
-  teamsRef = null;
+  usersRef = null;
 
-  componentDidMount(){
+  componentDidMount() {
     if (!firebase.apps.length) {
       firebase.initializeApp(firebaseConfig);
     }
-
-    this.db = firebase.app().database();
-    this.teamsRef = this.db.ref("users/" + ls.get("user").id + "/teams");
     var self = this;
-    this.teamsRef.on("value", (snapshot) => {
-      
-      var data_list = [];
-      for (var property in snapshot.val()) {
-        if (snapshot.val().hasOwnProperty(property)) {
-          var team = snapshot.val()[property];
-          team.key = property;
-          data_list.push({label: team.name});
+    this.db = firebase.app().database();
+    this.usersRef = this.db.ref("/users");
+    this.usersRef.on("value", snapshot => {
+      var allTeams = [];
+      for (var item in snapshot.val()) {
+        var user = snapshot.val()[item];
+        for (var team in user.teams) {
+          var teamInfo = user.teams[team];
+          if (
+            item === ls.get("user").id ||
+            (teamInfo.contributors &&
+              teamInfo.contributors.accepted &&
+              teamInfo.contributors.accepted.indexOf(ls.get("user").id) >= 0)
+          ) {
+            teamInfo.owner = {
+              displayName: user.displayName,
+              pictureUrl: user.pictureUrl,
+              id: item
+            };
+            teamInfo.key = team;
+            allTeams.push({label: teamInfo.name});
+          }
         }
       }
-      self.setState({...self.state, suggestions: data_list});
-    })
+      console.log(allTeams);
+      self.setState({ ...self.state, suggestions: allTeams });
+    });
+  }
+
+  componentWillUnmount() {
+    if (this.usersRef !== null) {
+      this.usersRef.off("value");
+    }
   }
 
   handleKeyDown = event => {
     const { inputValue, selectedItem } = this.state;
-    if (selectedItem.length && !inputValue.length && keycode(event) === 'backspace') {
+    if (
+      selectedItem.length &&
+      !inputValue.length &&
+      keycode(event) === "backspace"
+    ) {
       this.setState({
-        selectedItem: selectedItem.slice(0, selectedItem.length - 1),
+        selectedItem: selectedItem.slice(0, selectedItem.length - 1)
       });
     }
   };
 
   handleInputChange = event => {
     this.setState({ inputValue: event.target.value });
-    store.dispatch(updateCreateMatch(this.props.label === "Team A" ? "teamA" : "teamB", event.target.value));
+    store.dispatch(
+      updateCreateMatch(
+        this.props.label === "Team A" ? "teamA" : "teamB",
+        event.target.value
+      )
+    );
   };
 
   handleChange = item => {
@@ -169,12 +203,17 @@ class DownshiftMultiple extends React.Component {
     if (selectedItem.indexOf(item) === -1) {
       selectedItem = [...selectedItem, item];
     }
-    
+
     this.setState({
-      inputValue: '',
-      selectedItem,
+      inputValue: "",
+      selectedItem
     });
-    store.dispatch(updateCreateMatch(this.props.label === "Team A" ? "teamA" : "teamB", selectedItem[0]));
+    store.dispatch(
+      updateCreateMatch(
+        this.props.label === "Team A" ? "teamA" : "teamB",
+        selectedItem[0]
+      )
+    );
   };
 
   handleDelete = item => () => {
@@ -204,7 +243,7 @@ class DownshiftMultiple extends React.Component {
           isOpen,
           inputValue: inputValue2,
           selectedItem: selectedItem2,
-          highlightedIndex,
+          highlightedIndex
         }) => (
           <div className={classes.container}>
             {renderInput({
@@ -215,18 +254,19 @@ class DownshiftMultiple extends React.Component {
                 label: label,
                 value: selectedItem[0]
                 // placeholder: 'Select multiple countries',
-              }),
+              })
             })}
             {isOpen ? (
               <Paper className={classes.paper} square>
-                {getSuggestions(inputValue2, this.state.suggestions).map((suggestion, index) =>
-                  renderSuggestion({
-                    suggestion,
-                    index,
-                    itemProps: getItemProps({ item: suggestion.label }),
-                    highlightedIndex,
-                    selectedItem: selectedItem2,
-                  }),
+                {getSuggestions(inputValue2, this.state.suggestions).map(
+                  (suggestion, index) =>
+                    renderSuggestion({
+                      suggestion,
+                      index,
+                      itemProps: getItemProps({ item: suggestion.label }),
+                      highlightedIndex,
+                      selectedItem: selectedItem2
+                    })
                 )}
               </Paper>
             ) : null}
@@ -238,34 +278,34 @@ class DownshiftMultiple extends React.Component {
 }
 
 DownshiftMultiple.propTypes = {
-  classes: PropTypes.object.isRequired,
+  classes: PropTypes.object.isRequired
 };
 
 const styles = theme => ({
   root: {
-    flexGrow: 1,
+    flexGrow: 1
   },
   container: {
     flexGrow: 1,
-    position: 'relative',
+    position: "relative"
   },
   paper: {
-    position: 'absolute',
+    position: "absolute",
     zIndex: 99,
     // marginTop: theme.spacing.unit,
     left: 0,
-    right: 0,
+    right: 0
   },
   inputRoot: {
-    flexWrap: 'wrap',
+    flexWrap: "wrap"
   },
   inputInput: {
-    width: 'auto',
-    flexGrow: 1,
+    width: "auto",
+    flexGrow: 1
   },
   divider: {
-    height: theme.spacing.unit * 2,
-  },
+    height: theme.spacing.unit * 2
+  }
 });
 
 function IntegrationDownshift(props) {
@@ -273,15 +313,13 @@ function IntegrationDownshift(props) {
 
   return (
     <div className={classes.root}>
-      
-      <DownshiftMultiple classes={classes} label={props.label}/>
-      
+      <DownshiftMultiple classes={classes} label={props.label} />
     </div>
   );
 }
 
 IntegrationDownshift.propTypes = {
-  classes: PropTypes.object.isRequired,
+  classes: PropTypes.object.isRequired
 };
 
 export default withStyles(styles)(IntegrationDownshift);

@@ -115,6 +115,17 @@ class MyTeams extends React.Component {
         this.state.teams.forEach((team, index) => {
           teams.push(team);
         });
+        
+        this.state.allTeams.forEach((team, index) => {
+          if(team.contributors && team.contributors.accepted && team.contributors.accepted.indexOf(ls.get("user").id) >= 0){
+            var found = teams.filter((item) => {
+              return item.id === team.id;
+            });
+            if(found.length <= 0){
+              teams.push(team);
+            }
+          }
+        })
       }
     }
     //TODO: nessun risultato
