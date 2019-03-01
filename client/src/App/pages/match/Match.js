@@ -16,7 +16,8 @@ import {
   DialogTitle,
   Menu,
   MenuItem,
-  Badge
+  Badge,
+  TextField
 } from "@material-ui/core";
 import ArrowBack from "@material-ui/icons/ArrowBack";
 import Delete from "@material-ui/icons/Delete";
@@ -33,6 +34,7 @@ import MoreVertIcon from "@material-ui/icons/MoreVert";
 import MatchInfo from "../match-info/MatchInfo";
 import Chat from "../chat/Chat";
 import MatchFormation from "../match-formation/MatchFormation";
+import GameVideo from "../game-video/GameVideo";
 
 const styles = theme => ({
   header: {
@@ -78,7 +80,8 @@ class Match extends React.Component {
     spectator: false,
     anchorEl: null,
     chatBadge: 0,
-    gameUrl: ""
+    gameUrl: "",
+    videoUrl: ""
   };
   gameRef = null;
 
@@ -102,7 +105,7 @@ class Match extends React.Component {
     }
 
     this.db = firebase.app().database();
-    var url = "users/" + userId + "/games/" + this.props.match.params.id
+    var url = "users/" + userId + "/games/" + this.props.match.params.id;
     this.gameRef = this.db.ref(url);
     this.gameRef.on("value", snapshot => {
       this.setState(prevState => ({
@@ -214,6 +217,7 @@ class Match extends React.Component {
     const { classes, theme } = this.props;
     const { anchorEl } = this.state;
     const openMenu = Boolean(anchorEl);
+    const {videoUrl} = this.state;
 
     return (
       <div className={classes.root}>
@@ -299,6 +303,10 @@ class Match extends React.Component {
               onClick={this.onClickTab.bind(this, "chat")}
               style={this.state.value !== 2 ? { color: "#808080" } : {}}
             />
+            <Tab
+              label="Youtube"
+              style={this.state.value !== 3 ? { color: "#808080" } : {}}
+            />
           </Tabs>
         </AppBar>
         <SwipeableViews
@@ -316,12 +324,13 @@ class Match extends React.Component {
             />
           </TabContainer>
           <TabContainer dir={theme.direction}>
-              <MatchFormation
+            <MatchFormation
               gameRef={this.gameRef}
               currentGame={this.state.currentGame}
               spectator={this.state.spectator}
               owner={this.props.match.params.owner}
-              tab={this.state.value} />
+              tab={this.state.value}
+            />
           </TabContainer>
           <TabContainer dir={theme.direction}>
             <Chat
@@ -332,6 +341,11 @@ class Match extends React.Component {
               ownerId={this.props.match.params.owner}
               onReceiveMessage={this.onReceiveMessage.bind(this)}
             />
+          </TabContainer>
+          <TabContainer dir={theme.direction}>
+            <GameVideo 
+            gameUrl={this.state.gameUrl}
+            owner={this.props.match.params.owner}/>
           </TabContainer>
         </SwipeableViews>
         <Dialog
