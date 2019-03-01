@@ -53,7 +53,7 @@ class Game extends React.Component {
           }
         >
           <CardActionArea style={{ height: "100%" }}>
-            <CardContent>
+            <CardContent style={{padding: 0}}>
               <div
                 className="game-content"
                 onClick={this.onClickGame.bind(this)}

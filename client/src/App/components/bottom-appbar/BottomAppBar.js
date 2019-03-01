@@ -20,7 +20,7 @@ import { Home, Group, Flag, ExitToApp } from "@material-ui/icons";
 import { Link } from "react-router-dom";
 import ls from "local-storage";
 import store from "../../store/store.js";
-import { updateAppbar, showCreateMatch } from "../../actions/actions";
+import { updateAppbar, showCreateMatch, showCreateTeam } from "../../actions/actions";
 import { connect } from "react-redux";
 import Slide from "@material-ui/core/Slide";
 import TextField from "@material-ui/core/TextField";
@@ -146,7 +146,12 @@ class BottomAppBar extends React.Component {
   };
 
   onClickFab = () => {
-    store.dispatch(showCreateMatch(true));
+    console.log(window.location.pathname);
+    if(window.location.pathname === "/myteams"){
+      store.dispatch(showCreateTeam(true));
+    }else{
+      store.dispatch(showCreateMatch(true));
+    }
   };
 
   logoutUser = () => {

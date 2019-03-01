@@ -51,3 +51,11 @@ export function updateLoggedUser(loggedIn) {
     loggedIn: loggedIn
   };
 }
+
+export function showCreateTeam(value) {
+  // console.log("action showCreateMatch", value);
+  return {
+    type: "SHOW_CREATETEAM",
+    open: value
+  };
+}

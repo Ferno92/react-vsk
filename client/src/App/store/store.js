@@ -29,7 +29,10 @@ export const initialState = {
     present: null,
     future: []
   },
-  loggedIn: false
+  loggedIn: false,
+  myTeams: {
+    createTeamOpen: false
+  }
 };
 const store = createStore(reducer, initialState);
 

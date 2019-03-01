@@ -562,16 +562,26 @@ class EditTeam extends React.Component {
       this.deletePlayer();
     } else if (this.state.dialogType === "remove-contributor") {
       this.removeContributor(this.state.dialogOptions);
+    } else if (this.state.dialogType === "delete-team") {
+      this.removeTeam();
     }
+  };
+
+  removeTeam = () => {
+    this.teamRef.remove();
+
+    this.setState({
+      deleteDialogOpen: false
+    });
+
+    this.props.history.push("/myteams");
   };
 
   render() {
     const { classes } = this.props;
     const { usersInfoList } = this.state;
     var players =
-      this.state !== null &&
-      this.state.team !== null &&
-      this.state.team.players !== null
+      this.state !== null && this.state.team !== null && this.state.team.players
         ? this.state.team.players
         : [];
     var formations =
@@ -611,6 +621,19 @@ class EditTeam extends React.Component {
             >
               {this.state.team ? this.state.team.name : ""}
             </Typography>
+            {isOwner && (
+              <IconButton
+                color="secondary"
+                onClick={this.toggleDeleteDialog.bind(
+                  this,
+                  "Elimina squadra",
+                  "Sei sicuro di voler eliminare questa squadra?",
+                  "delete-team"
+                )}
+              >
+                <Delete />
+              </IconButton>
+            )}
           </Toolbar>
         </AppBar>
         <div className="team-info">

@@ -14,7 +14,6 @@ import Button from "@material-ui/core/Button";
 import "./Dashboard.scss";
 import { Link } from "react-router-dom";
 import Grid from "@material-ui/core/Grid";
-import { Divider } from "@material-ui/core";
 
 const mapStateToProps = state => {
   return {

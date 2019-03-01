@@ -119,6 +119,11 @@ export default (state, action) => {
         ...state,
         history: currentHistory
       };
+      case "SHOW_CREATETEAM":
+      return {
+        ...state,
+        myTeams: { ...state.myTeams, createTeamOpen: action.open }
+      };
     default:
       return state;
   }

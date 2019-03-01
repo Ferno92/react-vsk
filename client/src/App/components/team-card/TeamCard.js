@@ -49,7 +49,7 @@ class TeamCard extends React.Component {
           }
         >
           <CardActionArea style={{ height: "100%" }}>
-            <CardContent>
+            <CardContent style={{padding: 0}}>
               <div
                 className="team-content"
                 onClick={this.onClickTeam.bind(this)}

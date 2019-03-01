@@ -7,6 +7,7 @@ import TeamCard from "../../components/team-card/TeamCard";
 import "./MyTeams.scss";
 import store from "../../store/store";
 import { updateAppbar } from "../../actions/actions";
+import CreateTeam from "../create-team/CreateTeam";
 
 class MyTeams extends React.Component {
   db = null;
@@ -16,7 +17,8 @@ class MyTeams extends React.Component {
     teams: [],
     allTeams: [],
     search: false,
-    text: ""
+    text: "",
+    createTeamOpen: false
   };
   storeUnsubscribe = null;  
 
@@ -85,17 +87,33 @@ class MyTeams extends React.Component {
   }
 
   updateProps = () => {
-    console.log("MyTeams update props", store.getState().appBar);
+    console.log("MyTeams update props", store.getState());
     if(store.getState().appBar.search !== this.state.search || store.getState().appBar.inputSearch !== this.state.text){
-      this.setState({...this.state, search: store.getState().appBar.search, text: store.getState().appBar.inputSearch});
+      this.setState({search: store.getState().appBar.search, text: store.getState().appBar.inputSearch});
+    }
+    if(store.getState().myTeams.createTeamOpen !== this.state.createTeamOpen){
+      this.setState({createTeamOpen: store.getState().myTeams.createTeamOpen});
     }
   }
 
   onClickTeam = (id, ownerId) => {
+    console.log('onClickTeam', id, ownerId);
     this.props.history.push("/team/" + id + (ownerId !== null ? ("/" + ownerId) : ""));
   };
+  
+  saveNewTeam = (teamName) =>{
+    const newTeamRef = this.teamsRef.push();
+    const promise = newTeamRef.set({
+      id: newTeamRef.key,
+      name: teamName
+    });
+    promise.then(() => {
+      this.onClickTeam(newTeamRef.key, null);
+    });
+  }
 
   render() {
+    const {createTeamOpen} = this.state
     var teams = [];
     var otherTeams = [];
     if (this.state !== null) {
@@ -123,6 +141,7 @@ class MyTeams extends React.Component {
             });
             if(found.length <= 0){
               teams.push(team);
+              console.log("TEAM",team);
             }
           }
         })
@@ -135,12 +154,13 @@ class MyTeams extends React.Component {
       {!this.state.search && (<h1 style={{ textAlign: "center" }}>Le mie squadre:</h1>)}
       {this.state.search && teams.length > 0 && (<div className="titles">Le mie squadre:</div>)}
         {teams.length > 0 && teams.map((team, index) => {
+            var isContributor = team.contributors && team.contributors.accepted && team.contributors.accepted.indexOf(ls.get("user").id) >= 0;
             return (
               <TeamCard
                 key={team.id}
                 team={team}
                 opening={false}
-                onClick={this.onClickTeam.bind(this, team.id, null)}
+                onClick={this.onClickTeam.bind(this, team.id, isContributor ? team.owner.id : null)}
                 index={index}
               />
             );
@@ -158,6 +178,7 @@ class MyTeams extends React.Component {
               />
             );
           })}
+          <CreateTeam open={createTeamOpen} save={this.saveNewTeam}/>
       </div>
     );
   }
