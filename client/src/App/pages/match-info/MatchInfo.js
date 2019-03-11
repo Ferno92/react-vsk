@@ -14,9 +14,7 @@ import {
   DialogTitle,
   Dialog,
   Chip,
-  Avatar,
-  Switch,
-  FormControlLabel
+  Avatar
 } from "@material-ui/core";
 
 class MatchInfo extends React.Component {
@@ -34,6 +32,52 @@ class MatchInfo extends React.Component {
     scoutEnabled: false
   };
   audienceRef = null;
+  
+  componentWillReceiveProps(nextProps) {
+    this.setState({
+      currentGame: nextProps.currentGame,
+      spectator: nextProps.spectator,
+      gameRef: nextProps.gameRef,
+      gameUrl: nextProps.gameUrl
+    });
+    if(this.isSetOver(nextProps.currentGame) && (nextProps.currentGame.resultA < 3 && nextProps.currentGame.resultB < 3)){
+      console.log("isSetOver", nextProps.currentGame)
+      var a = nextProps.currentGame.sets[nextProps.currentGame.sets.length-1].a;
+      var b = nextProps.currentGame.sets[nextProps.currentGame.sets.length-1].b;
+      if(a > b){
+        nextProps.currentGame.resultA++;
+      }else{
+        nextProps.currentGame.resultB++;
+      }
+      nextProps.currentGame.live = false;
+      console.log(nextProps.currentGame)
+      nextProps.gameRef.update(nextProps.currentGame);
+    }
+    if (this.audienceRef === null) {
+      var self = this;
+      setTimeout(function() {
+        self.initAudienceObserver(nextProps.gameUrl);
+      }, 2000);
+    }
+  }
+
+  componentWillUnmount() {
+    if (this.audienceRef !== null) {
+      this.audienceRef.off("value");
+
+      var audienceWithoutMe = this.state.audience.slice();
+      var userId = ls.get("user")
+        ? ls.get("user").id
+        : ls.get("anonymous").code;
+      if (this.getAudienceIndex(audienceWithoutMe, userId) >= 0) {
+        audienceWithoutMe.splice(
+          this.getAudienceIndex(audienceWithoutMe, userId),
+          1
+        );
+        this.audienceRef.set(audienceWithoutMe);
+      }
+    }
+  }
 
   add(team) {
     var setsMissing = {
@@ -84,14 +128,7 @@ class MatchInfo extends React.Component {
       ];
     }
 
-    if (
-      (currentGame.sets[Object.keys(currentGame.sets).length - 1].a >= 25 ||
-        currentGame.sets[Object.keys(currentGame.sets).length - 1].b >= 25) &&
-      Math.abs(
-        currentGame.sets[Object.keys(currentGame.sets).length - 1].a -
-          currentGame.sets[Object.keys(currentGame.sets).length - 1].b
-      ) >= 2
-    ) {
+    if (this.isSetOver(currentGame)) {
       // the set is over
       currentGame[team]++;
 
@@ -108,6 +145,17 @@ class MatchInfo extends React.Component {
       );
     }
     this.state.gameRef.update(currentGame);
+  }
+
+  isSetOver = (currentGame) =>{
+    var max = Object.keys(currentGame.sets).length === 5 ? 15 : 25
+    
+    return (currentGame.sets[Object.keys(currentGame.sets).length - 1].a >= max ||
+    currentGame.sets[Object.keys(currentGame.sets).length - 1].b >= max) &&
+    Math.abs(
+      currentGame.sets[Object.keys(currentGame.sets).length - 1].a -
+        currentGame.sets[Object.keys(currentGame.sets).length - 1].b
+    ) >= 2;
   }
 
   printFormation = () => {
@@ -274,40 +322,6 @@ class MatchInfo extends React.Component {
   openHistory(set) {
     if (set.history !== undefined) {
       this.setState({ ...this.state, selectedSet: { ...set, open: true } });
-    }
-  }
-
-  componentWillReceiveProps(nextProps) {
-    this.setState({
-      ...this.state,
-      currentGame: nextProps.currentGame,
-      spectator: nextProps.spectator,
-      gameRef: nextProps.gameRef,
-      gameUrl: nextProps.gameUrl
-    });
-    if (this.audienceRef === null) {
-      var self = this;
-      setTimeout(function() {
-        self.initAudienceObserver(nextProps.gameUrl);
-      }, 2000);
-    }
-  }
-
-  componentWillUnmount() {
-    if (this.audienceRef !== null) {
-      this.audienceRef.off("value");
-
-      var audienceWithoutMe = this.state.audience.slice();
-      var userId = ls.get("user")
-        ? ls.get("user").id
-        : ls.get("anonymous").code;
-      if (this.getAudienceIndex(audienceWithoutMe, userId) >= 0) {
-        audienceWithoutMe.splice(
-          this.getAudienceIndex(audienceWithoutMe, userId),
-          1
-        );
-        this.audienceRef.set(audienceWithoutMe);
-      }
     }
   }
 
