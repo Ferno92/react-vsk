@@ -24,7 +24,7 @@ import Delete from "@material-ui/icons/Delete";
 import Share from "@material-ui/icons/Share";
 import SwipeableViews from "react-swipeable-views";
 import store from "../../store/store";
-import { updateAppbar, updateCreateMatch } from "../../actions/actions";
+import { updateAppbar, updateCreateMatch, showMessageAction } from "../../actions/actions";
 import firebase from "firebase/app";
 import "firebase/database";
 import ls from "local-storage";
@@ -61,7 +61,12 @@ const styles = theme => ({
 
 function TabContainer({ children, dir }) {
   return (
-    <Typography component="div" dir={dir} style={{ padding: 8 * 3 }} className="swipeable-container">
+    <Typography
+      component="div"
+      dir={dir}
+      style={{ padding: 8 * 3 }}
+      className="swipeable-container"
+    >
       {children}
     </Typography>
   );
@@ -108,12 +113,22 @@ class Match extends React.Component {
     var url = "users/" + userId + "/games/" + this.props.match.params.id;
     this.gameRef = this.db.ref(url);
     this.gameRef.on("value", snapshot => {
-      this.setState(prevState => ({
-        ...prevState,
-        currentGame: snapshot.val(),
-        gameUrl: url
-      }));
-      console.log("game from db", this.state.currentGame);
+      if (snapshot.val() === null) {
+        store.dispatch(
+          showMessageAction(
+            "error",
+            "Questa partita non esiste o è stata eliminata"
+          )
+        );
+        this.onRedirectToHome();
+      } else {
+        this.setState(prevState => ({
+          ...prevState,
+          currentGame: snapshot.val(),
+          gameUrl: url
+        }));
+        console.log("game from db", this.state.currentGame);
+      }
     });
   }
 
@@ -213,11 +228,15 @@ class Match extends React.Component {
     }
   };
 
+  onRedirectToHome = () => {
+    this.props.history.push("/");
+  };
+
   render() {
     const { classes, theme } = this.props;
     const { anchorEl } = this.state;
     const openMenu = Boolean(anchorEl);
-    const {videoUrl} = this.state;
+    const { videoUrl } = this.state;
 
     return (
       <div className={classes.root}>
@@ -343,9 +362,10 @@ class Match extends React.Component {
             />
           </TabContainer>
           <TabContainer dir={theme.direction}>
-            <GameVideo 
-            gameUrl={this.state.gameUrl}
-            owner={this.props.match.params.owner}/>
+            <GameVideo
+              gameUrl={this.state.gameUrl}
+              owner={this.props.match.params.owner}
+            />
           </TabContainer>
         </SwipeableViews>
         <Dialog

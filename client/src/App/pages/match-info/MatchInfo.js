@@ -27,38 +27,42 @@ class MatchInfo extends React.Component {
     scoutEnabled: false
   };
   audienceRef = null;
+  isUnmount = false;
 
   componentWillReceiveProps(nextProps) {
-    this.setState({
-      currentGame: nextProps.currentGame,
-      spectator: nextProps.spectator,
-      gameRef: nextProps.gameRef,
-      gameUrl: nextProps.gameUrl
-    });
-    if (
-      this.isSetOver(nextProps.currentGame) &&
-      (nextProps.currentGame.resultA < 3 && nextProps.currentGame.resultB < 3)
-    ) {
-      console.log("isSetOver", nextProps.currentGame);
-      var a =
-        nextProps.currentGame.sets[nextProps.currentGame.sets.length - 1].a;
-      var b =
-        nextProps.currentGame.sets[nextProps.currentGame.sets.length - 1].b;
-      if (a > b) {
-        nextProps.currentGame.resultA++;
-      } else {
-        nextProps.currentGame.resultB++;
+    if(nextProps.currentGame !== null){
+      this.setState({
+        currentGame: nextProps.currentGame,
+        spectator: nextProps.spectator,
+        gameRef: nextProps.gameRef,
+        gameUrl: nextProps.gameUrl
+      });
+      if (
+        this.isSetOver(nextProps.currentGame) &&
+        (nextProps.currentGame.resultA < 3 && nextProps.currentGame.resultB < 3)
+      ) {
+        console.log("isSetOver", nextProps.currentGame);
+        var a =
+          nextProps.currentGame.sets[nextProps.currentGame.sets.length - 1].a;
+        var b =
+          nextProps.currentGame.sets[nextProps.currentGame.sets.length - 1].b;
+        if (a > b) {
+          nextProps.currentGame.resultA++;
+        } else {
+          nextProps.currentGame.resultB++;
+        }
+        nextProps.currentGame.live = false;
+        console.log(nextProps.currentGame);
+        nextProps.gameRef.update(nextProps.currentGame);
       }
-      nextProps.currentGame.live = false;
-      console.log(nextProps.currentGame);
-      nextProps.gameRef.update(nextProps.currentGame);
+      if (this.audienceRef === null) {
+        var self = this;
+        setTimeout(function() {
+          self.initAudienceObserver(nextProps.gameUrl);
+        }, 2000);
+      } 
     }
-    if (this.audienceRef === null) {
-      var self = this;
-      setTimeout(function() {
-        self.initAudienceObserver(nextProps.gameUrl);
-      }, 2000);
-    }
+         
   }
 
   componentWillUnmount() {
@@ -77,6 +81,7 @@ class MatchInfo extends React.Component {
         this.audienceRef.set(audienceWithoutMe);
       }
     }
+    this.isUnmount = true;
   }
 
   add(team) {
@@ -359,7 +364,9 @@ class MatchInfo extends React.Component {
         }
         self.audienceRef.set(audience);
       }
-      self.setState({ ...self.state, audience: audience });
+      if(!self.isUnmount){
+        self.setState({ ...self.state, audience: audience });
+      }
     });
   };
 

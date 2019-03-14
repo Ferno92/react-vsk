@@ -21,6 +21,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faTrophy } from "@fortawesome/free-solid-svg-icons";
 import EditTeam from "./pages/edit-team/EditTeam";
 import TeamService from "./service/TeamService";
+import NoMatch from "./pages/no-match/NoMatch";
 //end font awesome region
 
 export const theme = createMuiTheme({
@@ -143,6 +144,7 @@ class App extends Component {
               <Route path="/profile" component={Profile} />
               <Route path="/myteams" component={MyTeams} />
               <Route path="/team/:id?/:owner?" component={EditTeam} />
+              <Route component={NoMatch} />
             </Switch>
           </MuiThemeProvider>
         </div>

@@ -102,10 +102,20 @@ class EditTeam extends React.Component {
     var self = this;
     this.teamRef.on("value", snapshot => {
       console.log("team", snapshot.val());
-      self.setState({
-        ...self.state,
-        team: snapshot.val()
-      });
+      if (snapshot.val() === null) {
+        store.dispatch(
+          showMessageAction(
+            "error",
+            "Questa squadra non esiste o è stata eliminata"
+          )
+        );
+        self.props.history.push("/myteams");
+      } else {
+        self.setState({
+          ...self.state,
+          team: snapshot.val()
+        });
+      }
       self.teamRef.off("value");
     });
 
