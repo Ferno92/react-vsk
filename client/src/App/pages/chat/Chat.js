@@ -105,7 +105,7 @@ class Chat extends React.Component {
       const user = ls.get("user");
       const chatsNewItem = this.chatsRef.push({});
       var self = this;
-      const chatsPromise = chatsNewItem
+      chatsNewItem
         .set({
           name: user != null ? user.name : "Anonimo(" + ls.get("anonymous").code +")",
           userId: user != null ? user.id : ls.get("anonymous").code,

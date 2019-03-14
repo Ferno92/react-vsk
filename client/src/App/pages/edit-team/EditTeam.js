@@ -7,8 +7,7 @@ import {
   PhotoCamera,
   GroupAdd,
   Edit,
-  Done,
-  ErrorOutline
+  Done
 } from "@material-ui/icons";
 import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
 import {

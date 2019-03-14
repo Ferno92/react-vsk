@@ -5,9 +5,7 @@ import ls from "local-storage";
 import { firebaseConfig } from "../../App";
 import TeamCard from "../../components/team-card/TeamCard";
 import { Avatar, Chip, Button } from "@material-ui/core";
-import { Delete, Close } from "@material-ui/icons";
-import store from "../../store/store";
-import { updateAppbar, updateCreateMatch } from "../../actions/actions";
+import { Close } from "@material-ui/icons";
 import FormationCard from "../../components/formation-card/FormationCard";
 import "./MatchFormation.scss";
 import CourtAndChip from "../../components/court-and-chip/CourtAndChip";
@@ -21,7 +19,9 @@ class MatchFormation extends React.Component {
     configured: false,
     isOwnerMe: false,
     readOnly: true,
-    editingPosition: -1
+    editingPosition: -1,
+    live: true,
+    history: []
   };
   teamsRef = null;
 
@@ -47,7 +47,6 @@ class MatchFormation extends React.Component {
     var self = this;
 
     teamService.getAllTeams(teams => {
-
       self.setState({
         ...self.state,
         teamsList: teams,
@@ -66,8 +65,15 @@ class MatchFormation extends React.Component {
   }
 
   componentWillReceiveProps(nextProps) {
-    console.log("componentWillReceiveProps", nextProps.currentGame, this.state.team);
-    if (nextProps.currentGame && (this.state.team === null || !this.state.configured)) {
+    console.log(
+      "componentWillReceiveProps",
+      nextProps.currentGame.live,
+      this.state.team
+    );
+    if (
+      nextProps.currentGame &&
+      (this.state.team === null || !this.state.configured)
+    ) {
       this.setState({
         team:
           nextProps.currentGame.team === undefined
@@ -84,11 +90,12 @@ class MatchFormation extends React.Component {
           ? true
           : nextProps.tab !== 1
           ? true
-          : this.state.readOnly
+          : this.state.readOnly,
+        live: nextProps.currentGame.live,
+        history: nextProps.currentGame.sets
       });
     } else if (nextProps.currentGame.formation) {
       this.setState({
-        ...this.state,
         formation: nextProps.currentGame.formation,
         readOnly: this.state.readOnly
           ? true
@@ -189,8 +196,77 @@ class MatchFormation extends React.Component {
     );
   };
 
+  getBestFormation = () => {
+    const { history } = this.state;
+
+    var formationArray = [];
+    history.forEach((set, index) => {
+      set.history.forEach((item, i) => {
+        var historyIndex = this.getHistoryIndex(formationArray, item);
+        if (item.a === "x") {
+          if (formationArray.length === 0 || historyIndex < 0) {
+            formationArray.push({
+              formation: item.formation,
+              count: 1
+            });
+          } else {
+            formationArray[historyIndex].count++;
+          }
+        }
+      });
+    });
+    console.log("formationArray", formationArray);
+    formationArray.sort(this.sortAscCount);
+
+    return formationArray;
+  };
+
+  getBestFormationPlayers = formation => {
+    var players = [];
+    const { teamsList } = this.state;
+    if (formation.formation && formation.formation.length > 0 && teamsList.length > 0) {
+      formation.formation.forEach((item, index) => {
+        teamsList[0].players.forEach((player, i) => {
+          if (player.id === item) {
+            player.position = index + 1;
+            players.push(player);
+          }
+        });
+      });
+    }
+    return players;
+  };
+
+  sortAscCount = (a, b) => {
+    if (a.count < b.count) return -1;
+    if (a.count > b.count) return 1;
+    return 0;
+  };
+
+  getHistoryIndex = (array, item) => {
+    var index = -1;
+    array.forEach((formationList, i) => {
+      var samePlayers = 0;
+
+      if (formationList.formation) {
+        formationList.formation.forEach((player, j) => {
+          if (item.formation.length - 1 >= j) {
+            if (item.formation[j] === player) {
+              samePlayers++;
+            }
+          }
+        });
+      }
+      if (samePlayers === 6) {
+        index = i;
+      }
+    });
+    return index;
+  };
+
   render() {
     var currentTeam = null;
+    const { live } = this.state;
     if (this.state.configured) {
       var self = this;
       this.state.teamsList.forEach(team => {
@@ -199,11 +275,24 @@ class MatchFormation extends React.Component {
         }
       });
     }
+    var bestFormation = [];
+    var bestPlayers = [];
+    if (!live) {
+      bestFormation =
+        this.getBestFormation().length > 0 ? this.getBestFormation() : [];
+      if (bestFormation.length > 0) {
+        bestPlayers = this.getBestFormationPlayers(
+          bestFormation[bestFormation.length - 1]
+        );
+      }
+    }
 
     return (
       <div className="match-formation">
         {!this.state.configured && (
           <div>
+          {live ? (
+            <React.Fragment>
             {this.state.team === null && (
               <div className="team-not-configured">
                 <div>Quale squadra vuoi seguire?</div>
@@ -290,42 +379,64 @@ class MatchFormation extends React.Component {
                 )}
               </div>
             )}
+            </React.Fragment>
+        ) : (<div>Non è stata configurata nessuna formazione durante la partita</div>)}
           </div>
         )}
         {this.state.configured && currentTeam !== null && (
-          <div>
-            {this.state.isOwnerMe && (
-              <div className="edit-buttons">
-                <Button
-                  variant="outlined"
-                  onClick={this.rotateFormation.bind(this)}
-                  color="primary"
-                >
-                  Ruota formazione
-                </Button>
+          <React.Fragment>
+            {live ? (
+              <React.Fragment>
+                {this.state.isOwnerMe && (
+                  <div className="edit-buttons">
+                    <Button
+                      variant="outlined"
+                      onClick={this.rotateFormation.bind(this)}
+                      color="primary"
+                    >
+                      Ruota formazione
+                    </Button>
 
-                <Button
-                  variant={this.state.readOnly ? "outlined" : "contained"}
-                  onClick={this.switchPlayer.bind(this)}
-                  color="primary"
-                >
-                  {this.state.readOnly
-                    ? "Sostituisci giocatore"
-                    : "Fine modifiche"}
-                </Button>
-              </div>
+                    <Button
+                      variant={this.state.readOnly ? "outlined" : "contained"}
+                      onClick={this.switchPlayer.bind(this)}
+                      color="primary"
+                    >
+                      {this.state.readOnly
+                        ? "Sostituisci giocatore"
+                        : "Fine modifiche"}
+                    </Button>
+                  </div>
+                )}
+
+                <CourtAndChip
+                  editingPosition={this.state.editingPosition}
+                  removeFromCourt={this.removeFromCourt}
+                  addPlayer={this.addPlayer}
+                  formation={this.state.formation}
+                  playersList={currentTeam.players}
+                  readOnly={this.state.readOnly}
+                  choosePlayerCallback={this.choosePlayerCallback}
+                />
+              </React.Fragment>
+            ) : (
+              <React.Fragment>
+                <div>
+                  Formazione più efficace (
+                  {bestFormation.length > 0
+                    ? bestFormation[bestFormation.length - 1].count
+                    : ""}{" "}
+                  punti)
+                </div>
+                <FormationCard
+                  formation={{ players: bestPlayers }}
+                  addFormation={() => {}}
+                  key={"best"}
+                  players={bestPlayers}
+                />
+              </React.Fragment>
             )}
-
-            <CourtAndChip
-              editingPosition={this.state.editingPosition}
-              removeFromCourt={this.removeFromCourt}
-              addPlayer={this.addPlayer}
-              formation={this.state.formation}
-              playersList={currentTeam.players}
-              readOnly={this.state.readOnly}
-              choosePlayerCallback={this.choosePlayerCallback}
-            />
-          </div>
+          </React.Fragment>
         )}
       </div>
     );

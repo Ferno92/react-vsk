@@ -1,6 +1,5 @@
 import React from "react";
 import {Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions, Button} from "@material-ui/core";
-import store from "../../store/store";
 
 class YesNoDialog extends React.Component{
     render(){

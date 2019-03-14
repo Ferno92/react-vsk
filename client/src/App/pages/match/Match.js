@@ -16,8 +16,7 @@ import {
   DialogTitle,
   Menu,
   MenuItem,
-  Badge,
-  TextField
+  Badge
 } from "@material-ui/core";
 import ArrowBack from "@material-ui/icons/ArrowBack";
 import Delete from "@material-ui/icons/Delete";
@@ -236,7 +235,6 @@ class Match extends React.Component {
     const { classes, theme } = this.props;
     const { anchorEl } = this.state;
     const openMenu = Boolean(anchorEl);
-    const { videoUrl } = this.state;
 
     return (
       <div className={classes.root}>

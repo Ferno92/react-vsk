@@ -17,7 +17,7 @@ import Profile from "./pages/profile/Profile";
 import MyTeams from "./pages/my-teams/MyTeams";
 //font awesome region
 import { library } from "@fortawesome/fontawesome-svg-core";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+// import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faTrophy } from "@fortawesome/free-solid-svg-icons";
 import EditTeam from "./pages/edit-team/EditTeam";
 import TeamService from "./service/TeamService";
@@ -61,7 +61,7 @@ export const firebaseConfig = {
 export const newGuid = () => {
   return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, function(c) {
     var r = (Math.random() * 16) | 0,
-      v = c == "x" ? r : (r & 0x3) | 0x8;
+      v = c === "x" ? r : (r & 0x3) | 0x8;
     return v.toString(16);
   });
 };

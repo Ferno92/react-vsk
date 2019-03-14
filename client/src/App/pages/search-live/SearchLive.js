@@ -118,6 +118,8 @@ class SearchLive extends React.Component {
                   owner={game.owner}
                 />
               );
+            }else{
+              return ''
             }
             })
           : ""}

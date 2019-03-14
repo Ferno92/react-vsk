@@ -30,7 +30,7 @@ class MatchInfo extends React.Component {
   isUnmount = false;
 
   componentWillReceiveProps(nextProps) {
-    if(nextProps.currentGame !== null){
+    if (nextProps.currentGame !== null) {
       this.setState({
         currentGame: nextProps.currentGame,
         spectator: nextProps.spectator,
@@ -60,9 +60,8 @@ class MatchInfo extends React.Component {
         setTimeout(function() {
           self.initAudienceObserver(nextProps.gameUrl);
         }, 2000);
-      } 
+      }
     }
-         
   }
 
   componentWillUnmount() {
@@ -173,7 +172,15 @@ class MatchInfo extends React.Component {
   printFormation = () => {
     var print = [];
     if (this.state.currentGame.formation) {
-      this.state.currentGame.formation.players.forEach(player => {
+      var temp = this.state.currentGame.formation.players.slice();
+      temp.sort(function compare(a,b) {
+        if (a.position < b.position)
+          return -1;
+        if (a.position > b.position)
+          return 1;
+        return 0;
+      })
+      temp.forEach(player => {
         print.push(player.id);
       });
     }
@@ -238,8 +245,9 @@ class MatchInfo extends React.Component {
     };
     var penultimo = this.removeLastHistoryFor(currentGame, team);
     if (
-      (penultimo.a !== "x" && team === "resultA") ||
-      (penultimo.b !== "x" && team === "resultB")
+      penultimo &&
+      ((penultimo.a !== "x" && team === "resultA") ||
+        (penultimo.b !== "x" && team === "resultB"))
     ) {
       currentGame.formation.players = this.rotateFormation(
         currentGame.formation,
@@ -288,8 +296,8 @@ class MatchInfo extends React.Component {
               i
             ].b === "x")
         ) {
-          if (i > 0 && foundIndex === -1) {
-            penultimo =
+          if (i >= 0 && foundIndex === -1) {
+            penultimo = i === 0 ? null :
               currentGame.sets[Object.keys(currentGame.sets).length - 1]
                 .history[i - 1];
             foundIndex = i;
@@ -364,7 +372,7 @@ class MatchInfo extends React.Component {
         }
         self.audienceRef.set(audience);
       }
-      if(!self.isUnmount){
+      if (!self.isUnmount) {
         self.setState({ ...self.state, audience: audience });
       }
     });

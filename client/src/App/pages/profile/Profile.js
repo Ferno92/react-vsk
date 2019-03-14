@@ -5,7 +5,6 @@ import { updateAppbar, showMessageAction } from "../../actions/actions";
 import TextField from "@material-ui/core/TextField";
 import Button from "@material-ui/core/Button";
 import Fab from "@material-ui/core/Fab";
-import Edit from "@material-ui/icons/Edit";
 import PhotoCamera from "@material-ui/icons/PhotoCamera";
 import "./Profile.scss";
 import ExpansionPanel from "@material-ui/core/ExpansionPanel";
