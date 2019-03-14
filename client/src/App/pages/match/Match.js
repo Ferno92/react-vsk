@@ -61,7 +61,7 @@ const styles = theme => ({
 
 function TabContainer({ children, dir }) {
   return (
-    <Typography component="div" dir={dir} style={{ padding: 8 * 3 }}>
+    <Typography component="div" dir={dir} style={{ padding: 8 * 3 }} className="swipeable-container">
       {children}
     </Typography>
   );

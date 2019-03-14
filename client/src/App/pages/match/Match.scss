@@ -1,5 +1,11 @@
 .tab-container {
   margin-top: 105px;
+  max-height: calc(100vh - 105px);
+  overflow: hidden;
+  .swipeable-container {
+    max-height: calc(100vh - 155px);
+    overflow: auto;
+  }
 }
 
 .title-ellipsis {

@@ -10,12 +10,7 @@ import firebase from "firebase/app";
 import "firebase/database";
 import ls from "local-storage";
 import { firebaseConfig } from "../../App";
-import {
-  DialogTitle,
-  Dialog,
-  Chip,
-  Avatar
-} from "@material-ui/core";
+import { DialogTitle, Dialog, Chip, Avatar } from "@material-ui/core";
 
 class MatchInfo extends React.Component {
   state = {
@@ -32,7 +27,7 @@ class MatchInfo extends React.Component {
     scoutEnabled: false
   };
   audienceRef = null;
-  
+
   componentWillReceiveProps(nextProps) {
     this.setState({
       currentGame: nextProps.currentGame,
@@ -40,17 +35,22 @@ class MatchInfo extends React.Component {
       gameRef: nextProps.gameRef,
       gameUrl: nextProps.gameUrl
     });
-    if(this.isSetOver(nextProps.currentGame) && (nextProps.currentGame.resultA < 3 && nextProps.currentGame.resultB < 3)){
-      console.log("isSetOver", nextProps.currentGame)
-      var a = nextProps.currentGame.sets[nextProps.currentGame.sets.length-1].a;
-      var b = nextProps.currentGame.sets[nextProps.currentGame.sets.length-1].b;
-      if(a > b){
+    if (
+      this.isSetOver(nextProps.currentGame) &&
+      (nextProps.currentGame.resultA < 3 && nextProps.currentGame.resultB < 3)
+    ) {
+      console.log("isSetOver", nextProps.currentGame);
+      var a =
+        nextProps.currentGame.sets[nextProps.currentGame.sets.length - 1].a;
+      var b =
+        nextProps.currentGame.sets[nextProps.currentGame.sets.length - 1].b;
+      if (a > b) {
         nextProps.currentGame.resultA++;
-      }else{
+      } else {
         nextProps.currentGame.resultB++;
       }
       nextProps.currentGame.live = false;
-      console.log(nextProps.currentGame)
+      console.log(nextProps.currentGame);
       nextProps.gameRef.update(nextProps.currentGame);
     }
     if (this.audienceRef === null) {
@@ -147,16 +147,23 @@ class MatchInfo extends React.Component {
     this.state.gameRef.update(currentGame);
   }
 
-  isSetOver = (currentGame) =>{
-    var max = Object.keys(currentGame.sets).length === 5 ? 15 : 25
-    
-    return (currentGame.sets[Object.keys(currentGame.sets).length - 1].a >= max ||
-    currentGame.sets[Object.keys(currentGame.sets).length - 1].b >= max) &&
-    Math.abs(
-      currentGame.sets[Object.keys(currentGame.sets).length - 1].a -
-        currentGame.sets[Object.keys(currentGame.sets).length - 1].b
-    ) >= 2;
-  }
+  isSetOver = currentGame => {
+    if (currentGame.sets) {
+      var max = Object.keys(currentGame.sets).length === 5 ? 15 : 25;
+
+      return (
+        (currentGame.sets[Object.keys(currentGame.sets).length - 1].a >= max ||
+          currentGame.sets[Object.keys(currentGame.sets).length - 1].b >=
+            max) &&
+        Math.abs(
+          currentGame.sets[Object.keys(currentGame.sets).length - 1].a -
+            currentGame.sets[Object.keys(currentGame.sets).length - 1].b
+        ) >= 2
+      );
+    } else {
+      return false;
+    }
+  };
 
   printFormation = () => {
     var print = [];
