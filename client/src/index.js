@@ -13,6 +13,7 @@ function initializeReactGA() {
   ReactGA.initialize('UA-136203956-1');
 }
 var history = createBrowserHistory();
+
 render(
   <Router history={history}>
     <Provider store={store}>
@@ -21,12 +22,12 @@ render(
   </Router>,
   document.getElementById("root")
 );
-
-initializeReactGA();
-history.listen(analyticsListener);
-
-function analyticsListener(location){
-  console.log("analyticsListener", location);
-  ReactGA.pageview(location.pathname + location.search);
+if(window.location.hostname === 'react-vsk.herokuapp.com'){
+  initializeReactGA();
+  history.listen(analyticsListener);
+  
+  function analyticsListener(location){
+    ReactGA.pageview(location.pathname + location.search);
+  }
 }
 registerServiceWorker();
