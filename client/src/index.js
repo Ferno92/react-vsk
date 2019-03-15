@@ -27,7 +27,11 @@ if(window.location.hostname === 'react-vsk.herokuapp.com'){
   history.listen(analyticsListener);
   
   function analyticsListener(location){
-    ReactGA.pageview(location.pathname + location.search);
+    var pageName = location.pathname.substring(
+      location.pathname.indexOf("/") + 1, 
+      location.pathname.lastIndexOf("/")
+  );
+    ReactGA.pageview(pageName);
   }
 }
 registerServiceWorker();
