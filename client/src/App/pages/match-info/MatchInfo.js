@@ -171,8 +171,9 @@ class MatchInfo extends React.Component {
 
   printFormation = () => {
     var print = [];
-    if (this.state.currentGame.formation) {
-      var temp = this.state.currentGame.formation.players.slice();
+    const {formation} = this.state.currentGame
+    if (formation && formation.players) {
+      var temp = formation.players.slice();
       temp.sort(function compare(a,b) {
         if (a.position < b.position)
           return -1;
@@ -188,7 +189,7 @@ class MatchInfo extends React.Component {
   };
 
   rotateFormation = (formation, old) => {
-    var tempPlayers = formation.players.slice();
+    var tempPlayers = formation.players ? formation.players.slice() : [];
     var self = this;
     tempPlayers.forEach(player => {
       if (old) {

@@ -20,7 +20,7 @@ class CourtAndChip extends React.Component {
     }
     var self = this;
     courtPositions.forEach((value, cIndex) => {
-      if (formation !== null && formation.players !== null) {
+      if (formation !== null && formation.players && formation.players !== null) {
         formation.players.forEach(player => {
           if (value.position === player.position) {
             var playerInfo = self.getPlayerFromList(player);
@@ -52,7 +52,7 @@ class CourtAndChip extends React.Component {
 
   getFilteredPlayersList = () => {
     var playersList = [];
-    if (this.props.formation) {
+    if (this.props.formation && this.props.formation.players) {
       this.props.playersList.forEach(value => {
         var found = false;
         this.props.formation.players.forEach(fp => {

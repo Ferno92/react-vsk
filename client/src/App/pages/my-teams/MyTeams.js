@@ -8,6 +8,7 @@ import "./MyTeams.scss";
 import store from "../../store/store";
 import { updateAppbar } from "../../actions/actions";
 import CreateTeam from "../create-team/CreateTeam";
+import { CircularProgress } from "@material-ui/core";
 
 class MyTeams extends React.Component {
   db = null;
@@ -18,9 +19,10 @@ class MyTeams extends React.Component {
     allTeams: [],
     search: false,
     text: "",
-    createTeamOpen: false
+    createTeamOpen: false,
+    loading: true
   };
-  storeUnsubscribe = null;  
+  storeUnsubscribe = null;
 
   componentDidMount() {
     if (ls.get("user") === null) {
@@ -39,7 +41,6 @@ class MyTeams extends React.Component {
       this.teamsRef = this.db.ref("users/" + ls.get("user").id + "/teams");
       var self = this;
       this.teamsRef.on("value", snapshot => {
-        console.log("teams", snapshot.val());
         var data_list = [];
         for (var property in snapshot.val()) {
           if (snapshot.val().hasOwnProperty(property)) {
@@ -48,7 +49,7 @@ class MyTeams extends React.Component {
             data_list.push(team);
           }
         }
-        self.setState({ ...self.state, teams: data_list });
+        self.setState({ teams: data_list });
       });
       this.usersRef = this.db.ref("/users");
       this.usersRef.on("value", snapshot => {
@@ -66,10 +67,10 @@ class MyTeams extends React.Component {
           }
         }
 
-        self.setState({ ...self.state, allTeams: allTeams });
+        self.setState({ allTeams: allTeams, loading: false });
       });
     }
-    
+
     this.storeUnsubscribe = store.subscribe(this.updateProps);
   }
 
@@ -80,28 +81,36 @@ class MyTeams extends React.Component {
     if (this.usersRef) {
       this.usersRef.off("value");
     }
-    
+
     if (this.storeUnsubscribe !== null) {
       this.storeUnsubscribe();
     }
   }
 
   updateProps = () => {
-    console.log("MyTeams update props", store.getState());
-    if(store.getState().appBar.search !== this.state.search || store.getState().appBar.inputSearch !== this.state.text){
-      this.setState({search: store.getState().appBar.search, text: store.getState().appBar.inputSearch});
+    if (
+      store.getState().appBar.search !== this.state.search ||
+      store.getState().appBar.inputSearch !== this.state.text
+    ) {
+      this.setState({
+        search: store.getState().appBar.search,
+        text: store.getState().appBar.inputSearch
+      });
     }
-    if(store.getState().myTeams.createTeamOpen !== this.state.createTeamOpen){
-      this.setState({createTeamOpen: store.getState().myTeams.createTeamOpen});
+    if (store.getState().myTeams.createTeamOpen !== this.state.createTeamOpen) {
+      this.setState({
+        createTeamOpen: store.getState().myTeams.createTeamOpen
+      });
     }
-  }
+  };
 
   onClickTeam = (id, ownerId) => {
-    console.log('onClickTeam', id, ownerId);
-    this.props.history.push("/team/" + id + (ownerId !== null ? ("/" + ownerId) : ""));
+    this.props.history.push(
+      "/team/" + id + (ownerId !== null ? "/" + ownerId : "")
+    );
   };
-  
-  saveNewTeam = (teamName) =>{
+
+  saveNewTeam = teamName => {
     const newTeamRef = this.teamsRef.push();
     const promise = newTeamRef.set({
       id: newTeamRef.key,
@@ -110,20 +119,20 @@ class MyTeams extends React.Component {
     promise.then(() => {
       this.onClickTeam(newTeamRef.key, null);
     });
-  }
+  };
 
   render() {
-    const {createTeamOpen} = this.state
+    const { createTeamOpen, loading, search, text, allTeams } = this.state;
     var teams = [];
     var otherTeams = [];
     if (this.state !== null) {
-      if (this.state.search) {
-        if (this.state.text.trim().length > 0) {
-          this.state.allTeams.forEach((team, index) => {
-            if (team.name.toLowerCase().indexOf(this.state.text.toLowerCase()) >= 0) {
-              if(team.owner.id === ls.get("user").id){
+      if (search) {
+        if (text.trim().length > 0) {
+          allTeams.forEach((team, index) => {
+            if (team.name.toLowerCase().indexOf(text.toLowerCase()) >= 0) {
+              if (team.owner.id === ls.get("user").id) {
                 teams.push(team);
-              }else{
+              } else {
                 otherTeams.push(team);
               }
             }
@@ -133,52 +142,80 @@ class MyTeams extends React.Component {
         this.state.teams.forEach((team, index) => {
           teams.push(team);
         });
-        
-        this.state.allTeams.forEach((team, index) => {
-          if(team.contributors && team.contributors.accepted && team.contributors.accepted.indexOf(ls.get("user").id) >= 0){
-            var found = teams.filter((item) => {
+
+        allTeams.forEach((team, index) => {
+          if (
+            team.contributors &&
+            team.contributors.accepted &&
+            team.contributors.accepted.indexOf(ls.get("user").id) >= 0
+          ) {
+            var found = teams.filter(item => {
               return item.id === team.id;
             });
-            if(found.length <= 0){
+            if (found.length <= 0) {
               teams.push(team);
-              console.log("TEAM",team);
             }
           }
-        })
+        });
       }
     }
     //TODO: nessun risultato
     return (
       <div className="my-teams">
-      {this.state.search && (<h1>Cerca: {this.state.text}</h1>)}
-      {!this.state.search && (<h1 style={{ textAlign: "center" }}>Le mie squadre:</h1>)}
-      {this.state.search && teams.length > 0 && (<div className="titles">Le mie squadre:</div>)}
-        {teams.length > 0 && teams.map((team, index) => {
-            var isContributor = team.contributors && team.contributors.accepted && team.contributors.accepted.indexOf(ls.get("user").id) >= 0;
-            return (
-              <TeamCard
-                key={team.id}
-                team={team}
-                opening={false}
-                onClick={this.onClickTeam.bind(this, team.id, isContributor ? team.owner.id : null)}
-                index={index}
-              />
-            );
-          })}
-          
-      {this.state.search && otherTeams.length > 0 && (<div className="titles">Altre squadre:</div>)}
-        {otherTeams.length > 0 && otherTeams.map((team, index) => {
-            return (
-              <TeamCard
-                key={team.id}
-                team={team}
-                opening={false}
-                onClick={this.onClickTeam.bind(this, team.id, team.owner.id)}
-                index={index}
-              />
-            );
-          })}
-          <CreateTeam open={createTeamOpen} save={this.saveNewTeam}/>
+        {search && <h1>Cerca: {text}</h1>}
+        {!search && <h1 style={{ textAlign: "center" }}>Le mie squadre:</h1>}
+        {search && teams.length > 0 && (
+          <div className="titles">Le mie squadre:</div>
+        )}
+
+        {loading ? (
+          <CircularProgress className="progress"/>
+        ) : (
+          <React.Fragment>
+            {teams.length > 0 &&
+              teams.map((team, index) => {
+                var isContributor =
+                  team.contributors &&
+                  team.contributors.accepted &&
+                  team.contributors.accepted.indexOf(ls.get("user").id) >= 0;
+                return (
+                  <TeamCard
+                    key={team.id}
+                    team={team}
+                    opening={false}
+                    onClick={this.onClickTeam.bind(
+                      this,
+                      team.id,
+                      isContributor ? team.owner.id : null
+                    )}
+                    index={index}
+                  />
+                );
+              })}
+
+            {search && otherTeams.length > 0 && (
+              <div className="titles">Altre squadre:</div>
+            )}
+            {otherTeams.length > 0 &&
+              otherTeams.map((team, index) => {
+                return (
+                  <TeamCard
+                    key={team.id}
+                    team={team}
+                    opening={false}
+                    onClick={this.onClickTeam.bind(
+                      this,
+                      team.id,
+                      team.owner.id
+                    )}
+                    index={index}
+                  />
+                );
+              })}
+          </React.Fragment>
+        )}
+
+        <CreateTeam open={createTeamOpen} save={this.saveNewTeam} />
       </div>
     );
   }
