@@ -48,7 +48,6 @@ class MatchFormation extends React.Component {
 
     teamService.getAllTeams(teams => {
       self.setState({
-        ...self.state,
         teamsList: teams,
         isOwnerMe: isOwnerMe
       });
@@ -65,11 +64,6 @@ class MatchFormation extends React.Component {
   }
 
   componentWillReceiveProps(nextProps) {
-    console.log(
-      "componentWillReceiveProps",
-      nextProps.currentGame.live,
-      this.state.team
-    );
     if (
       nextProps.currentGame &&
       (this.state.team === null || !this.state.configured)
@@ -201,21 +195,22 @@ class MatchFormation extends React.Component {
 
     var formationArray = [];
     history.forEach((set, index) => {
-      set.history.forEach((item, i) => {
-        var historyIndex = this.getHistoryIndex(formationArray, item);
-        if (item.a === "x") {
-          if (formationArray.length === 0 || historyIndex < 0) {
-            formationArray.push({
-              formation: item.formation,
-              count: 1
-            });
-          } else {
-            formationArray[historyIndex].count++;
+      if(set.history){
+        set.history.forEach((item, i) => {
+          var historyIndex = this.getHistoryIndex(formationArray, item);
+          if (item.a === "x") {
+            if (formationArray.length === 0 || historyIndex < 0) {
+              formationArray.push({
+                formation: item.formation,
+                count: 1
+              });
+            } else {
+              formationArray[historyIndex].count++;
+            }
           }
-        }
-      });
+        });
+      }
     });
-    console.log("formationArray", formationArray);
     formationArray.sort(this.sortAscCount);
 
     return formationArray;

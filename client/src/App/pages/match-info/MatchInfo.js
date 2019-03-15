@@ -374,7 +374,7 @@ class MatchInfo extends React.Component {
         self.audienceRef.set(audience);
       }
       if (!self.isUnmount) {
-        self.setState({ ...self.state, audience: audience });
+        self.setState({ audience: audience });
       }
     });
   };
