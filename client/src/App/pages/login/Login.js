@@ -6,7 +6,7 @@ import firebase from "firebase/app";
 import "firebase/database";
 import "firebase/auth";
 import store from "../../store/store";
-import { updateLoggedUser, showMessageAction } from "../../actions/actions";
+import { updateLoggedUser, showMessageAction, updateAppbar } from "../../actions/actions";
 import "./Login.scss";
 import FacebookLogin from "react-facebook-login";
 import TextField from "@material-ui/core/TextField";
@@ -35,6 +35,9 @@ class Login extends React.Component {
     super(props, context);
     if (ls.get("user") !== null) {
       this.redirectToDashboard(false);
+    }else{
+      store.dispatch(updateAppbar("visible", true));
+      store.dispatch(updateAppbar("searchButtonVisible", false));
     }
   }
 

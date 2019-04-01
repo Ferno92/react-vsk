@@ -16,14 +16,19 @@ import {
   DialogTitle,
   Menu,
   MenuItem,
-  Badge
+  Badge,
+  CircularProgress
 } from "@material-ui/core";
 import ArrowBack from "@material-ui/icons/ArrowBack";
 import Delete from "@material-ui/icons/Delete";
 import Share from "@material-ui/icons/Share";
 import SwipeableViews from "react-swipeable-views";
 import store from "../../store/store";
-import { updateAppbar, updateCreateMatch, showMessageAction } from "../../actions/actions";
+import {
+  updateAppbar,
+  updateCreateMatch,
+  showMessageAction
+} from "../../actions/actions";
 import firebase from "firebase/app";
 import "firebase/database";
 import ls from "local-storage";
@@ -85,7 +90,8 @@ class Match extends React.Component {
     anchorEl: null,
     chatBadge: 0,
     gameUrl: "",
-    videoUrl: ""
+    videoUrl: "",
+    loading: true
   };
   gameRef = null;
 
@@ -124,7 +130,8 @@ class Match extends React.Component {
         this.setState(prevState => ({
           ...prevState,
           currentGame: snapshot.val(),
-          gameUrl: url
+          gameUrl: url,
+          loading: false
         }));
         console.log("game from db", this.state.currentGame);
       }
@@ -233,7 +240,7 @@ class Match extends React.Component {
 
   render() {
     const { classes, theme } = this.props;
-    const { anchorEl } = this.state;
+    const { anchorEl, loading, currentGame, spectator, value, chatBadge, gameUrl, confirmDialogOpen } = this.state;
     const openMenu = Boolean(anchorEl);
 
     return (
@@ -252,10 +259,10 @@ class Match extends React.Component {
               color="inherit"
               className={classes.grow + " title-ellipsis"}
             >
-              {this.state.currentGame
-                ? this.state.currentGame.teamA +
+              {currentGame
+                ? currentGame.teamA +
                   " vs " +
-                  this.state.currentGame.teamB
+                  currentGame.teamB
                 : ""}
             </Typography>
             <IconButton
@@ -272,7 +279,7 @@ class Match extends React.Component {
               onClose={this.handleCloseMenu}
               style={{ marginTop: "40px" }}
             >
-              {!this.state.spectator && (
+              {!spectator && (
                 <MenuItem
                   key={"deleteGame"}
                   onClick={this.deleteGame.bind(this)}
@@ -288,86 +295,92 @@ class Match extends React.Component {
               </MenuItem>
             </Menu>
           </Toolbar>
-          <Tabs
-            value={this.state.value}
-            onChange={this.handleChange}
-            indicatorColor="secondary"
-            textColor="secondary"
-            centered
-          >
-            <Tab
-              label="Punteggio"
-              style={this.state.value !== 0 ? { color: "#808080" } : {}}
-            />
-            <Tab
-              label="Formazione"
-              style={this.state.value !== 1 ? { color: "#808080" } : {}}
-            />
-            <Tab
-              label={
-                this.state.chatBadge > 0 ? (
-                  <Badge
-                    color="secondary"
-                    badgeContent={this.state.chatBadge}
-                    className="badge"
-                  >
-                    Chat
-                  </Badge>
-                ) : (
-                  "Chat"
-                )
-              }
-              onClick={this.onClickTab.bind(this, "chat")}
-              style={this.state.value !== 2 ? { color: "#808080" } : {}}
-            />
-            <Tab
-              label="Youtube"
-              style={this.state.value !== 3 ? { color: "#808080" } : {}}
-            />
-          </Tabs>
+          {!loading && (
+            <Tabs
+              value={value}
+              onChange={this.handleChange}
+              indicatorColor="secondary"
+              textColor="secondary"
+              centered
+            >
+              <Tab
+                label="Punteggio"
+                style={value !== 0 ? { color: "#808080" } : {}}
+              />
+              <Tab
+                label="Formazione"
+                style={value !== 1 ? { color: "#808080" } : {}}
+              />
+              <Tab
+                label={
+                  chatBadge > 0 ? (
+                    <Badge
+                      color="secondary"
+                      badgeContent={chatBadge}
+                      className="badge"
+                    >
+                      Chat
+                    </Badge>
+                  ) : (
+                    "Chat"
+                  )
+                }
+                onClick={this.onClickTab.bind(this, "chat")}
+                style={value !== 2 ? { color: "#808080" } : {}}
+              />
+              <Tab
+                label="Youtube"
+                style={value !== 3 ? { color: "#808080" } : {}}
+              />
+            </Tabs>
+          )}
         </AppBar>
-        <SwipeableViews
-          axis={theme.direction === "rtl" ? "x-reverse" : "x"}
-          index={this.state.value}
-          onChangeIndex={this.handleChangeIndex}
-          className="tab-container"
-        >
-          <TabContainer dir={theme.direction}>
-            <MatchInfo
-              currentGame={this.state.currentGame}
-              spectator={this.state.spectator}
-              gameRef={this.gameRef}
-              gameUrl={this.state.gameUrl}
-            />
-          </TabContainer>
-          <TabContainer dir={theme.direction}>
-            <MatchFormation
-              gameRef={this.gameRef}
-              currentGame={this.state.currentGame}
-              spectator={this.state.spectator}
-              owner={this.props.match.params.owner}
-              tab={this.state.value}
-            />
-          </TabContainer>
-          <TabContainer dir={theme.direction}>
-            <Chat
-              currentGame={this.state.currentGame}
-              gameRef={this.gameRef}
-              spectator={this.state.spectator}
-              isVisible={this.state.value === 2}
-              ownerId={this.props.match.params.owner}
-              onReceiveMessage={this.onReceiveMessage.bind(this)}
-            />
-          </TabContainer>
-          <TabContainer dir={theme.direction}>
-            <GameVideo
-              gameUrl={this.state.gameUrl}
-              owner={this.props.match.params.owner}
-            />
-          </TabContainer>
-        </SwipeableViews>
+        {loading ? (
+          <CircularProgress className="progress-main"/>
+        ) : (
+          <SwipeableViews
+            axis={theme.direction === "rtl" ? "x-reverse" : "x"}
+            index={value}
+            onChangeIndex={this.handleChangeIndex}
+            className="tab-container"
+          >
+            <TabContainer dir={theme.direction}>
+              <MatchInfo
+                currentGame={currentGame}
+                spectator={spectator}
+                gameRef={this.gameRef}
+                gameUrl={gameUrl}
+              />
+            </TabContainer>
+            <TabContainer dir={theme.direction}>
+              <MatchFormation
+                gameRef={this.gameRef}
+                currentGame={currentGame}
+                spectator={spectator}
+                owner={this.props.match.params.owner}
+                tab={value}
+              />
+            </TabContainer>
+            <TabContainer dir={theme.direction}>
+              <Chat
+                currentGame={currentGame}
+                gameRef={this.gameRef}
+                spectator={spectator}
+                isVisible={value === 2}
+                ownerId={this.props.match.params.owner}
+                onReceiveMessage={this.onReceiveMessage.bind(this)}
+              />
+            </TabContainer>
+            <TabContainer dir={theme.direction}>
+              <GameVideo
+                gameUrl={gameUrl}
+                owner={this.props.match.params.owner}
+              />
+            </TabContainer>
+          </SwipeableViews>
+        )}
         <Dialog
-          open={this.state.confirmDialogOpen}
+          open={confirmDialogOpen}
           onClose={this.handleCloseConfirmDialog.bind(this, false)}
           aria-labelledby="alert-dialog-title"
           aria-describedby="alert-dialog-description"

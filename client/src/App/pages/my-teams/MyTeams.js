@@ -17,6 +17,7 @@ class MyTeams extends React.Component {
   state = {
     teams: [],
     allTeams: [],
+    allGames: [],
     search: false,
     text: "",
     createTeamOpen: false,
@@ -54,6 +55,7 @@ class MyTeams extends React.Component {
       this.usersRef = this.db.ref("/users");
       this.usersRef.on("value", snapshot => {
         var allTeams = [];
+        var allGames = [];
         for (var item in snapshot.val()) {
           var user = snapshot.val()[item];
           for (var team in user.teams) {
@@ -65,9 +67,14 @@ class MyTeams extends React.Component {
             };
             allTeams.push(teamInfo);
           }
+          for (var gameId in user.games) {
+            var game = user.games[gameId]
+            allGames.push(game);
+          }
         }
 
-        self.setState({ allTeams: allTeams, loading: false });
+
+        self.setState({ allTeams: allTeams, loading: false, allGames: allGames });
       });
     }
 
@@ -120,6 +127,21 @@ class MyTeams extends React.Component {
       this.onClickTeam(newTeamRef.key, null);
     });
   };
+
+  getGameWon = (id)=>{
+     let win = 0;
+     let max = 0;
+    const {allGames} = this.state
+    allGames.forEach((item, index) => {
+      if(item.team === id && !item.live){
+        if(item.resultA > item.resultB){
+          win++;
+        }
+        max++;
+      }
+    })
+    return win.toString() + '/' + max.toString();
+  }
 
   render() {
     const { createTeamOpen, loading, search, text, allTeams } = this.state;
@@ -189,6 +211,7 @@ class MyTeams extends React.Component {
                       isContributor ? team.owner.id : null
                     )}
                     index={index}
+                    win={this.getGameWon(team.id)}
                   />
                 );
               })}
@@ -209,6 +232,7 @@ class MyTeams extends React.Component {
                       team.owner.id
                     )}
                     index={index}
+                    win={this.getGameWon(team.id)}
                   />
                 );
               })}

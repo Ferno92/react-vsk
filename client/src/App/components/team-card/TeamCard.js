@@ -39,8 +39,9 @@ class TeamCard extends React.Component {
   }
 
   render() {
+    const {win, index, team} = this.props
     return (
-      <Grow in={true} timeout={200 * this.props.index}>
+      <Grow in={true} timeout={200 * index}>
         <Card
           className={
             this.classes.card +
@@ -61,31 +62,31 @@ class TeamCard extends React.Component {
                       style={{
                         backgroundImage:
                           "url(" +
-                          (this.props.team.pictureUrl
-                            ? this.props.team.pictureUrl
+                          (team.pictureUrl
+                            ? team.pictureUrl
                             : "") +
                           ")"
                       }}
                     >
-                      {this.props.team.pictureUrl === undefined
-                        ? this.props.team.name.charAt(0).toUpperCase()
+                      {team.pictureUrl === undefined
+                        ? team.name.charAt(0).toUpperCase()
                         : ""}
                     </div>
                   </div>
                 </div>
                 <div className="float-left">
-                  <div className="team-name">{this.props.team.name}</div>
+                  <div className="team-name">{team.name}</div>
                   <div className="team-players">
-                    {(this.props.team.players === undefined
+                    {(team.players === undefined
                       ? 0
-                      : this.props.team.players.length) + " giocatori"}{" "}
+                      : team.players.length) + " giocatori"}{" "}
                   </div>
                 </div>
                 <div className="float-right">
                   <div>
                     <FontAwesomeIcon icon="trophy" className="trophy-icon" />
                   </div>
-                  <div className="win-number">{this.props.team.win}</div>
+                  <div className="win-number">{win}</div>
                 </div>
                 <div className="clear" />
               </div>

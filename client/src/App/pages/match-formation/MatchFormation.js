@@ -23,7 +23,7 @@ class MatchFormation extends React.Component {
     live: true,
     history: []
   };
-  teamsRef = null;
+  isUnmounted = false;
 
   componentDidMount() {
     if (!firebase.apps.length) {
@@ -47,20 +47,17 @@ class MatchFormation extends React.Component {
     var self = this;
 
     teamService.getAllTeams(teams => {
-      self.setState({
-        teamsList: teams,
-        isOwnerMe: isOwnerMe
-      });
+      if(!self.isUnmounted){
+        self.setState({
+          teamsList: teams,
+          isOwnerMe: isOwnerMe
+        });
+      }
     }, userId);
-
-    // this.teamsRef = this.db.ref("users/" + userId + "/teams");
-    // this.teamsRef.on("value", );
   }
 
   componentWillUnmount() {
-    if (this.teamsRef !== null) {
-      this.teamsRef.off("value");
-    }
+    this.isUnmounted = true;
   }
 
   componentWillReceiveProps(nextProps) {

@@ -10,7 +10,7 @@ import firebase from "firebase/app";
 import "firebase/database";
 import ls from "local-storage";
 import { firebaseConfig } from "../../App";
-import { DialogTitle, Dialog, Chip, Avatar } from "@material-ui/core";
+import { DialogTitle, Dialog, Chip, Avatar, DialogContent, DialogContentText, DialogActions } from "@material-ui/core";
 
 class MatchInfo extends React.Component {
   state = {
@@ -24,7 +24,8 @@ class MatchInfo extends React.Component {
     gameUrl: "",
     audience: [],
     showAudience: false,
-    scoutEnabled: false
+    scoutEnabled: false,
+    alertFormationDialogOpen: false
   };
   audienceRef = null;
   isUnmount = false;
@@ -147,6 +148,9 @@ class MatchInfo extends React.Component {
         currentGame.formation,
         false
       );
+    }
+    if(currentGame.sets[Object.keys(currentGame.sets).length - 1].a + currentGame.sets[Object.keys(currentGame.sets).length - 1].b === 1){
+      this.setState({alertFormationDialogOpen: true});
     }
     this.state.gameRef.update(currentGame);
   }
@@ -397,7 +401,13 @@ class MatchInfo extends React.Component {
     this.setState({ ...this.state, scoutEnabled: !this.state.scoutEnabled });
   };
 
+  handleAlertFormationClose = ()=>{
+    const {alertFormationDialogOpen} = this.state
+    this.setState({alertFormationDialogOpen: !alertFormationDialogOpen});
+  }
+
   render() {
+    const {alertFormationDialogOpen, currentGame, spectator, audience, showAudience, selectedSet} = this.state
     return (
       <div>
         {/*!this.state.spectator && (
@@ -413,15 +423,15 @@ class MatchInfo extends React.Component {
             label="Abilita scout"
           />
           )*/}
-        {this.state.currentGame && this.state.currentGame.live && (
+        {currentGame && currentGame.live && (
           <div className="flex-container set-info">
             <div className="flex-child-bigger">
-              {this.state.currentGame ? this.state.currentGame.resultA : ""}
+              {currentGame ? currentGame.resultA : ""}
             </div>
             <div className="flex-child separator">-</div>
 
             <div className="flex-child-bigger">
-              {this.state.currentGame ? this.state.currentGame.resultB : ""}
+              {currentGame ? currentGame.resultB : ""}
             </div>
           </div>
         )}
@@ -429,63 +439,63 @@ class MatchInfo extends React.Component {
         <div className="flex-container">
           <div className="flex-child">
             <p className="team-name">
-              {this.state.currentGame ? this.state.currentGame.teamA : ""}
+              {currentGame ? currentGame.teamA : ""}
             </p>
             <ResultButton
               result={
-                this.state.currentGame
-                  ? this.state.currentGame.live
-                    ? this.state.currentGame.sets
-                      ? this.state.currentGame.sets[
-                          this.state.currentGame.sets.length - 1
+                currentGame
+                  ? currentGame.live
+                    ? currentGame.sets
+                      ? currentGame.sets[
+                          currentGame.sets.length - 1
                         ].a
                       : 0
-                    : this.state.currentGame.resultA
+                    :currentGame.resultA
                   : 0
               }
               team={0}
               add={this.add.bind(this, "resultA")}
               remove={this.remove.bind(this, "resultA")}
               disabled={
-                this.state.currentGame ? !this.state.currentGame.live : true
+                currentGame ? !currentGame.live : true
               }
-              spectator={this.state.spectator}
+              spectator={spectator}
             />
           </div>
           <div className="flex-child">
             <p className="team-name">
-              {this.state.currentGame ? this.state.currentGame.teamB : ""}
+              {currentGame ? currentGame.teamB : ""}
             </p>
             <ResultButton
               result={
-                this.state.currentGame
-                  ? this.state.currentGame.live
-                    ? this.state.currentGame.sets
-                      ? this.state.currentGame.sets[
-                          this.state.currentGame.sets.length - 1
+                currentGame
+                  ? currentGame.live
+                    ? currentGame.sets
+                      ? currentGame.sets[
+                          currentGame.sets.length - 1
                         ].b
                       : 0
-                    : this.state.currentGame.resultB
+                    : currentGame.resultB
                   : 0
               }
               team={1}
               add={this.add.bind(this, "resultB")}
               remove={this.remove.bind(this, "resultB")}
               disabled={
-                this.state.currentGame ? !this.state.currentGame.live : true
+                currentGame ? !currentGame.live : true
               }
-              spectator={this.state.spectator}
+              spectator={spectator}
             />
           </div>
         </div>
         <div className="undo-container">
-          {this.state.currentGame !== null &&
-            this.state.currentGame.live &&
-            (this.state.currentGame.resultA !== 0 ||
-              this.state.currentGame.resultB !== 0) &&
-            this.state.currentGame.sets[this.state.currentGame.sets.length - 1]
+          {currentGame !== null &&
+            currentGame.live &&
+            (currentGame.resultA !== 0 ||
+              currentGame.resultB !== 0) &&
+            currentGame.sets[currentGame.sets.length - 1]
               .a === 0 &&
-            this.state.currentGame.sets[this.state.currentGame.sets.length - 1]
+            currentGame.sets[currentGame.sets.length - 1]
               .b === 0 && (
               <Button
                 variant="contained"
@@ -503,16 +513,16 @@ class MatchInfo extends React.Component {
             color="primary"
             variant="outlined"
             onClick={
-              this.state.audience.length > 0
+              audience.length > 0
                 ? this.showAudience.bind(this, true)
                 : function() {}
             }
           >
-            Spettatori: {this.state.audience.length}
+            Spettatori: {audience.length}
           </Button>
           <Dialog
             onClose={this.showAudience.bind(this, false)}
-            open={this.state.showAudience}
+            open={showAudience}
           >
             <DialogTitle
               id="customized-dialog-title"
@@ -520,9 +530,9 @@ class MatchInfo extends React.Component {
             >
               Spettatori
             </DialogTitle>
-            {this.state.currentGame &&
-              this.state.currentGame.audience &&
-              this.state.currentGame.audience.map((people, index) => {
+            {currentGame &&
+              currentGame.audience &&
+              currentGame.audience.map((people, index) => {
                 return (
                   <Chip
                     style={{ margin: "10px", justifyContent: "end" }}
@@ -540,8 +550,8 @@ class MatchInfo extends React.Component {
               })}
           </Dialog>
           <List>
-            {this.state.currentGame && this.state.currentGame.sets
-              ? this.state.currentGame.sets.map((set, index) => {
+            {currentGame && currentGame.sets
+              ? currentGame.sets.map((set, index) => {
                   var inCorso = (
                     <div key={index}>
                       <ListItem
@@ -558,9 +568,9 @@ class MatchInfo extends React.Component {
                     </div>
                   );
                   return index ===
-                    (this.state.currentGame
-                      ? this.state.currentGame.sets.length - 1
-                      : 0) && this.state.currentGame.live ? (
+                    (currentGame
+                      ? currentGame.sets.length - 1
+                      : 0) && currentGame.live ? (
                     inCorso
                   ) : (
                     <div key={index}>
@@ -596,13 +606,30 @@ class MatchInfo extends React.Component {
         </div>
 
         <SetHistoryDialog
-          history={this.state.selectedSet.history}
+          history={selectedSet.history}
           open={
-            this.state.selectedSet.open !== undefined &&
-            this.state.selectedSet.open
+            selectedSet.open !== undefined &&
+            selectedSet.open
           }
-          close={this.closeHistory.bind(this, this.state.selectedSet)}
+          close={this.closeHistory.bind(this, selectedSet)}
         />
+        {/* __________________- Alert dialog change formation -___________________ */}
+        <Dialog
+          open={alertFormationDialogOpen}
+          onClose={this.handleAlertFormationClose}
+        >
+          <DialogTitle>{"Hai aggiornato la formazione?"}</DialogTitle>
+          <DialogContent>
+            <DialogContentText id="alert-dialog-description">
+              Ricordati di aggiornare la formazione per poter tracciare l'andamento dei giocatori durante la partita.
+            </DialogContentText>
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={this.handleAlertFormationClose} color="primary" autoFocus>
+              Ok, ho capito
+            </Button>
+          </DialogActions>
+        </Dialog>
       </div>
     );
   }
