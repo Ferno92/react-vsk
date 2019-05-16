@@ -2,16 +2,9 @@ import React from "react";
 import ls from "local-storage";
 import store from "../../store/store";
 import { updateAppbar, showMessageAction } from "../../actions/actions";
-import TextField from "@material-ui/core/TextField";
-import Button from "@material-ui/core/Button";
-import Fab from "@material-ui/core/Fab";
+import {TextField, Button, Fab, ExpansionPanel, ExpansionPanelSummary, ExpansionPanelDetails, Dialog, CircularProgress, Switch, FormControlLabel} from "@material-ui/core";
 import PhotoCamera from "@material-ui/icons/PhotoCamera";
 import "./Profile.scss";
-import ExpansionPanel from "@material-ui/core/ExpansionPanel";
-import ExpansionPanelSummary from "@material-ui/core/ExpansionPanelSummary";
-import ExpansionPanelDetails from "@material-ui/core/ExpansionPanelDetails";
-import Dialog from "@material-ui/core/Dialog";
-import CircularProgress from "@material-ui/core/CircularProgress";
 import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
 import { firebaseConfig } from "../../App";
 import firebase from "firebase/app";
@@ -21,23 +14,7 @@ import "firebase/storage";
 import ImageCompressor from "image-compressor.js";
 
 class Profile extends React.Component {
-  state = {
-    user: {
-      email: "",
-      familyName: "",
-      givenName: "",
-      id: "",
-      imageUrl: null,
-      name: "",
-      type: ""
-    },
-    edit: false,
-    password: "",
-    confirmPass: "",
-    tempUser: {},
-    loaderVisible: false,
-    loaderCount: 0
-  };
+  
   db = null;
   unsubscribe = null;
   imageFile = null;
@@ -50,6 +27,26 @@ class Profile extends React.Component {
 
   constructor() {
     super();
+    
+    const pushPermission = ls.get("pushPermission");
+    this.state = {
+      user: {
+        email: "",
+        familyName: "",
+        givenName: "",
+        id: "",
+        imageUrl: null,
+        name: "",
+        type: ""
+      },
+      edit: false,
+      password: "",
+      confirmPass: "",
+      tempUser: {},
+      loaderVisible: false,
+      loaderCount: 0,
+      pushPermissionOn: pushPermission !== null ? pushPermission : false
+    };
 
     store.dispatch(updateAppbar("searchButtonVisible", false));
     store.dispatch(updateAppbar("fabVisible", false));
@@ -349,8 +346,45 @@ class Profile extends React.Component {
     this.setState({ ...this.state, loaderVisible: value });
   };
 
+  changePushPermission = (e) =>{
+    var checked = e.target.checked
+    this.setState({pushPermissionOn: checked})
+    if(checked){
+      this.subscribeUser()
+    }else{
+      ls.set("pushPermission", false)
+    }
+  }
+
+  subscribeUser = () => {
+    var self = this;
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.ready.then(function(reg) {
+  
+        reg.pushManager.subscribe({
+          userVisibleOnly: true
+        }).then(function(sub) {
+          console.log('Endpoint URL: ', sub.endpoint);
+          ls.set("pushPermission", true)
+        }).catch(function(e) {
+          if (Notification.permission === 'denied') {
+            console.warn('Permission for notifications was denied');
+            ls.set("pushPermission", false)
+            self.setState({pushPermissionOn: false})
+          } else {
+            console.log(e);
+            console.error('Unable to subscribe to push', e);
+            ls.set("pushPermission", false)
+            self.setState({pushPermissionOn: false})
+          }
+        });
+      })
+    }
+  }
+
   render() {
-    const disabled = this.state.user.type !== "firebase" || !this.state.edit;
+    const {user, edit, tempUser, password, confirmPass, pushPermissionOn, loaderVisible} = this.state
+    const disabled = user.type !== "firebase" || !edit;
     return (
       <div className="profile">
         <div
@@ -358,13 +392,13 @@ class Profile extends React.Component {
           style={{
             backgroundImage:
               "url(" +
-              (this.state.edit
-                ? this.state.tempUser.imageUrl
-                : this.state.user.imageUrl) +
+              (edit
+                ? tempUser.imageUrl
+                : user.imageUrl) +
               ")"
           }}
         />
-        {this.state.edit && (
+        {edit && (
           <Fab
             color="primary"
             aria-label="Add"
@@ -388,7 +422,7 @@ class Profile extends React.Component {
           className="name inputs"
           disabled={disabled}
           value={
-            this.state.edit ? this.state.tempUser.name : this.state.user.name
+            edit ? tempUser.name : user.name
           }
           onChange={this.handleChange.bind(this, "name")}
         />
@@ -399,11 +433,11 @@ class Profile extends React.Component {
           className="email inputs"
           disabled={disabled}
           value={
-            this.state.edit ? this.state.tempUser.email : this.state.user.email
+            edit ? tempUser.email : user.email
           }
           onChange={this.handleChange.bind(this, "email")}
         />
-        {this.state.user.type === "firebase" && this.state.edit && (
+        {user.type === "firebase" && edit && (
           <ExpansionPanel className="expansion-panel">
             <ExpansionPanelSummary expandIcon={<ExpandMoreIcon />}>
               Password
@@ -416,7 +450,7 @@ class Profile extends React.Component {
                 className="password inputs"
                 disabled={disabled}
                 type="password"
-                value={this.state.edit ? this.state.tempUser.password : this.state.password}
+                value={edit ? tempUser.password : password}
                 onChange={this.handleChange.bind(this, "newPass")}
               />
               <TextField
@@ -425,7 +459,7 @@ class Profile extends React.Component {
                 variant="outlined"
                 className="password-confirm inputs"
                 type="password"
-                value={this.state.edit ? this.state.tempUser.confirmPass : this.state.confirmPass}
+                value={edit ? tempUser.confirmPass : confirmPass}
                 onChange={this.handleChange.bind(this, "confirmPass")}
               />
             </ExpansionPanelDetails>
@@ -433,8 +467,19 @@ class Profile extends React.Component {
         )}
         <div className="teams">Squadre: (Coming soon)</div>
         <div className="friends">Amici: (Coming soon)</div>
+        <FormControlLabel
+          control={
+            <Switch
+              checked={pushPermissionOn}
+              onChange={this.changePushPermission}
+              value="pushPermission"
+              color="primary"
+            />
+          }
+          label="Abilità notifiche dell'app"
+        />
         <div className="edit-save-container">
-          {this.state.user.type === "firebase" && this.state.edit && (
+          {user.type === "firebase" && edit && (
             <Button
               variant={"outlined"}
               color="primary"
@@ -444,20 +489,20 @@ class Profile extends React.Component {
               Annulla
             </Button>
           )}
-          {this.state.user.type === "firebase" && (
+          {user.type === "firebase" && (
             <Button
               variant={"contained"}
               color="primary"
-              onClick={this.state.edit ? this.save.bind(this) : this.onEdit}
+              onClick={edit ? this.save.bind(this) : this.onEdit}
               className="buttons"
             >
-              {this.state.edit ? "Salva" : "Modifica"}
+              {edit ? "Salva" : "Modifica"}
             </Button>
           )}
         </div>
         <Dialog
           aria-labelledby="simple-dialog-title"
-          open={this.state.loaderVisible}
+          open={loaderVisible}
         >
           <div className="dialog-loader">
             <CircularProgress className="loader" />

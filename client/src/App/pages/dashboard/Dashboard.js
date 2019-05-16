@@ -126,10 +126,10 @@ class Dashboard extends React.Component {
   render() {
     var gameLive = [];
     var gameEnded = [];
-    const { loading } = this.state;
+    const { loading, games } = this.state;
 
     if (this.state != null && this.loggedIn) {
-      this.state.games.forEach((game, index) => {
+      games.forEach((game, index) => {
         if (game.live) {
           gameLive.push(game);
         } else {
@@ -146,7 +146,7 @@ class Dashboard extends React.Component {
           <React.Fragment>
             {this.state != null &&
               this.loggedIn &&
-              this.state.games.length > 0 && (
+              games.length > 0 && (
                 <h1 style={{ textAlign: "center" }}>Le mie partite:</h1>
               )}
 
@@ -186,7 +186,7 @@ class Dashboard extends React.Component {
             {/* no game in list */}
             {this.state != null &&
               this.loggedIn &&
-              this.state.games.length === 0 && (
+              games.length === 0 && (
                 <Grid
                   container
                   justify="center"

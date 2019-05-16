@@ -81,15 +81,6 @@ class FullScreenDialog extends React.Component {
           </AppBar>
           <List>
             <ListItem>
-              {/* <TextField
-                required
-                id="outlined"
-                label="Team A"
-                margin="normal"
-                variant="outlined"
-                style={{width: "100%"}}
-              /> */}
-
               <IntegrationReactSelect label="Team A" />
             </ListItem>
             <Divider />

@@ -14,44 +14,7 @@ import "firebase/database";
 import ls from "local-storage";
 import { firebaseConfig } from "../../App";
 
-// const suggestions = [
-//   { label: 'Afghanistan' },
-//   { label: 'Aland Islands' },
-//   { label: 'Albania' },
-//   { label: 'Algeria' },
-//   { label: 'American Samoa' },
-//   { label: 'Andorra' },
-//   { label: 'Angola' },
-//   { label: 'Anguilla' },
-//   { label: 'Antarctica' },
-//   { label: 'Antigua and Barbuda' },
-//   { label: 'Argentina' },
-//   { label: 'Armenia' },
-//   { label: 'Aruba' },
-//   { label: 'Australia' },
-//   { label: 'Austria' },
-//   { label: 'Azerbaijan' },
-//   { label: 'Bahamas' },
-//   { label: 'Bahrain' },
-//   { label: 'Bangladesh' },
-//   { label: 'Barbados' },
-//   { label: 'Belarus' },
-//   { label: 'Belgium' },
-//   { label: 'Belize' },
-//   { label: 'Benin' },
-//   { label: 'Bermuda' },
-//   { label: 'Bhutan' },
-//   { label: 'Bolivia, Plurinational State of' },
-//   { label: 'Bonaire, Sint Eustatius and Saba' },
-//   { label: 'Bosnia and Herzegovina' },
-//   { label: 'Botswana' },
-//   { label: 'Bouvet Island' },
-//   { label: 'Brazil' },
-//   { label: 'British Indian Ocean Territory' },
-//   { label: 'Brunei Darussalam' },
-// ];
-
-function renderInput(inputProps) {
+function renderInput(inputProps, hasDefaultValue) {
   const { InputProps, classes, ref, ...other } = inputProps;
   return (
     <TextField
@@ -69,6 +32,7 @@ function renderInput(inputProps) {
         ...InputProps
       }}
       {...other}
+      disabled={hasDefaultValue}
     />
   );
 }
@@ -106,7 +70,6 @@ renderSuggestion.propTypes = {
 };
 
 function getSuggestions(value, suggestions) {
-  console.log("suggestions", suggestions);
   const inputValue = deburr(value.trim()).toLowerCase();
   const inputLength = inputValue.length;
   let count = 0;
@@ -163,7 +126,7 @@ class DownshiftMultiple extends React.Component {
           }
         }
       }
-      console.log(allTeams);
+      
       self.setState({ ...self.state, suggestions: allTeams });
     });
   }
@@ -189,12 +152,17 @@ class DownshiftMultiple extends React.Component {
 
   handleInputChange = event => {
     this.setState({ inputValue: event.target.value });
-    store.dispatch(
-      updateCreateMatch(
-        this.props.label === "Team A" ? "teamA" : "teamB",
-        event.target.value
-      )
-    );
+    const {onChangeText} = this.props;
+    if(onChangeText){
+      onChangeText(event.target.value);
+    }else{
+      store.dispatch(
+        updateCreateMatch(
+          this.props.label === "Team A" ? "teamA" : "teamB",
+          event.target.value
+        )
+      );
+    }
   };
 
   handleChange = item => {
@@ -225,11 +193,9 @@ class DownshiftMultiple extends React.Component {
   };
 
   render() {
-    const { classes, label } = this.props;
+    const { classes, label, teamName } = this.props;
     const { inputValue, selectedItem } = this.state;
-    // console.log(this.props);
 
-    console.log("state suggestions", this.state.suggestions);
     return (
       <Downshift
         id="downshift-multiple"
@@ -252,10 +218,10 @@ class DownshiftMultiple extends React.Component {
                 onChange: this.handleInputChange,
                 onKeyDown: this.handleKeyDown,
                 label: label,
-                value: selectedItem[0]
+                value: teamName ? teamName : selectedItem[0]
                 // placeholder: 'Select multiple countries',
               })
-            })}
+            }, teamName ? true : false)}
             {isOpen ? (
               <Paper className={classes.paper} square>
                 {getSuggestions(inputValue2, this.state.suggestions).map(
@@ -309,11 +275,11 @@ const styles = theme => ({
 });
 
 function IntegrationDownshift(props) {
-  const { classes } = props;
+  const { classes, label, teamName, onChangeText } = props;
 
   return (
     <div className={classes.root}>
-      <DownshiftMultiple classes={classes} label={props.label} />
+      <DownshiftMultiple classes={classes} label={label} teamName={teamName} onChangeText={onChangeText}/>
     </div>
   );
 }

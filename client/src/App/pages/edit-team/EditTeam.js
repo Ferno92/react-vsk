@@ -7,7 +7,8 @@ import {
   PhotoCamera,
   GroupAdd,
   Edit,
-  Done
+  Done,
+  Add
 } from "@material-ui/icons";
 import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
 import {
@@ -47,6 +48,8 @@ import ImageCompressor from "image-compressor.js";
 import EditFormationDialog from "../../components/edit-formation-dialog/EditFormationDialog";
 import FormationCard from "../../components/formation-card/FormationCard";
 import ContributorCard from "../../components/contributor-card/ContributorCard";
+import AddCalendarDialog from "../../components/add-calendar-dialog/AddCalendarDialog";
+import CalendarCard from "../../components/calendar-card/CalendarCard";
 
 const styles = theme => ({
   grow: {
@@ -77,11 +80,15 @@ class EditTeam extends React.Component {
     deleteDialogTitle: "",
     deleteDialogText: "",
     dialogOptions: null,
-    dialogType: ""
+    dialogType: "",
+    openCalendarDialog: false,
+    calendar: []
   };
   teamRef = null;
   contributorsRef = null;
   usersRef = null;
+  teamRefUrl = '';
+  calendarRef = null;
 
   componentDidMount() {
     store.dispatch(updateCreateMatch("save", false));
@@ -95,12 +102,12 @@ class EditTeam extends React.Component {
     if (this.props.match.params.owner) {
       userId = this.props.match.params.owner;
     }
+    this.teamRefUrl = "users/" + userId + "/teams/" + this.props.match.params.id
     this.teamRef = this.db.ref(
-      "users/" + userId + "/teams/" + this.props.match.params.id
+      this.teamRefUrl
     );
     var self = this;
     this.teamRef.on("value", snapshot => {
-      console.log("team", snapshot.val());
       if (snapshot.val() === null) {
         store.dispatch(
           showMessageAction(
@@ -131,10 +138,26 @@ class EditTeam extends React.Component {
           id: childSnapshot.key
         });
       });
-      console.log(tempArray);
       self.setState({ usersInfoList: tempArray });
     });
 
+    
+    this.calendarRef = this.db.ref("/calendar"
+    );
+
+    this.calendarRef.on("value", snapshot =>{
+      var tempCalendar = [];
+      snapshot.forEach(childSnapshot => {
+        var event = childSnapshot.val();
+        event.key = childSnapshot.key;
+        tempCalendar.push(event);
+      });
+      console.log("calendarRef", tempCalendar);
+      this.setState({calendar: tempCalendar});
+    })
+    Notification.requestPermission(function(status) {
+      console.log('Notification permission status:', status);
+  });
     // const Http = new XMLHttpRequest();
     // const url =
     //   "https://www.cpvolley.it/csi-forli/campionato/1412/misto-open-promozione";
@@ -154,6 +177,9 @@ class EditTeam extends React.Component {
     }
     if (this.usersRef !== null) {
       this.usersRef.off("value");
+    }
+    if (this.calendarRef !== null) {
+      this.calendarRef.off("value");
     }
   }
 
@@ -586,32 +612,77 @@ class EditTeam extends React.Component {
     this.props.history.push("/myteams");
   };
 
+  addCalendarEvent = () => {
+  };
+
+  toggleCalendarDialog = () => {
+    const {openCalendarDialog} = this.state;
+    this.setState({openCalendarDialog: !openCalendarDialog});
+  };
+
+  addGameOnCalendar = (date, where, opponents) =>{
+    console.log(date, where, opponents);
+    this.setState({openCalendarDialog: false});
+    this.calendarRef.push({date: date.toString(), where: where, opponents: opponents});
+  }
+
+  onClickDate = ()=>{
+    console.log("onClickDate", Date.now());
+    if (Notification.permission == 'granted') {
+      navigator.serviceWorker.getRegistration().then(function(reg) {
+        var options = {
+          body: 'Here is a notification body!',
+          icon: 'public/icon.png',
+          vibrate: [100, 50, 100],
+          data: {
+            dateOfArrival: 1557991551000,
+            primaryKey: 1
+          },
+          actions: [
+            {action: 'explore', title: 'Explore this new world',
+              icon: 'images/checkmark.png'},
+            {action: 'close', title: 'Close notification',
+              icon: 'images/xmark.png'},
+          ]
+        };
+        reg.showNotification('Hello world!', options);
+      });
+    }
+  }
+
   render() {
     const { classes } = this.props;
-    const { usersInfoList } = this.state;
-    var players =
-      this.state !== null && this.state.team !== null && this.state.team.players
-        ? this.state.team.players
-        : [];
+    const {
+      usersInfoList,
+      readOnly,
+      team,
+      editingPlayer,
+      contributors,
+      editName,
+      editFormationOpen,
+      deleteDialogOpen,
+      deleteDialogText,
+      deleteDialogTitle,
+      editPlayerDialogOpen,
+      currentEditFormation,
+      tempEditingPlayer,
+      openCalendarDialog,
+      calendar
+    } = this.state;
+    var players = team !== null && team.players ? team.players : [];
     var formations =
-      this.state !== null &&
-      this.state.team !== null &&
-      this.state.team.formations !== null &&
-      this.state.team.formations !== undefined
-        ? this.state.team.formations
+      team !== null && team.formations !== null && team.formations !== undefined
+        ? team.formations
         : [];
     players.sort(function(a, b) {
       return parseInt(a.number) - parseInt(b.number);
     });
-    var onEditPlayer = this.state.editingPlayer
-      ? this.state.editingPlayer.onEdit
-      : false;
+    var onEditPlayer = editingPlayer ? editingPlayer.onEdit : false;
 
     var isOwner =
       this.props.match.params.owner === undefined ||
       this.props.match.params.owner === ls.get("user").id;
-    var isAsking =
-      this.state.contributors.asking.indexOf(ls.get("user").id) >= 0;
+    var isAsking = contributors.asking.indexOf(ls.get("user").id) >= 0;
     return (
       <div>
         <AppBar position="fixed" color="primary">
@@ -628,7 +699,7 @@ class EditTeam extends React.Component {
               color="inherit"
               className={classes.grow + " title-ellipsis"}
             >
-              {this.state.team ? this.state.team.name : ""}
+              {team ? team.name : ""}
             </Typography>
             {isOwner && (
               <IconButton
@@ -646,7 +717,7 @@ class EditTeam extends React.Component {
           </Toolbar>
         </AppBar>
         <div className="team-info">
-          {this.state.team !== null && this.state.readOnly ? (
+          {team !== null && readOnly ? (
             isAsking ? (
               <div className="asking-message">
                 La tua richiesta di collaborazione è stata inviata
@@ -659,10 +730,10 @@ class EditTeam extends React.Component {
           ) : (
             ""
           )}
-          {!this.state.editName && (
+          {!editName && (
             <h1 className="team-title">
-              {this.state.team ? this.state.team.name : ""}
-              {!this.state.readOnly && (
+              {team ? team.name : ""}
+              {!readOnly && (
                 <Button
                   variant="outlined"
                   className="edit-team-name"
@@ -674,14 +745,14 @@ class EditTeam extends React.Component {
             </h1>
           )}
 
-          {this.state.editName && (
+          {editName && (
             <div>
               <TextField
                 label="Nome squadra"
                 margin="normal"
                 variant="outlined"
                 className="name inputs"
-                value={this.state.team ? this.state.team.name : ""}
+                value={team ? team.name : ""}
                 onChange={this.onChangeName.bind(this)}
               />
               <Button
@@ -696,13 +767,10 @@ class EditTeam extends React.Component {
           <div
             className="team-image"
             style={{
-              backgroundImage:
-                "url(" +
-                (this.state.team ? this.state.team.pictureUrl : "") +
-                ")"
+              backgroundImage: "url(" + (team ? team.pictureUrl : "") + ")"
             }}
           >
-            {!this.state.readOnly && (
+            {!readOnly && (
               <Fab
                 color="primary"
                 aria-label="Add"
@@ -729,7 +797,7 @@ class EditTeam extends React.Component {
               className="expansion-details"
               style={{ display: "block" }}
             >
-              {!this.state.readOnly && (
+              {!readOnly && (
                 <div style={{ margin: "0 auto", width: "fit-content" }}>
                   <Button onClick={this.addPlayer.bind(this, null)}>
                     <PersonAdd /> Aggiungi giocatore
@@ -779,7 +847,7 @@ class EditTeam extends React.Component {
               style={{ display: "block" }}
             >
               <div style={{ margin: "0 auto", width: "fit-content" }}>
-                {!this.state.readOnly && (
+                {!readOnly && (
                   <Button
                     onClick={this.addFormation.bind(this, null)}
                     style={{ marginBottom: "5px" }}
@@ -797,7 +865,7 @@ class EditTeam extends React.Component {
                     formation={formation}
                     addFormation={this.addFormation}
                     key={index}
-                    players={this.state.team.players}
+                    players={team.players}
                   />
                 );
               })}
@@ -805,13 +873,13 @@ class EditTeam extends React.Component {
           </ExpansionPanel>
           <ExpansionPanel className="expansion-panel" color="primary">
             <ExpansionPanelSummary expandIcon={<ExpandMoreIcon />}>
-              Collaboratori ({this.state.contributors.accepted.length})
+              Collaboratori ({contributors.accepted.length})
             </ExpansionPanelSummary>
             <ExpansionPanelDetails
               className="expansion-details"
               style={{ display: "block" }}
             >
-              {this.state.contributors.accepted.map((accepted, index) => {
+              {contributors.accepted.map((accepted, index) => {
                 var users = usersInfoList.filter(usersInfo => {
                   return usersInfo.id === accepted;
                 });
@@ -847,13 +915,13 @@ class EditTeam extends React.Component {
           {isOwner && (
             <ExpansionPanel className="expansion-panel" color="primary">
               <ExpansionPanelSummary expandIcon={<ExpandMoreIcon />}>
-                Richieste ({this.state.contributors.asking.length})
+                Richieste ({contributors.asking.length})
               </ExpansionPanelSummary>
               <ExpansionPanelDetails
                 className="expansion-details"
                 style={{ display: "block" }}
               >
-                {this.state.contributors.asking.map((asking, index) => {
+                {contributors.asking.map((asking, index) => {
                   var users = usersInfoList.filter(usersInfo => {
                     return usersInfo.id === asking;
                   });
@@ -887,36 +955,52 @@ class EditTeam extends React.Component {
               </ExpansionPanelDetails>
             </ExpansionPanel>
           )}
+          <ExpansionPanel className="expansion-panel" color="primary">
+            <ExpansionPanelSummary expandIcon={<ExpandMoreIcon />}>
+              Calendario ({calendar.length})
+            </ExpansionPanelSummary>
+            <ExpansionPanelDetails
+              className="expansion-details"
+              style={{ display: "block" }}
+            >
+              {!readOnly && (
+                <div style={{ margin: "0 auto", width: "fit-content" }}>
+                  <Button onClick={this.toggleCalendarDialog.bind(this)}>
+                    <Add /> Aggiungi partita a calendario
+                  </Button>
+                </div>
+              )}
+              {calendar.map((item, index) => 
+                <CalendarCard key={item.key} date={item.date} onClickDate={this.onClickDate}/>)}
+            </ExpansionPanelDetails>
+          </ExpansionPanel>
 
-          {this.state.team !== null &&
-            !isAsking &&
-            !isOwner &&
-            this.state.readOnly && (
-              <Button
-                className="ask-contribution"
-                variant="contained"
-                color="primary"
-                onClick={this.askContribution.bind(this)}
-              >
-                Richiedi collaborazione
-              </Button>
-            )}
+          {team !== null && !isAsking && !isOwner && readOnly && (
+            <Button
+              className="ask-contribution"
+              variant="contained"
+              color="primary"
+              onClick={this.askContribution.bind(this)}
+            >
+              Richiedi collaborazione
+            </Button>
+          )}
 
           {/* EditFormationDialog */}
           <EditFormationDialog
-            open={this.state.editFormationOpen}
-            formation={this.state.currentEditFormation}
+            open={editFormationOpen}
+            formation={currentEditFormation}
             closeEditFormation={this.closeEditFormation.bind(this)}
             playersList={players}
             saveFormation={this.saveFormation}
             deleteFormation={this.deleteFormation}
-            readOnly={this.state.readOnly}
+            readOnly={readOnly}
           />
         </div>
         {/* Dialog edit */}
         <Dialog
           fullScreen
-          open={this.state.editPlayerDialogOpen}
+          open={editPlayerDialogOpen}
           onClose={this.onCloseEditPlayer.bind(this)}
           TransitionComponent={Transition}
         >
@@ -930,27 +1014,25 @@ class EditTeam extends React.Component {
                 <Close />
               </IconButton>
               <Typography variant="h6" color="inherit" style={{ flex: 1 }}>
-                {this.state.editingPlayer && this.state.editingPlayer.id !== ""
+                {editingPlayer && editingPlayer.id !== ""
                   ? "Modifica "
                   : "Crea nuovo giocatore"}
-                {this.state.editingPlayer ? this.state.editingPlayer.name : ""}
+                {editingPlayer ? editingPlayer.name : ""}
               </Typography>
-              {!this.state.readOnly &&
-                this.state.editingPlayer &&
-                this.state.editingPlayer.id !== "" && (
-                  <IconButton
-                    color="inherit"
-                    onClick={this.toggleDeleteDialog.bind(
-                      this,
-                      "Elimina giocatore",
-                      "Sei sicuro di voler eliminare questo giocatore?",
-                      "delete"
-                    )}
-                    aria-label="Delete"
-                  >
-                    <Delete />
-                  </IconButton>
-                )}
+              {!readOnly && editingPlayer && editingPlayer.id !== "" && (
+                <IconButton
+                  color="inherit"
+                  onClick={this.toggleDeleteDialog.bind(
+                    this,
+                    "Elimina giocatore",
+                    "Sei sicuro di voler eliminare questo giocatore?",
+                    "delete"
+                  )}
+                  aria-label="Delete"
+                >
+                  <Delete />
+                </IconButton>
+              )}
             </Toolbar>
           </AppBar>
           <div style={{ padding: "30px" }}>
@@ -961,10 +1043,10 @@ class EditTeam extends React.Component {
                 type="number"
                 disabled={!onEditPlayer}
                 value={
-                  this.state.editingPlayer
-                    ? this.state.editingPlayer.onEdit
-                      ? this.state.tempEditingPlayer.number
-                      : this.state.editingPlayer.number
+                  editingPlayer
+                    ? editingPlayer.onEdit
+                      ? tempEditingPlayer.number
+                      : editingPlayer.number
                     : ""
                 }
                 onChange={this.onChangePlayerInfo.bind(this, "number")}
@@ -975,10 +1057,10 @@ class EditTeam extends React.Component {
               placeholder="Nome giocatore"
               disabled={!onEditPlayer}
               value={
-                this.state.editingPlayer
-                  ? this.state.editingPlayer.onEdit
-                    ? this.state.tempEditingPlayer.name
-                    : this.state.editingPlayer.name
+                editingPlayer
+                  ? editingPlayer.onEdit
+                    ? tempEditingPlayer.name
+                    : editingPlayer.name
                   : ""
               }
               onChange={this.onChangePlayerInfo.bind(this, "name")}
@@ -1057,7 +1139,7 @@ class EditTeam extends React.Component {
                   Annulla
                 </Button>
               )}
-              {!this.state.readOnly && (
+              {!readOnly && (
                 <Button
                   variant={"contained"}
                   color="primary"
@@ -1075,11 +1157,17 @@ class EditTeam extends React.Component {
           </div>
         </Dialog>
         <YesNoDialog
-          open={this.state.deleteDialogOpen}
+          open={deleteDialogOpen}
           noAction={this.toggleDeleteDialog.bind(this, "", "", "", null)}
           yesAction={this.dialogYesAction}
-          dialogText={this.state.deleteDialogText}
-          dialogTitle={this.state.deleteDialogTitle}
+          dialogText={deleteDialogText}
+          dialogTitle={deleteDialogTitle}
+        />
+        <AddCalendarDialog
+        open={openCalendarDialog}
+        onClose={this.toggleCalendarDialog}
+        teamName={team ? team.name : ''}
+        addOnCalendar={this.addGameOnCalendar}
         />
       </div>
     );

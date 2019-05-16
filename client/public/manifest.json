@@ -3,6 +3,7 @@
   "name": "Realtime volley score",
   "start_url": "/",
   "display": "standalone",
+  "gcm_sender_id": "522350313041",
   "icons": [
     {
       "src": "favicon.ico",
