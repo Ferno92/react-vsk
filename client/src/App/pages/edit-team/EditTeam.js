@@ -631,18 +631,18 @@ class EditTeam extends React.Component {
     if (Notification.permission == 'granted') {
       navigator.serviceWorker.getRegistration().then(function(reg) {
         var options = {
-          body: 'Here is a notification body!',
-          icon: 'public/icon.png',
+          body: 'Hey questo è un evento bellissimo!',
+          icon: '../public/icon.png',
           vibrate: [100, 50, 100],
           data: {
             dateOfArrival: 1557991551000,
             primaryKey: 1
           },
           actions: [
-            {action: 'explore', title: 'Explore this new world',
-              icon: 'images/checkmark.png'},
-            {action: 'close', title: 'Close notification',
-              icon: 'images/xmark.png'},
+            {action: 'explore', title: 'Open',
+              icon: '../images/done.svg'},
+            {action: 'close', title: 'Close',
+              icon: '../images/clear.svg'},
           ]
         };
         reg.showNotification('Hello world!', options);
