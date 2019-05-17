@@ -1,11 +1,3 @@
-const admin = require("firebase-admin");
-const serviceAccount = require("C:/projects/personal/react-vsk/adminsdk-key.json");
-const firebase = admin.initializeApp({
-  credential: admin.credential.cert(serviceAccount),
-  databaseURL: "https://react-pwa-2280e.firebaseio.com"
-});
-const db = admin.database();
-const ref = db.ref("/calendar");
 const express = require('express');
 const path = require('path');
 const secure = require('ssl-express-www');
