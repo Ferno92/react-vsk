@@ -14,6 +14,8 @@ const express = require("express");
 const path = require("path");
 const secure = require("ssl-express-www");
 const messaging = admin.messaging();
+let registrationTokens = [];
+const topic = 'calendar';
 
 
 const app = express();
@@ -31,11 +33,12 @@ app.get("/api/getList", (req, res) => {
 
 //
 app.post("/api/settoken", (req, res) => {
-  console.log("settoken");
-  req.on("data", function(data) {
-    console.log("settoken data", data);
-  });
+  console.log("settoken", req.params.value);
   res.json('OK');
+  if(registrationTokens.valueOf(req.params.value) < 0){
+    registrationTokens.push(req.params.value);
+    subscribeToTopic();
+  }
 });
 
 // Handles any requests that don't match the ones above
@@ -74,9 +77,10 @@ ref.on(
 
           var message = {
             data: {
-              score: "850",
-              time: "2:45"
-            }
+              score: "3 - 1",
+              team: "IGNORANTEAM!!"
+            },
+            topic: topic
           };
 
           // Send a message to the device corresponding to the provided
@@ -90,7 +94,7 @@ ref.on(
             .catch(error => {
               console.log("Error sending message:", error);
             });
-        }, 5000); //MOCK ms
+        }, ms); //MOCK ms
       }
     });
   },
@@ -98,4 +102,21 @@ ref.on(
     console.log("The read failed: " + errorObject.code);
   }
 );
+
+//TODO: create ref to add registration tokens on firebase & unsubscribe clients when update token
+
+
+function subscribeToTopic(){
+  messaging.subscribeToTopic(registrationTokens, topic)
+  .then(function(response) {
+    // See the MessagingTopicManagementResponse reference documentation
+    // for the contents of response.
+    console.log('Successfully subscribed to topic:', response);
+  })
+  .catch(function(error) {
+    console.log('Error subscribing to topic:', error);
+  });
+}
+
+
 console.log("App is listening on port " + port);
