@@ -6,6 +6,18 @@ const firebase = admin.initializeApp({
 });
 const db = admin.database();
 const ref = db.ref("/calendar");
+var webPush = require('web-push');
+var pushSubscription = {"endpoint":"https://android.googleapis.com/gcm/send/f1LsxkKphfQ:APA91bFUx7ja4BK4JVrNgVjpg1cs9lGSGI6IMNL4mQ3Xe6mDGxvt_C_gItKYJI9CAx5i_Ss6cmDxdWZoLyhS2RJhkcv7LeE6hkiOsK6oBzbyifvKCdUYU7ADIRBiYNxIVpLIYeZ8kq_A",
+"keys":{"p256dh":"BLc4xRzKlKORKWlbdgFaBrrPK3ydWAHo4M0gs0i1oEKgPpWC5cW8OCzVrOQRv-1npXRWk8udnW3oYhIO4475rds=", "auth":"5I2Bu2oKdyy9CwL8QVF0NQ=="}};
+
+var options = {
+  gcmAPIKey: ' AIzaSyDO4KLmlNjHJ88eV6bOpH2hHptrBkcD1ko',
+  TTL: 60
+};
+// https://www.npmjs.com/package/node-schedule
+// https://developers.google.com/web/ilt/pwa/introduction-to-push-notifications
+// https://blog.sessionstack.com/how-javascript-works-the-mechanics-of-web-push-notifications-290176c5c55d
+// https://web-push-book.gauntface.com/demos/notification-examples/
 const express = require('express');
 const path = require('path');
 const secure = require('ssl-express-www');
