@@ -107,7 +107,6 @@ class App extends Component {
     }
     const self = this;
     const messaging = firebase.messaging();
-    messaging.useServiceWorker(registration);
     messaging
       .requestPermission()
       .then(function() {
