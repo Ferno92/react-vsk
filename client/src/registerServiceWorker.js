@@ -73,7 +73,7 @@ function registerValidSW(swUrl) {
         };
         window.addEventListener('push', function(e) {
           var body;
-          console.log('push event!!!!');
+          console.log('push event!!!!', e);
           if (e.data) {
             body = e.data.text();
           } else {

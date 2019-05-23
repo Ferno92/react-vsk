@@ -1,5 +1,5 @@
 const admin = require("firebase-admin");
-const serviceAccount = require("C:/projects/personal/react-vsk/adminsdk-key.json");
+const serviceAccount = require("./adminsdk-key.json");
 const firebase = admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
   databaseURL: "https://react-pwa-2280e.firebaseio.com"
@@ -53,13 +53,14 @@ ref.on(
         console.log(
           "remaining " + minutes + ":" + (seconds < 10 ? "0" : "") + seconds
         );
-        // setTimeout(function(){
-        //   webPush.sendNotification(
-        //     pushSubscription,
-        //     'opponents: ' + childSnapshot.val().opponents,
-        //     options
-        //   );
-        // }, ms)
+        setTimeout(function(){
+          console.log('send push notification')
+          webPush.sendNotification(
+            pushSubscription,
+            'opponents: ' + childSnapshot.val().opponents,
+            options
+          );
+        }, ms)
       }
     });
   },
