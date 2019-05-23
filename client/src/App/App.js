@@ -85,9 +85,10 @@ class App extends Component {
     }
     library.add(faTrophy);
 
+    const self = this;
     window.addEventListener("registrationSW", function(e) {
       console.log("EventListener registrationSW");
-      this.requestMessagingPermission(e.registration);
+      self.requestMessagingPermission(e.registration);
     });
   }
 
