@@ -121,11 +121,12 @@ class App extends Component {
   initializeFCMToken = (registration) => {
     const messaging = firebase.messaging();
     messaging.useServiceWorker(registration);
+    const self = this;
     messaging
       .getToken()
       .then(function(currentToken) {
         if (currentToken) {
-          this.sendTokenToServer(currentToken);
+          self.sendTokenToServer(currentToken);
           console.log("DEBUG!!!! token: " + currentToken);
           // updateUIForPushEnabled(currentToken);
         } else {
