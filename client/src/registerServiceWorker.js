@@ -52,7 +52,7 @@ function registerValidSW(swUrl) {
       registrationSW = registration;
 
       var evt = new CustomEvent("registrationSW", {
-        registration: registration
+        detail: registration
       });
 
       window.dispatchEvent(evt);

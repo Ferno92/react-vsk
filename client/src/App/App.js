@@ -88,7 +88,7 @@ class App extends Component {
     const self = this;
     window.addEventListener("registrationSW", function(e) {
       console.log("EventListener registrationSW");
-      self.requestMessagingPermission(e.registration);
+      self.requestMessagingPermission(e.detail);
     });
   }
 
