@@ -85,7 +85,10 @@ class App extends Component {
     }
     library.add(faTrophy);
 
-    this.requestMessagingPermission();
+    window.addEventListener("registrationSW", function(e) {
+      console.log("EventListener registrationSW");
+      this.requestMessagingPermission(e.registration);
+    });
   }
 
   componentDidMount() {
@@ -97,25 +100,27 @@ class App extends Component {
     teamService.clear();
   }
 
-  requestMessagingPermission = () => {
+  requestMessagingPermission = (registration) => {
     if (!firebase.apps.length) {
       firebase.initializeApp(firebaseConfig);
     }
     const self = this;
     const messaging = firebase.messaging();
+    messaging.useServiceWorker(registration);
     messaging
       .requestPermission()
       .then(function() {
         console.log("Notification permission granted.");
-        self.initializeFCMToken();
+        self.initializeFCMToken(registration);
       })
       .catch(function(err) {
         console.log("Unable to get permission to notify. ", err);
       });
   };
 
-  initializeFCMToken = () => {
+  initializeFCMToken = (registration) => {
     const messaging = firebase.messaging();
+    messaging.useServiceWorker(registration);
     messaging
       .getToken()
       .then(function(currentToken) {

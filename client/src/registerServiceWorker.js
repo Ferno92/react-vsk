@@ -8,6 +8,8 @@
 // To learn more about the benefits of this model, read https://goo.gl/KwvDNy.
 // This link also includes instructions on opting out of this behavior.
 
+var registrationSW = null;
+
 const isLocalhost = Boolean(
   window.location.hostname === "localhost" ||
     // [::1] is the IPv6 localhost address.
@@ -47,6 +49,14 @@ function registerValidSW(swUrl) {
   navigator.serviceWorker
     .register(swUrl)
     .then(registration => {
+      registrationSW = registration;
+
+      var evt = new CustomEvent("registrationSW", {
+        registration: registration
+      });
+
+      window.dispatchEvent(evt);
+
       registration.onupdatefound = () => {
         const installingWorker = registration.installing;
         installingWorker.onstatechange = () => {
@@ -71,59 +81,66 @@ function registerValidSW(swUrl) {
             }
           }
         };
-        window.addEventListener('push', function(e) {
+        window.addEventListener("push", function(e) {
           var body;
-          console.log('push event!!!!', e);
+          console.log("push event!!!!", e);
           if (e.data) {
             body = e.data.text();
           } else {
-            body = 'Push message no payload';
+            body = "Push message no payload";
           }
-        
+
           var options = {
             body: body,
-            icon: 'images/notification-flat.png',
+            icon: "images/notification-flat.png",
             vibrate: [100, 50, 100],
             data: {
               dateOfArrival: Date.now(),
               primaryKey: 1
             },
             actions: [
-              {action: 'explore', title: 'Explore this new world',
-                icon: 'images/checkmark.png'},
-              {action: 'close', title: 'I don\'t want any of this',
-                icon: 'images/xmark.png'},
+              {
+                action: "explore",
+                title: "Explore this new world",
+                icon: "images/checkmark.png"
+              },
+              {
+                action: "close",
+                title: "I don't want any of this",
+                icon: "images/xmark.png"
+              }
             ]
           };
           e.waitUntil(
-            window.registration.showNotification('Push Notification', options)
+            window.registration.showNotification("Push Notification", options)
           );
         });
 
-        window.addEventListener('notificationclick', function(event) {
-          let url = 'https://react-vsk.herokuapp.com/';
-          console.log('notificationclick event', event, window.clients);
+        window.addEventListener("notificationclick", function(event) {
+          let url = "https://react-vsk.herokuapp.com/";
+          console.log("notificationclick event", event, window.clients);
           event.notification.close(); // Android needs explicit close.
-          if(window.clients){
+          if (window.clients) {
             event.waitUntil(
-            window.clients.matchAll({type: 'window'}).then( windowClients => {
-                // Check if there is already a window/tab open with the target URL
-                for (var i = 0; i < windowClients.length; i++) {
+              window.clients
+                .matchAll({ type: "window" })
+                .then(windowClients => {
+                  // Check if there is already a window/tab open with the target URL
+                  for (var i = 0; i < windowClients.length; i++) {
                     var client = windowClients[i];
                     // If so, just focus it.
-                    if (client.url === url && 'focus' in client) {
-                        return client.focus();
+                    if (client.url === url && "focus" in client) {
+                      return client.focus();
                     }
-                }
-                // If not, then open the target URL in a new window/tab.
-                if (window.clients.openWindow) {
+                  }
+                  // If not, then open the target URL in a new window/tab.
+                  if (window.clients.openWindow) {
                     return window.clients.openWindow(url);
-                }
-            })
-        );
+                  }
+                })
+            );
           }
-          
-      });
+        });
       };
     })
     .catch(error => {
