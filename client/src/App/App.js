@@ -12,7 +12,8 @@ import SearchLive from "./pages/search-live/SearchLive";
 import store from "./store/store";
 import { updateLoggedUser } from "./actions/actions";
 import "firebase/auth";
-import firebase from "firebase/app";
+import firebase from "firebase";
+// import firebaseBase from 'firebase';
 import Profile from "./pages/profile/Profile";
 import MyTeams from "./pages/my-teams/MyTeams";
 //font awesome region
@@ -22,6 +23,7 @@ import { faTrophy } from "@fortawesome/free-solid-svg-icons";
 import EditTeam from "./pages/edit-team/EditTeam";
 import TeamService from "./service/TeamService";
 import NoMatch from "./pages/no-match/NoMatch";
+import register from "../registerServiceWorker";
 //end font awesome region
 
 export const theme = createMuiTheme({
@@ -82,6 +84,8 @@ class App extends Component {
       store.dispatch(updateLoggedUser(true));
     }
     library.add(faTrophy);
+
+    this.initializeFCMToken();
   }
 
   componentDidMount() {
@@ -91,6 +95,40 @@ class App extends Component {
 
   componentWillUnmount() {
     teamService.clear();
+  }
+
+  initializeFCMToken = () => {
+    
+    if (!firebase.apps.length) {
+      firebase.initializeApp(firebaseConfig);
+    }
+    const messaging = firebase.messaging();
+    messaging.getToken().then(function(currentToken) {
+      if (currentToken) {
+        this.sendTokenToServer(currentToken);
+        console.log('DEBUG!!!! token: ' + currentToken);
+        // updateUIForPushEnabled(currentToken);
+      } else {
+        // Show permission request.
+        console.log('No Instance ID token available. Request permission to generate one.');
+        // Show permission UI.
+        // updateUIForPushPermissionRequired();
+      }
+    }).catch(function(err) {
+      console.log('An error occurred while retrieving token. ', err);
+    });
+    
+  }
+
+  sendTokenToServer = (token) =>{
+    var xhr = new XMLHttpRequest();
+    xhr.open("POST", 'https://react-vsk.herokuapp.com', true);
+    xhr.setRequestHeader("Content-Type", "application/json");
+    xhr.send(
+      JSON.stringify({
+        value: token
+      })
+    );
   }
 
   loginSuccess = () => {
