@@ -145,7 +145,7 @@ class App extends Component {
 
   sendTokenToServer = token => {
     var xhr = new XMLHttpRequest();
-    xhr.open("POST", "https://react-vsk.herokuapp.com", true);
+    xhr.open("POST", "/api/settoken", true);
     xhr.setRequestHeader("Content-Type", "application/json");
     xhr.send(
       JSON.stringify({

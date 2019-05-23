@@ -14,30 +14,7 @@ const express = require("express");
 const path = require("path");
 const secure = require("ssl-express-www");
 const messaging = admin.messaging();
-var http = require("http");
 
-
-
-http.createServer(function(req, res) {
-  console.log('createServer', req.method);
-  if (req.method == "POST") {
-    console.log("POST");
-    var body = "";
-    req.on("data", function(data) {
-      body += data;
-      console.log("Partial body: " + body);
-    });
-    req.on("end", function() {
-      console.log("Body: " + body);
-    });
-    res.writeHead(200, { "Content-Type": "text/html" });
-    res.end('callback(\'{"msg": "OK"}\')');
-  } else {
-    console.log("GET");
-    res.writeHead(200, { "Content-Type": "text/html" });
-    res.end('callback(\'{"msg": "OK"}\')');
-  }
-}).listen();
 
 const app = express();
 app.use(secure);
@@ -50,6 +27,15 @@ app.get("/api/getList", (req, res) => {
   var list = ["item1", "item2", "item3"];
   res.json(list);
   console.log("Sent list of items");
+});
+
+//
+app.post("/api/settoken", (req, res) => {
+  console.log("settoken");
+  req.on("data", function(data) {
+    console.log("settoken data", data);
+  });
+  res.json('OK');
 });
 
 // Handles any requests that don't match the ones above
