@@ -85,7 +85,7 @@ class App extends Component {
     }
     library.add(faTrophy);
 
-    this.initializeFCMToken();
+    this.requestMessagingPermission();
   }
 
   componentDidMount() {
@@ -97,39 +97,56 @@ class App extends Component {
     teamService.clear();
   }
 
-  initializeFCMToken = () => {
-    
+  requestMessagingPermission = () => {
     if (!firebase.apps.length) {
       firebase.initializeApp(firebaseConfig);
     }
+    const self = this;
     const messaging = firebase.messaging();
-    messaging.getToken().then(function(currentToken) {
-      if (currentToken) {
-        this.sendTokenToServer(currentToken);
-        console.log('DEBUG!!!! token: ' + currentToken);
-        // updateUIForPushEnabled(currentToken);
-      } else {
-        // Show permission request.
-        console.log('No Instance ID token available. Request permission to generate one.');
-        // Show permission UI.
-        // updateUIForPushPermissionRequired();
-      }
-    }).catch(function(err) {
-      console.log('An error occurred while retrieving token. ', err);
-    });
-    
-  }
+    messaging
+      .requestPermission()
+      .then(function() {
+        console.log("Notification permission granted.");
+        self.initializeFCMToken();
+      })
+      .catch(function(err) {
+        console.log("Unable to get permission to notify. ", err);
+      });
+  };
 
-  sendTokenToServer = (token) =>{
+  initializeFCMToken = () => {
+    const messaging = firebase.messaging();
+    messaging
+      .getToken()
+      .then(function(currentToken) {
+        if (currentToken) {
+          this.sendTokenToServer(currentToken);
+          console.log("DEBUG!!!! token: " + currentToken);
+          // updateUIForPushEnabled(currentToken);
+        } else {
+          // Show permission request.
+          console.log(
+            "No Instance ID token available. Request permission to generate one."
+          );
+          // Show permission UI.
+          // updateUIForPushPermissionRequired();
+        }
+      })
+      .catch(function(err) {
+        console.log("An error occurred while retrieving token. ", err);
+      });
+  };
+
+  sendTokenToServer = token => {
     var xhr = new XMLHttpRequest();
-    xhr.open("POST", 'https://react-vsk.herokuapp.com', true);
+    xhr.open("POST", "https://react-vsk.herokuapp.com", true);
     xhr.setRequestHeader("Content-Type", "application/json");
     xhr.send(
       JSON.stringify({
         value: token
       })
     );
-  }
+  };
 
   loginSuccess = () => {
     this.child.current.showMessage("success", "Login effettuato con successo!");
