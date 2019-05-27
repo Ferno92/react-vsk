@@ -33,7 +33,7 @@ app.get("/api/getList", (req, res) => {
 
 //
 app.post("/api/settoken", (req, res) => {
-  console.log("settoken", req.params.value);
+  console.log("settoken", JSON.stringify(req.params), JSON.stringify(req.body)); 
   res.json('OK');
   if(registrationTokens.valueOf(req.params.value) < 0){
     registrationTokens.push(req.params.value);
