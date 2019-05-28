@@ -19,6 +19,11 @@ const topic = 'calendar';
 
 
 const app = express();
+app.configure(function(){
+  app.use(express.bodyParser());
+  app.use(app.router);
+});
+
 app.use(secure);
 
 // Serve the static files from the React app
@@ -33,7 +38,16 @@ app.get("/api/getList", (req, res) => {
 
 //
 app.post("/api/settoken", (req, res) => {
-  console.log("settoken", JSON.stringify(req.params), JSON.stringify(req.body)); 
+  console.log("settoken POST", JSON.stringify(req)); 
+  res.json('OK');
+  if(registrationTokens.valueOf(req.params.value) < 0){
+    registrationTokens.push(req.params.value);
+    subscribeToTopic();
+  }
+});
+
+app.get("/api/settoken", (req, res) => {
+  console.log("settoken GET", JSON.stringify(req) ); 
   res.json('OK');
   if(registrationTokens.valueOf(req.params.value) < 0){
     registrationTokens.push(req.params.value);
