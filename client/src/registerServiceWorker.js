@@ -8,8 +8,12 @@
 // To learn more about the benefits of this model, read https://goo.gl/KwvDNy.
 // This link also includes instructions on opting out of this behavior.
 import firebase from 'firebase';
+import firebaseConfig from './App/App'
 
 const messaging = firebase.messaging();
+if (!firebase.apps.length) {
+  firebase.initializeApp(firebaseConfig);
+}
 var registrationSW = null;
 
 const isLocalhost = Boolean(
