@@ -57,7 +57,7 @@ export const firebaseConfig = {
   databaseURL: "https://react-pwa-2280e.firebaseio.com",
   projectId: "react-pwa-2280e",
   storageBucket: "react-pwa-2280e.appspot.com",
-  messagingSenderId: "522350313041"
+  messagingSenderId: "103953800507"
 };
 
 export const newGuid = () => {
