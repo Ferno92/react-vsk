@@ -117,6 +117,9 @@ function subscribeToTopic(){
     // See the MessagingTopicManagementResponse reference documentation
     // for the contents of response.
     console.log('Successfully subscribed to topic:', response);
+    if(response.errors && response.errors.length > 0){
+      console.log('errors on response', JSON.stringify(response.errors[0].error));
+    }
   })
   .catch(function(error) {
     console.log('Error subscribing to topic:', error);

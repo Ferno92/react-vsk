@@ -122,6 +122,7 @@ class App extends Component {
     const messaging = firebase.messaging();
     messaging.useServiceWorker(registration);
     const self = this;
+    
     messaging
       .getToken()
       .then(function(currentToken) {
@@ -148,7 +149,20 @@ class App extends Component {
     xhr.open("POST", "/api/settoken?value=" + token, true);
     xhr.setRequestHeader("Content-Type", "application/json");
     xhr.send(null);
+
+    this.initFCMListener();
   };
+
+  initFCMListener = () =>{
+    const messaging = firebase.messaging();
+    messaging.onMessage(function(payload) {
+      // Messages received. Either because the
+      // app is running in the foreground, or
+      // because the notification was clicked.
+      // `payload` will contain your data.
+      console.log("Message received. ", payload);
+    });
+  }
 
   loginSuccess = () => {
     this.child.current.showMessage("success", "Login effettuato con successo!");

@@ -7,7 +7,9 @@
 
 // To learn more about the benefits of this model, read https://goo.gl/KwvDNy.
 // This link also includes instructions on opting out of this behavior.
+import firebase from 'firebase';
 
+const messaging = firebase.messaging();
 var registrationSW = null;
 
 const isLocalhost = Boolean(
@@ -81,6 +83,8 @@ function registerValidSW(swUrl) {
             }
           }
         };
+        
+        //push notification.. doesnt work..
         window.addEventListener("push", function(e) {
           var body;
           console.log("push event!!!!", e);
@@ -114,6 +118,12 @@ function registerValidSW(swUrl) {
           e.waitUntil(
             window.registration.showNotification("Push Notification", options)
           );
+        });
+
+        //push notification with fcm
+        messaging.setBackgroundMessageHandler(function(payload) {
+          console.log('[firebase-messaging-sw.js] Received background message ', payload);
+          // ...
         });
 
         window.addEventListener("notificationclick", function(event) {
