@@ -21,27 +21,10 @@ const topic = 'calendar';
 const app = express();
 
 app.use(secure);
+app.use(express.json())
 
 // Serve the static files from the React app
 app.use(express.static(path.join(__dirname, "client/build")));
-var cache = [];
-function stringify(key, value) {
-  if (typeof value === 'object' && value !== null) {
-      if (cache.indexOf(value) !== -1) {
-          // Duplicate reference found
-          try {
-              // If this value does not reference a parent it can be deduped
-              return JSON.parse(JSON.stringify(value));
-          } catch (error) {
-              // discard key if value cannot be deduped
-              return;
-          }
-      }
-      // Store value in our collection
-      cache.push(value);
-  }
-  return value;
-}
 
 // An api endpoint that returns a short list of items
 app.get("/api/getList", (req, res) => {
@@ -52,16 +35,7 @@ app.get("/api/getList", (req, res) => {
 
 //
 app.post("/api/settoken", (req, res) => {
-  console.log("settoken POST", JSON.stringify(req, stringify), JSON.stringify(res)); 
-  res.json('OK');
-  if(registrationTokens.valueOf(req.params.value) < 0){
-    registrationTokens.push(req.params.value);
-    subscribeToTopic();
-  }
-});
-
-app.get("/api/settoken", (req, res) => {
-  console.log("settoken GET", JSON.stringify(req, stringify), JSON.stringify(res) ); 
+  console.log("settoken POST", JSON.stringify(req.body)); 
   res.json('OK');
   if(registrationTokens.valueOf(req.params.value) < 0){
     registrationTokens.push(req.params.value);
