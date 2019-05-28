@@ -10,10 +10,10 @@
 import firebase from 'firebase';
 import firebaseConfig from './App/App'
 
-const messaging = firebase.messaging();
 if (!firebase.apps.length) {
   firebase.initializeApp(firebaseConfig);
 }
+const messaging = firebase.messaging();
 var registrationSW = null;
 
 const isLocalhost = Boolean(
