@@ -145,13 +145,9 @@ class App extends Component {
 
   sendTokenToServer = token => {
     var xhr = new XMLHttpRequest();
-    xhr.open("POST", "/api/settoken", true);
+    xhr.open("POST", "/api/settoken?value=" + token, true);
     xhr.setRequestHeader("Content-Type", "application/json");
-    xhr.send(
-      JSON.stringify({
-        value: token
-      })
-    );
+    xhr.send(null);
   };
 
   loginSuccess = () => {
