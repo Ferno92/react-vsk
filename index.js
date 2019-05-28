@@ -34,9 +34,9 @@ app.get("/api/getList", (req, res) => {
 
 //
 app.post("/api/settoken", (req, res) => {
-  console.log("settoken POST", req.query.value, registrationTokens.valueOf(req.query.value)); 
+  console.log("settoken POST", JSON.stringify(req.query.value), registrationTokens.indexOf(req.query.value)); 
   res.json('OK');
-  if(registrationTokens.valueOf(req.query.value) < 0){
+  if(registrationTokens.indexOf(req.query.value) < 0){
     registrationTokens.push(req.query.value);
     subscribeToTopic();
   }
