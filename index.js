@@ -19,10 +19,6 @@ const topic = 'calendar';
 
 
 const app = express();
-app.configure(function(){
-  app.use(express.bodyParser());
-  app.use(app.router);
-});
 
 app.use(secure);
 
@@ -38,7 +34,7 @@ app.get("/api/getList", (req, res) => {
 
 //
 app.post("/api/settoken", (req, res) => {
-  console.log("settoken POST", JSON.stringify(req)); 
+  console.log("settoken POST", JSON.stringify(req), JSON.stringify(res)); 
   res.json('OK');
   if(registrationTokens.valueOf(req.params.value) < 0){
     registrationTokens.push(req.params.value);
@@ -47,7 +43,7 @@ app.post("/api/settoken", (req, res) => {
 });
 
 app.get("/api/settoken", (req, res) => {
-  console.log("settoken GET", JSON.stringify(req) ); 
+  console.log("settoken GET", JSON.stringify(req), JSON.stringify(res) ); 
   res.json('OK');
   if(registrationTokens.valueOf(req.params.value) < 0){
     registrationTokens.push(req.params.value);
