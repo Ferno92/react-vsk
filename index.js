@@ -37,6 +37,7 @@ app.post("/api/settoken", (req, res) => {
   const value = JSON.stringify(req.query.value);
   res.json('OK');
   if(registrationTokens.indexOf(value) < 0){
+    console.log('subscribeToTopic and push value= ', value);
     registrationTokens.push(value);
     subscribeToTopic();
   }
@@ -108,6 +109,9 @@ ref.on(
 
 
 function subscribeToTopic(){
+  for(i = 0; i < registrationTokens.length; i++){
+    console.log('token at index ' + i, registrationTokens[i]);
+  }
   messaging.subscribeToTopic(registrationTokens, topic)
   .then(function(response) {
     // See the MessagingTopicManagementResponse reference documentation
