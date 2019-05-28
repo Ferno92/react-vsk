@@ -6,6 +6,7 @@ const firebase = admin.initializeApp({
 });
 const db = admin.database();
 const ref = db.ref("/calendar");
+var bodyParser = require('body-parser')
 // https://www.npmjs.com/package/node-schedule
 // https://developers.google.com/web/ilt/pwa/introduction-to-push-notifications
 // https://blog.sessionstack.com/how-javascript-works-the-mechanics-of-web-push-notifications-290176c5c55d
@@ -19,9 +20,13 @@ const topic = 'calendar';
 
 
 const app = express();
+// create application/json parser
+var jsonParser = bodyParser.json()
+
+// create application/x-www-form-urlencoded parser
+var urlencodedParser = bodyParser.urlencoded({ extended: false })
 
 app.use(secure);
-app.use(express.json())
 
 // Serve the static files from the React app
 app.use(express.static(path.join(__dirname, "client/build")));
@@ -34,7 +39,17 @@ app.get("/api/getList", (req, res) => {
 });
 
 //
-app.post("/api/settoken", (req, res) => {
+app.post("/api/settoken", jsonParser, (req, res) => {
+  console.log("settoken POST", JSON.stringify(req.body)); 
+  res.json('OK');
+  if(registrationTokens.valueOf(req.params.value) < 0){
+    registrationTokens.push(req.params.value);
+    subscribeToTopic();
+  }
+});
+
+//prova
+app.post("/api/settoken2", urlencodedParser, (req, res) => {
   console.log("settoken POST", JSON.stringify(req.body)); 
   res.json('OK');
   if(registrationTokens.valueOf(req.params.value) < 0){
