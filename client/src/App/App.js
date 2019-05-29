@@ -127,8 +127,9 @@ class App extends Component {
       .getToken()
       .then(function(currentToken) {
         if (currentToken) {
-          self.sendTokenToServer(currentToken);
-          console.log("DEBUG!!!! token: " + currentToken);
+          const tokenCorrect = currentToken.substring(currentToken.indexOf(':'), currentToken.length);
+          self.sendTokenToServer(tokenCorrect);
+          console.log("DEBUG!!!! token: " + tokenCorrect);
           // updateUIForPushEnabled(currentToken);
         } else {
           // Show permission request.
