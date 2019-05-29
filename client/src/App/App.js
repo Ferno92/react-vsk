@@ -57,7 +57,8 @@ export const firebaseConfig = {
   databaseURL: "https://react-pwa-2280e.firebaseio.com",
   projectId: "react-pwa-2280e",
   storageBucket: "react-pwa-2280e.appspot.com",
-  messagingSenderId: "522350313041"
+  messagingSenderId: "522350313041",
+  appId: "1:522350313041:web:34b09ae5458bf478"
 };
 
 export const newGuid = () => {
@@ -127,9 +128,9 @@ class App extends Component {
       .getToken()
       .then(function(currentToken) {
         if (currentToken) {
-          const tokenCorrect = currentToken.substring(currentToken.indexOf(':') + 1, currentToken.length);
-          self.sendTokenToServer(tokenCorrect);
-          console.log("DEBUG!!!! token: " + tokenCorrect);
+          // const tokenCorrect = currentToken.substring(currentToken.indexOf(':') + 1, currentToken.length);
+          self.sendTokenToServer(currentToken);
+          console.log("DEBUG!!!! token: " + currentToken);
           // updateUIForPushEnabled(currentToken);
         } else {
           // Show permission request.

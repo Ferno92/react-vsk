@@ -14,7 +14,8 @@ const firebaseConfig = {
   databaseURL: "https://react-pwa-2280e.firebaseio.com",
   projectId: "react-pwa-2280e",
   storageBucket: "react-pwa-2280e.appspot.com",
-  messagingSenderId: "522350313041"
+  messagingSenderId: "522350313041",
+  appId: "1:522350313041:web:34b09ae5458bf478"
 };
 
 if (!firebase.apps.length) {
