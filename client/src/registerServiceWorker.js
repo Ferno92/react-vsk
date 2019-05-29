@@ -13,7 +13,10 @@ import firebaseConfig from './App/App'
 if (!firebase.apps.length) {
   firebase.initializeApp(firebaseConfig);
 }
-const messaging = firebase.messaging();
+const messaging = firebase.messaging()
+.catch(error => {
+  console.log("Error init messaging:", JSON.stringify(error));
+});;
 var registrationSW = null;
 
 const isLocalhost = Boolean(
