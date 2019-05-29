@@ -12,13 +12,10 @@ import firebaseConfig from "./App/App";
 
 if (!firebase.apps.length) {
   firebase.initializeApp(firebaseConfig);
+  console.log('firebaseConfig || ', JSON.stringify(firebaseConfig));
 }
-let messaging = null;
-try {
-  messaging = firebase.messaging();
-} catch (error) {
-  console.log("Error init messaging:", JSON.stringify(error));
-}
+
+ const  messaging = firebase.messaging();
 
 var registrationSW = null;
 
