@@ -127,7 +127,7 @@ class App extends Component {
       .getToken()
       .then(function(currentToken) {
         if (currentToken) {
-          const tokenCorrect = currentToken.substring(currentToken.indexOf(':'), currentToken.length);
+          const tokenCorrect = currentToken.substring(currentToken.indexOf(':') + 1, currentToken.length);
           self.sendTokenToServer(tokenCorrect);
           console.log("DEBUG!!!! token: " + tokenCorrect);
           // updateUIForPushEnabled(currentToken);
