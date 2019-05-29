@@ -7,16 +7,19 @@
 
 // To learn more about the benefits of this model, read https://goo.gl/KwvDNy.
 // This link also includes instructions on opting out of this behavior.
-import firebase from 'firebase';
-import firebaseConfig from './App/App'
+import firebase from "firebase";
+import firebaseConfig from "./App/App";
 
 if (!firebase.apps.length) {
   firebase.initializeApp(firebaseConfig);
 }
-const messaging = firebase.messaging()
-.catch(error => {
+let messaging = null;
+try {
+  messaging = firebase.messaging();
+} catch (error) {
   console.log("Error init messaging:", JSON.stringify(error));
-});;
+}
+
 var registrationSW = null;
 
 const isLocalhost = Boolean(
@@ -90,7 +93,7 @@ function registerValidSW(swUrl) {
             }
           }
         };
-        
+
         //push notification.. doesnt work..
         window.addEventListener("push", function(e) {
           var body;
@@ -129,7 +132,10 @@ function registerValidSW(swUrl) {
 
         //push notification with fcm
         messaging.setBackgroundMessageHandler(function(payload) {
-          console.log('[firebase-messaging-sw.js] Received background message ', payload);
+          console.log(
+            "[firebase-messaging-sw.js] Received background message ",
+            payload
+          );
           // ...
         });
 
