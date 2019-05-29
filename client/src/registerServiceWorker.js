@@ -8,7 +8,14 @@
 // To learn more about the benefits of this model, read https://goo.gl/KwvDNy.
 // This link also includes instructions on opting out of this behavior.
 import firebase from "firebase";
-import firebaseConfig from "./App/App";
+const firebaseConfig = {
+  apiKey: "AIzaSyDO4KLmlNjHJ88eV6bOpH2hHptrBkcD1ko",
+  authDomain: "react-pwa-2280e.firebaseapp.com",
+  databaseURL: "https://react-pwa-2280e.firebaseio.com",
+  projectId: "react-pwa-2280e",
+  storageBucket: "react-pwa-2280e.appspot.com",
+  messagingSenderId: "522350313041"
+};
 
 if (!firebase.apps.length) {
   firebase.initializeApp(firebaseConfig);
