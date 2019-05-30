@@ -102,9 +102,12 @@ class App extends Component {
     teamService.clear();
   }
 
-
-  initFCMListener = () =>{
+  initFCMListener = () => {
     const messaging = firebase.messaging();
+
+    messaging.usePublicVapidKey(
+      "BEUePRLG8q_Pd9nWCd-K4LzuBym4yaA7QK7VwyqupDiLWOosG4xLPij_tLgzeJu5tNgBmyRu-Gdh37xy14f7V3c"
+    );
     messaging.onMessage(function(payload) {
       // Messages received. Either because the
       // app is running in the foreground, or
@@ -112,7 +115,7 @@ class App extends Component {
       // `payload` will contain your data.
       console.log("Message received. ", payload);
     });
-  }
+  };
 
   loginSuccess = () => {
     this.child.current.showMessage("success", "Login effettuato con successo!");

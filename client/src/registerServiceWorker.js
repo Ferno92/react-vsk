@@ -24,8 +24,9 @@ if (!firebase.apps.length) {
 }
 
 const messaging = firebase.messaging();
-
-var registrationSW = null;
+messaging.usePublicVapidKey(
+  "BEUePRLG8q_Pd9nWCd-K4LzuBym4yaA7QK7VwyqupDiLWOosG4xLPij_tLgzeJu5tNgBmyRu-Gdh37xy14f7V3c"
+);
 
 const isLocalhost = Boolean(
   window.location.hostname === "localhost" ||
@@ -66,8 +67,6 @@ function registerValidSW(swUrl) {
   navigator.serviceWorker
     .register(swUrl)
     .then(registration => {
-      registrationSW = registration;
-
       var evt = new CustomEvent("registrationSW", {
         detail: registration
       });
