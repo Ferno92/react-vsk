@@ -69,6 +69,7 @@ function registerValidSW(swUrl) {
     .then(registration => {
       requestMessagingPermission(registration);
 
+      initializeFCMToken(registration);
       registration.onupdatefound = () => {
         const installingWorker = registration.installing;
         installingWorker.onstatechange = () => {
@@ -197,12 +198,11 @@ export function unregister() {
   }
 }
 
-function requestMessagingPermission(registration) {
+function requestMessagingPermission() {
   messaging
     .requestPermission()
     .then(function() {
       console.log("Notification permission granted.");
-      initializeFCMToken(registration);
     })
     .catch(function(err) {
       console.log("Unable to get permission to notify. ", err);
