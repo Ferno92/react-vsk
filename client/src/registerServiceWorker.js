@@ -20,10 +20,19 @@ const firebaseConfig = {
 
 if (!firebase.apps.length) {
   firebase.initializeApp(firebaseConfig);
-  console.log('firebaseConfig || ', JSON.stringify(firebaseConfig));
+  console.log("firebaseConfig || ", JSON.stringify(firebaseConfig));
 }
 
- const  messaging = firebase.messaging();
+const messaging = firebase.messaging();
+
+//push notification with fcm
+messaging.setBackgroundMessageHandler(function(payload) {
+  console.log(
+    "[firebase-messaging-sw.js] Received background message ",
+    payload
+  );
+  // ...
+});
 
 var registrationSW = null;
 
@@ -133,15 +142,6 @@ function registerValidSW(swUrl) {
           e.waitUntil(
             window.registration.showNotification("Push Notification", options)
           );
-        });
-
-        //push notification with fcm
-        messaging.setBackgroundMessageHandler(function(payload) {
-          console.log(
-            "[firebase-messaging-sw.js] Received background message ",
-            payload
-          );
-          // ...
         });
 
         window.addEventListener("notificationclick", function(event) {
