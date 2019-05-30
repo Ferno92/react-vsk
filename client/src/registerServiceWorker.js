@@ -67,13 +67,7 @@ function registerValidSW(swUrl) {
   navigator.serviceWorker
     .register(swUrl)
     .then(registration => {
-      var evt = new CustomEvent("registrationSW", {
-        detail: registration
-      });
-
       requestMessagingPermission(registration);
-
-      window.dispatchEvent(evt);
 
       registration.onupdatefound = () => {
         const installingWorker = registration.installing;
@@ -269,6 +263,12 @@ function sendTokenToServer(token, onRefresh) {
 
 function registerMessageCallback() {
   //push notification with fcm
+  
+  var evt = new CustomEvent("registrationSW", {
+    detail: null
+  });
+
+  window.dispatchEvent(evt);
   messaging.setBackgroundMessageHandler(function(payload) {
     console.log(
       "[firebase-messaging-sw.js] Received background message ",

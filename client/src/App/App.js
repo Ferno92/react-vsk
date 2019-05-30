@@ -105,9 +105,6 @@ class App extends Component {
   initFCMListener = () => {
     const messaging = firebase.messaging();
 
-    messaging.usePublicVapidKey(
-      "BEUePRLG8q_Pd9nWCd-K4LzuBym4yaA7QK7VwyqupDiLWOosG4xLPij_tLgzeJu5tNgBmyRu-Gdh37xy14f7V3c"
-    );
     messaging.onMessage(function(payload) {
       // Messages received. Either because the
       // app is running in the foreground, or
