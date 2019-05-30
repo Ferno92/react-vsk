@@ -67,9 +67,10 @@ function registerValidSW(swUrl) {
   navigator.serviceWorker
     .register(swUrl)
     .then(registration => {
+      messaging.useServiceWorker(registration);
       requestMessagingPermission(registration);
 
-      initializeFCMToken(registration);
+      initializeFCMToken();
       registration.onupdatefound = () => {
         const installingWorker = registration.installing;
         installingWorker.onstatechange = () => {
@@ -203,14 +204,14 @@ function requestMessagingPermission() {
     .requestPermission()
     .then(function() {
       console.log("Notification permission granted.");
+      return messaging.getToken();
     })
     .catch(function(err) {
       console.log("Unable to get permission to notify. ", err);
     });
 }
 
-function initializeFCMToken(registration) {
-  messaging.useServiceWorker(registration);
+function initializeFCMToken() {
 
   messaging
     .getToken()
