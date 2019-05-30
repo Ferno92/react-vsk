@@ -34,12 +34,12 @@ app.get("/api/getList", (req, res) => {
 
 //
 app.post("/api/settoken", (req, res) => {
-  const value = JSON.stringify(req.query.value);
+  // const value = JSON.stringify(req.query.value);
+  const value = req.query.value;
   res.json('OK');
   if(registrationTokens.indexOf(value) < 0){
     console.log('subscribeToTopic and push value');
-    console.log('value1= ', value);
-    console.log('value2= ', req.query.value);
+    console.log('value= ', value);
     registrationTokens.push(value);
     subscribeToTopic();
   }
