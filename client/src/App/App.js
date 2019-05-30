@@ -89,7 +89,7 @@ class App extends Component {
     const self = this;
     window.addEventListener("registrationSW", function(e) {
       console.log("EventListener registrationSW");
-      self.requestMessagingPermission(e.detail);
+      self.initFCMListener();
     });
   }
 
@@ -102,58 +102,6 @@ class App extends Component {
     teamService.clear();
   }
 
-  requestMessagingPermission = (registration) => {
-    if (!firebase.apps.length) {
-      firebase.initializeApp(firebaseConfig);
-    }
-    const self = this;
-    const messaging = firebase.messaging();
-    messaging
-      .requestPermission()
-      .then(function() {
-        console.log("Notification permission granted.");
-        self.initializeFCMToken(registration);
-      })
-      .catch(function(err) {
-        console.log("Unable to get permission to notify. ", err);
-      });
-  };
-
-  initializeFCMToken = (registration) => {
-    const messaging = firebase.messaging();
-    messaging.useServiceWorker(registration);
-    const self = this;
-    
-    messaging
-      .getToken()
-      .then(function(currentToken) {
-        if (currentToken) {
-          // const tokenCorrect = currentToken.substring(currentToken.indexOf(':') + 1, currentToken.length);
-          self.sendTokenToServer(currentToken);
-          console.log("DEBUG!!!! token: " + currentToken);
-          // updateUIForPushEnabled(currentToken);
-        } else {
-          // Show permission request.
-          console.log(
-            "No Instance ID token available. Request permission to generate one."
-          );
-          // Show permission UI.
-          // updateUIForPushPermissionRequired();
-        }
-      })
-      .catch(function(err) {
-        console.log("An error occurred while retrieving token. ", err);
-      });
-  };
-
-  sendTokenToServer = token => {
-    var xhr = new XMLHttpRequest();
-    xhr.open("POST", "/api/settoken?value=" + token, true);
-    xhr.setRequestHeader("Content-Type", "application/json");
-    xhr.send(null);
-
-    this.initFCMListener();
-  };
 
   initFCMListener = () =>{
     const messaging = firebase.messaging();

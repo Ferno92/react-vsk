@@ -25,15 +25,6 @@ if (!firebase.apps.length) {
 
 const messaging = firebase.messaging();
 
-//push notification with fcm
-messaging.setBackgroundMessageHandler(function(payload) {
-  console.log(
-    "[firebase-messaging-sw.js] Received background message ",
-    payload
-  );
-  // ...
-});
-
 var registrationSW = null;
 
 const isLocalhost = Boolean(
@@ -80,6 +71,8 @@ function registerValidSW(swUrl) {
       var evt = new CustomEvent("registrationSW", {
         detail: registration
       });
+
+      requestMessagingPermission(registration);
 
       window.dispatchEvent(evt);
 
@@ -209,4 +202,79 @@ export function unregister() {
       registration.unregister();
     });
   }
+}
+
+function requestMessagingPermission(registration) {
+  messaging
+    .requestPermission()
+    .then(function() {
+      console.log("Notification permission granted.");
+      initializeFCMToken(registration);
+    })
+    .catch(function(err) {
+      console.log("Unable to get permission to notify. ", err);
+    });
+}
+
+function initializeFCMToken(registration) {
+  messaging.useServiceWorker(registration);
+
+  messaging
+    .getToken()
+    .then(function(currentToken) {
+      if (currentToken) {
+        // const tokenCorrect = currentToken.substring(currentToken.indexOf(':') + 1, currentToken.length);
+        sendTokenToServer(currentToken, false);
+        console.log("DEBUG!!!! token: " + currentToken);
+        // updateUIForPushEnabled(currentToken);
+      } else {
+        // Show permission request.
+        console.log(
+          "No Instance ID token available. Request permission to generate one."
+        );
+        // Show permission UI.
+        // updateUIForPushPermissionRequired();
+      }
+    })
+    .catch(function(err) {
+      console.log("An error occurred while retrieving token. ", err);
+    });
+
+  // Callback fired if Instance ID token is updated.
+  messaging.onTokenRefresh(function() {
+    messaging
+      .getToken()
+      .then(function(refreshedToken) {
+        console.log("onTokenRefresh getToken Token refreshed.");
+        console.log("onTokenRefresh getToken", refreshedToken);
+        sendTokenToServer(refreshedToken, true);
+      })
+      .catch(function(err) {
+        console.log(
+          "onTokenRefresh getToken Unable to retrieve refreshed token ",
+          err
+        );
+      });
+  });
+}
+
+function sendTokenToServer(token, onRefresh) {
+  var xhr = new XMLHttpRequest();
+  xhr.open("POST", "/api/settoken?value=" + token, true);
+  xhr.setRequestHeader("Content-Type", "application/json");
+  xhr.send(null);
+  if (!onRefresh) {
+    registerMessageCallback();
+  }
+}
+
+function registerMessageCallback() {
+  //push notification with fcm
+  messaging.setBackgroundMessageHandler(function(payload) {
+    console.log(
+      "[firebase-messaging-sw.js] Received background message ",
+      payload
+    );
+    // ...
+  });
 }
