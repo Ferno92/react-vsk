@@ -67,104 +67,103 @@ export default function register() {
 
 async function registerValidSW(swUrl) {
   const registeredServiceWorker = await serviceWorker
-    .register(swUrl)
-    .then(registration => {
-      messaging.useServiceWorker(registration);
-      requestMessagingPermission(registration);
+    .register(swUrl);
+    // .catch(error => {
+    //   console.error("Error during service worker registration:", error);
+    // });
+    
+    console.log('registeredServiceWorker done?', registeredServiceWorker);
+    messaging.useServiceWorker(registeredServiceWorker);
+    requestMessagingPermission(registeredServiceWorker);
 
-      initializeFCMToken();
-      registration.onupdatefound = () => {
-        const installingWorker = registration.installing;
-        installingWorker.onstatechange = () => {
-          if (installingWorker.state === "installed") {
-            if (navigator.serviceWorker.controller) {
-              // At this point, the old content will have been purged and
-              // the fresh content will have been added to the cache.
-              // It's the perfect time to display a "New content is
-              // available; please refresh." message in your web app.
-              console.log("New content is available; please refresh.");
-              var isOK = window.confirm(
-                "E' disponibile un aggiornamento! L'applicazione verrà ricaricata, vuoi farlo ora?"
-              );
-              if (isOK) {
-                window.location.reload();
-              }
-            } else {
-              // At this point, everything has been precached.
-              // It's the perfect time to display a
-              // "Content is cached for offline use." message.
-              console.log("Content is cached for offline use.");
-            }
-          }
-        };
-
-        //push notification.. doesnt work..
-        window.addEventListener("push", function(e) {
-          var body;
-          console.log("push event!!!!", e);
-          if (e.data) {
-            body = e.data.text();
-          } else {
-            body = "Push message no payload";
-          }
-
-          var options = {
-            body: body,
-            icon: "images/notification-flat.png",
-            vibrate: [100, 50, 100],
-            data: {
-              dateOfArrival: Date.now(),
-              primaryKey: 1
-            },
-            actions: [
-              {
-                action: "explore",
-                title: "Explore this new world",
-                icon: "images/checkmark.png"
-              },
-              {
-                action: "close",
-                title: "I don't want any of this",
-                icon: "images/xmark.png"
-              }
-            ]
-          };
-          e.waitUntil(
-            window.registration.showNotification("Push Notification", options)
-          );
-        });
-
-        window.addEventListener("notificationclick", function(event) {
-          let url = "https://react-vsk.herokuapp.com/";
-          console.log("notificationclick event", event, window.clients);
-          event.notification.close(); // Android needs explicit close.
-          if (window.clients) {
-            event.waitUntil(
-              window.clients
-                .matchAll({ type: "window" })
-                .then(windowClients => {
-                  // Check if there is already a window/tab open with the target URL
-                  for (var i = 0; i < windowClients.length; i++) {
-                    var client = windowClients[i];
-                    // If so, just focus it.
-                    if (client.url === url && "focus" in client) {
-                      return client.focus();
-                    }
-                  }
-                  // If not, then open the target URL in a new window/tab.
-                  if (window.clients.openWindow) {
-                    return window.clients.openWindow(url);
-                  }
-                })
+    initializeFCMToken();
+    registeredServiceWorker.onupdatefound = () => {
+      const installingWorker = registeredServiceWorker.installing;
+      installingWorker.onstatechange = () => {
+        if (installingWorker.state === "installed") {
+          if (navigator.serviceWorker.controller) {
+            // At this point, the old content will have been purged and
+            // the fresh content will have been added to the cache.
+            // It's the perfect time to display a "New content is
+            // available; please refresh." message in your web app.
+            console.log("New content is available; please refresh.");
+            var isOK = window.confirm(
+              "E' disponibile un aggiornamento! L'applicazione verrà ricaricata, vuoi farlo ora?"
             );
+            if (isOK) {
+              window.location.reload();
+            }
+          } else {
+            // At this point, everything has been precached.
+            // It's the perfect time to display a
+            // "Content is cached for offline use." message.
+            console.log("Content is cached for offline use.");
           }
-        });
+        }
       };
-    })
-    .catch(error => {
-      console.error("Error during service worker registration:", error);
-    });
-    console.log('registeredServiceWorker done?');
+
+      //push notification.. doesnt work..
+      window.addEventListener("push", function(e) {
+        var body;
+        console.log("push event!!!!", e);
+        if (e.data) {
+          body = e.data.text();
+        } else {
+          body = "Push message no payload";
+        }
+
+        var options = {
+          body: body,
+          icon: "images/notification-flat.png",
+          vibrate: [100, 50, 100],
+          data: {
+            dateOfArrival: Date.now(),
+            primaryKey: 1
+          },
+          actions: [
+            {
+              action: "explore",
+              title: "Explore this new world",
+              icon: "images/checkmark.png"
+            },
+            {
+              action: "close",
+              title: "I don't want any of this",
+              icon: "images/xmark.png"
+            }
+          ]
+        };
+        e.waitUntil(
+          window.registration.showNotification("Push Notification", options)
+        );
+      });
+
+      window.addEventListener("notificationclick", function(event) {
+        let url = "https://react-vsk.herokuapp.com/";
+        console.log("notificationclick event", event, window.clients);
+        event.notification.close(); // Android needs explicit close.
+        if (window.clients) {
+          event.waitUntil(
+            window.clients
+              .matchAll({ type: "window" })
+              .then(windowClients => {
+                // Check if there is already a window/tab open with the target URL
+                for (var i = 0; i < windowClients.length; i++) {
+                  var client = windowClients[i];
+                  // If so, just focus it.
+                  if (client.url === url && "focus" in client) {
+                    return client.focus();
+                  }
+                }
+                // If not, then open the target URL in a new window/tab.
+                if (window.clients.openWindow) {
+                  return window.clients.openWindow(url);
+                }
+              })
+          );
+        }
+      });
+    };
     registeredServiceWorker.enablePush('BLx__NGvdasMNkjd6VYPdzQJVBkb2qafh');
 }
 
