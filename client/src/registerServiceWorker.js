@@ -8,6 +8,8 @@
 // To learn more about the benefits of this model, read https://goo.gl/KwvDNy.
 // This link also includes instructions on opting out of this behavior.
 import firebase from "firebase";
+import { ServiceWorker } from 'aws-amplify';
+const serviceWorker = new ServiceWorker();
 const firebaseConfig = {
   apiKey: "AIzaSyDO4KLmlNjHJ88eV6bOpH2hHptrBkcD1ko",
   authDomain: "react-pwa-2280e.firebaseapp.com",
@@ -63,8 +65,8 @@ export default function register() {
   }
 }
 
-function registerValidSW(swUrl) {
-  navigator.serviceWorker
+async function registerValidSW(swUrl) {
+  const registeredServiceWorker = await serviceWorker
     .register(swUrl)
     .then(registration => {
       messaging.useServiceWorker(registration);
@@ -162,6 +164,8 @@ function registerValidSW(swUrl) {
     .catch(error => {
       console.error("Error during service worker registration:", error);
     });
+    console.log('registeredServiceWorker done?');
+    registeredServiceWorker.enablePush('BLx__NGvdasMNkjd6VYPdzQJVBkb2qafh');
 }
 
 function checkValidServiceWorker(swUrl) {
