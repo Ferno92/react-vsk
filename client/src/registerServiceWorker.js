@@ -176,8 +176,8 @@ function registerValidSW(swUrl) {
 .then(function(registration) {
   return registration.pushManager.getSubscription()
   .then(async function(subscription) {
-    console.log("getSubscription", subscription);
     if (subscription) {
+      console.log("getSubscription", subscription);
       return subscription;
     }
  
