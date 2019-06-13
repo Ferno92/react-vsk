@@ -48,6 +48,7 @@ app.post('/api/register', function(req, res) {
 });
 
 app.post('/api/sendNotification', function(req, res) {
+  console.log('sendNotification', req.body.subscription);
   const subscription = req.body.subscription;
   const payload = req.body.payload;
   const options = {

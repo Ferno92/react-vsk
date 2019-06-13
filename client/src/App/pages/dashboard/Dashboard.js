@@ -131,7 +131,7 @@ class Dashboard extends React.Component {
 
   clickLogin = ()=>{
     
-    fetch('./sendNotification', {
+    fetch('/api/sendNotification', {
       method: 'post',
       headers: {
         'Content-type': 'application/json'
