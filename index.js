@@ -20,10 +20,10 @@ app.use(secure);
 //   console.log(webPush.generateVAPIDKeys());
 //   return;
 // }
-
+const vapidPublicKey = 'BJQzCYDeFuijftd_AiYfBr8hv6Vr_CG-VcaLnuXdMW-uGW_yH3NEU4d3yAD0KNjCtJ_MtaPk1W0uI8qf_Kz-1OQ';
 webPush.setVapidDetails(
   'https://react-vsk.herokuapp.com',
-  'BJQzCYDeFuijftd_AiYfBr8hv6Vr_CG-VcaLnuXdMW-uGW_yH3NEU4d3yAD0KNjCtJ_MtaPk1W0uI8qf_Kz-1OQ',
+  vapidPublicKey,
   '9BbmqTZ3aR-d3hvtcPeU7BqZyEqoTP95MCjphrTdomI'
 );
 
@@ -48,7 +48,7 @@ app.get('/client/src/service-worker.js', (req, res) => {
 
 //notification region
 app.get('/api/vapidPublicKey', function(req, res) {
-  res.send(process.env.VAPID_PUBLIC_KEY);
+  res.send(vapidPublicKey);
 });
 
 app.post('/api/register', function(req, res) {
