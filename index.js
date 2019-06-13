@@ -37,15 +37,6 @@ app.get('/api/getList', (req,res) => {
     console.log('Sent list of items');
 });
 
-// Handles any requests that don't match the ones above
-app.get('*', (req,res) =>{
-    res.sendFile(path.join(__dirname+'/client/build/index.html'));
-});
-
-app.get('/client/src/service-worker.js', (req, res) => {
-    res.sendFile(path.resolve(__dirname, '..', 'build', 'service-worker.js'));
-});
-
 //notification region
 app.get('/api/vapidPublicKey', (req, res) => {
   res.json(vapidPublicKey);
@@ -81,6 +72,15 @@ app.get('/api/getPayload', function(req, res) {
 });
 
 //end notification region
+
+// Handles any requests that don't match the ones above
+app.get('*', (req,res) =>{
+    res.sendFile(path.join(__dirname+'/client/build/index.html'));
+});
+
+app.get('/client/src/service-worker.js', (req, res) => {
+    res.sendFile(path.resolve(__dirname, '..', 'build', 'service-worker.js'));
+});
 
 const port = process.env.PORT || 5000;
 
