@@ -9,9 +9,23 @@ const ref = db.ref("/calendar");
 const express = require('express');
 const path = require('path');
 const secure = require('ssl-express-www');
+const webPush = require('web-push');
 
 const app = express();
 app.use(secure);
+
+if (!process.env.VAPID_PUBLIC_KEY || !process.env.VAPID_PRIVATE_KEY) {
+  console.log("You must set the VAPID_PUBLIC_KEY and VAPID_PRIVATE_KEY "+
+    "environment variables. You can use the following ones:");
+  console.log(webPush.generateVAPIDKeys());
+  return;
+}
+
+webPush.setVapidDetails(
+  'https://serviceworke.rs/',
+  process.env.VAPID_PUBLIC_KEY,
+  process.env.VAPID_PRIVATE_KEY
+);
 
 // Serve the static files from the React app
 app.use(express.static(path.join(__dirname, 'client/build')));
@@ -31,6 +45,42 @@ app.get('*', (req,res) =>{
 app.get('/client/src/service-worker.js', (req, res) => {
     res.sendFile(path.resolve(__dirname, '..', 'build', 'service-worker.js'));
 });
+
+//notification region
+app.get('/api/vapidPublicKey', function(req, res) {
+  res.send(process.env.VAPID_PUBLIC_KEY);
+});
+
+app.post('/api/register', function(req, res) {
+
+  res.sendStatus(201);
+});
+
+app.post('/api/sendNotification', function(req, res) {
+  const subscription = req.body.subscription;
+  const payload = req.body.payload;
+  const options = {
+    TTL: req.body.ttl
+  };
+
+  setTimeout(function() {
+    payloads[req.body.subscription.endpoint] = payload;
+    webPush.sendNotification(subscription, null, options)
+    .then(function() {
+      res.sendStatus(201);
+    })
+    .catch(function(error) {
+      res.sendStatus(500);
+      console.log(error);
+    });
+  }, req.body.delay * 1000);
+});
+
+app.get('/api/getPayload', function(req, res) {
+  res.send(payloads[req.query.endpoint]);
+});
+
+//end notification region
 
 const port = process.env.PORT || 5000;
 

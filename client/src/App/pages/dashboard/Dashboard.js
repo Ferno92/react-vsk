@@ -12,7 +12,6 @@ import { firebaseConfig } from "../../App";
 import * as moment from "moment";
 import { Button, Grid, CircularProgress } from "@material-ui/core";
 import "./Dashboard.scss";
-import { Link } from "react-router-dom";
 
 const mapStateToProps = state => {
   return {
@@ -25,6 +24,7 @@ class Dashboard extends React.Component {
   count = 0;
   storeUnsubscribe = null;
   loggedIn = false;
+  subscription = null
 
   constructor() {
     super();
@@ -80,6 +80,12 @@ class Dashboard extends React.Component {
 
       store.dispatch(showCreateMatch(false));
     };
+
+    var self = this;
+    window.addEventListener('subscription', function(event){
+      console.log("subscription event", event);
+      self.subscription = event.subscription;
+    });
   }
 
   goToNewMatch() {
@@ -121,6 +127,22 @@ class Dashboard extends React.Component {
     setTimeout(function() {
       self.props.history.push("/match/" + id);
     }, 200);
+  }
+
+  clickLogin = ()=>{
+    
+    fetch('./sendNotification', {
+      method: 'post',
+      headers: {
+        'Content-type': 'application/json'
+      },
+      body: JSON.stringify({
+        subscription: this.subscription,
+        payload: 'Eccolo!',
+        delay: 5,
+        ttl: 0,
+      }),
+    });
   }
 
   render() {
@@ -218,8 +240,9 @@ class Dashboard extends React.Component {
                   variant="contained"
                   color="primary"
                   key={"Login"}
-                  component={Link}
-                  to="/login"
+                  // component={Link}
+                  // to="/login"
+                  onClick={this.clickLogin}
                 >
                   Login
                 </Button>

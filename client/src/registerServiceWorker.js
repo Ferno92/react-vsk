@@ -43,6 +43,32 @@ export default function register() {
   }
 }
 
+function urlBase64ToUint8Array(base64String) {
+  var padding = '='.repeat((4 - base64String.length % 4) % 4);
+  var base64 = (base64String + padding)
+    .replace(/\-/g, '+')
+    .replace(/_/g, '/');
+ 
+  var rawData = window.atob(base64);
+  var outputArray = new Uint8Array(rawData.length);
+ 
+  for (var i = 0; i < rawData.length; ++i) {
+    outputArray[i] = rawData.charCodeAt(i);
+  }
+  return outputArray;
+}
+
+function getEndpoint(registration) {
+  return registration.pushManager.getSubscription()
+  .then(function(subscription) {
+    if (subscription) {
+      return subscription.endpoint;
+    }
+
+    throw new Error('User not subscribed');
+  });
+}
+
 function registerValidSW(swUrl) {
   navigator.serviceWorker
     .register(swUrl)
@@ -71,32 +97,48 @@ function registerValidSW(swUrl) {
             }
           }
         };
-        window.addEventListener('push', function(e) {
-          var body;
-          console.log('push event!!!!');
-          if (e.data) {
-            body = e.data.text();
-          } else {
-            body = 'Push message no payload';
-          }
+        window.addEventListener('push', function(event) {
+          // var body;
+          // console.log('push event!!!!');
+          // if (e.data) {
+          //   body = e.data.text();
+          // } else {
+          //   body = 'Push message no payload';
+          // }
         
-          var options = {
-            body: body,
-            icon: 'images/notification-flat.png',
-            vibrate: [100, 50, 100],
-            data: {
-              dateOfArrival: Date.now(),
-              primaryKey: 1
-            },
-            actions: [
-              {action: 'explore', title: 'Explore this new world',
-                icon: 'images/checkmark.png'},
-              {action: 'close', title: 'I don\'t want any of this',
-                icon: 'images/xmark.png'},
-            ]
-          };
-          e.waitUntil(
-            window.registration.showNotification('Push Notification', options)
+          // var options = {
+          //   body: body,
+          //   icon: 'images/notification-flat.png',
+          //   vibrate: [100, 50, 100],
+          //   data: {
+          //     dateOfArrival: Date.now(),
+          //     primaryKey: 1
+          //   },
+          //   actions: [
+          //     {action: 'explore', title: 'Explore this new world',
+          //       icon: 'images/checkmark.png'},
+          //     {action: 'close', title: 'I don\'t want any of this',
+          //       icon: 'images/xmark.png'},
+          //   ]
+          // };
+          // e.waitUntil(
+          //   window.registration.showNotification('Push Notification', options)
+          // );
+          event.waitUntil(
+            getEndpoint(registration)
+            .then(function(endpoint) {        
+         
+              return fetch('./getPayload?endpoint=' + endpoint);
+            })
+            .then(function(response) {
+              return response.text();
+            })
+            .then(function(payload) {        
+         
+              registration.showNotification('ServiceWorker Cookbook', {
+                body: payload,
+              });
+            })
           );
         });
 
@@ -129,6 +171,41 @@ function registerValidSW(swUrl) {
     .catch(error => {
       console.error("Error during service worker registration:", error);
     });
+
+    navigator.serviceWorker.ready
+.then(function(registration) {
+  return registration.pushManager.getSubscription()
+  .then(async function(subscription) {
+    console.log("getSubscription", subscription);
+    if (subscription) {
+      return subscription;
+    }
+ 
+    const response = await fetch('./vapidPublicKey');
+    const vapidPublicKey = await response.text();
+    const convertedVapidKey = urlBase64ToUint8Array(vapidPublicKey);
+    console.log("vapidPublicKey", vapidPublicKey);
+    return registration.pushManager.subscribe({
+      userVisibleOnly: true,
+      applicationServerKey: convertedVapidKey
+    });
+  });
+}).then(function(subscription) {
+  console.log("fetch register");
+  fetch('./register', {
+    method: 'post',
+    headers: {
+      'Content-type': 'application/json'
+    },
+    body: JSON.stringify({
+      subscription: subscription
+    }),
+  });
+  
+  const event = new Event('sw-installed');
+  event.subscription = subscription;
+  window.dispatchEvent(event)
+});
 }
 
 function checkValidServiceWorker(swUrl) {
