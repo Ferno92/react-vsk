@@ -14,17 +14,17 @@ const webPush = require('web-push');
 const app = express();
 app.use(secure);
 
-if (!process.env.VAPID_PUBLIC_KEY || !process.env.VAPID_PRIVATE_KEY) {
-  console.log("You must set the VAPID_PUBLIC_KEY and VAPID_PRIVATE_KEY "+
-    "environment variables. You can use the following ones:");
-  console.log(webPush.generateVAPIDKeys());
-  return;
-}
+// if (!process.env.VAPID_PUBLIC_KEY || !process.env.VAPID_PRIVATE_KEY) {
+//   console.log("You must set the VAPID_PUBLIC_KEY and VAPID_PRIVATE_KEY "+
+//     "environment variables. You can use the following ones:");
+//   console.log(webPush.generateVAPIDKeys());
+//   return;
+// }
 
 webPush.setVapidDetails(
-  'https://serviceworke.rs/',
-  process.env.VAPID_PUBLIC_KEY,
-  process.env.VAPID_PRIVATE_KEY
+  'https://react-vsk.herokuapp.com',
+  'BJQzCYDeFuijftd_AiYfBr8hv6Vr_CG-VcaLnuXdMW-uGW_yH3NEU4d3yAD0KNjCtJ_MtaPk1W0uI8qf_Kz-1OQ',
+  '9BbmqTZ3aR-d3hvtcPeU7BqZyEqoTP95MCjphrTdomI'
 );
 
 // Serve the static files from the React app
