@@ -7,28 +7,6 @@
 
 // To learn more about the benefits of this model, read https://goo.gl/KwvDNy.
 // This link also includes instructions on opting out of this behavior.
-import firebase from "firebase";
-import { ServiceWorker } from 'aws-amplify';
-const serviceWorker = new ServiceWorker();
-const firebaseConfig = {
-  apiKey: "AIzaSyDO4KLmlNjHJ88eV6bOpH2hHptrBkcD1ko",
-  authDomain: "react-pwa-2280e.firebaseapp.com",
-  databaseURL: "https://react-pwa-2280e.firebaseio.com",
-  projectId: "react-pwa-2280e",
-  storageBucket: "react-pwa-2280e.appspot.com",
-  messagingSenderId: "522350313041",
-  appId: "1:522350313041:web:34b09ae5458bf478"
-};
-
-if (!firebase.apps.length) {
-  firebase.initializeApp(firebaseConfig);
-  console.log("firebaseConfig || ", JSON.stringify(firebaseConfig));
-}
-
-const messaging = firebase.messaging();
-messaging.usePublicVapidKey(
-  "BEUePRLG8q_Pd9nWCd-K4LzuBym4yaA7QK7VwyqupDiLWOosG4xLPij_tLgzeJu5tNgBmyRu-Gdh37xy14f7V3c"
-);
 
 const isLocalhost = Boolean(
   window.location.hostname === "localhost" ||
@@ -65,106 +43,92 @@ export default function register() {
   }
 }
 
-async function registerValidSW(swUrl) {
-  const registeredServiceWorker = await serviceWorker
-    .register(swUrl);
-    // .catch(error => {
-    //   console.error("Error during service worker registration:", error);
-    // });
-    
-    console.log('registeredServiceWorker done?', registeredServiceWorker);
-    messaging.useServiceWorker(registeredServiceWorker);
-    requestMessagingPermission(registeredServiceWorker);
-
-    initializeFCMToken();
-    registeredServiceWorker.onupdatefound = () => {
-      const installingWorker = registeredServiceWorker.installing;
-      installingWorker.onstatechange = () => {
-        if (installingWorker.state === "installed") {
-          if (navigator.serviceWorker.controller) {
-            // At this point, the old content will have been purged and
-            // the fresh content will have been added to the cache.
-            // It's the perfect time to display a "New content is
-            // available; please refresh." message in your web app.
-            console.log("New content is available; please refresh.");
-            var isOK = window.confirm(
-              "E' disponibile un aggiornamento! L'applicazione verrà ricaricata, vuoi farlo ora?"
-            );
-            if (isOK) {
-              window.location.reload();
+function registerValidSW(swUrl) {
+  navigator.serviceWorker
+    .register(swUrl)
+    .then(registration => {
+      registration.onupdatefound = () => {
+        const installingWorker = registration.installing;
+        installingWorker.onstatechange = () => {
+          if (installingWorker.state === "installed") {
+            if (navigator.serviceWorker.controller) {
+              // At this point, the old content will have been purged and
+              // the fresh content will have been added to the cache.
+              // It's the perfect time to display a "New content is
+              // available; please refresh." message in your web app.
+              console.log("New content is available; please refresh.");
+              var isOK = window.confirm(
+                "E' disponibile un aggiornamento! L'applicazione verrà ricaricata, vuoi farlo ora?"
+              );
+              if (isOK) {
+                window.location.reload();
+              }
+            } else {
+              // At this point, everything has been precached.
+              // It's the perfect time to display a
+              // "Content is cached for offline use." message.
+              console.log("Content is cached for offline use.");
             }
-          } else {
-            // At this point, everything has been precached.
-            // It's the perfect time to display a
-            // "Content is cached for offline use." message.
-            console.log("Content is cached for offline use.");
           }
-        }
-      };
-
-      //push notification.. doesnt work..
-      window.addEventListener("push", function(e) {
-        var body;
-        console.log("push event!!!!", e);
-        if (e.data) {
-          body = e.data.text();
-        } else {
-          body = "Push message no payload";
-        }
-
-        var options = {
-          body: body,
-          icon: "images/notification-flat.png",
-          vibrate: [100, 50, 100],
-          data: {
-            dateOfArrival: Date.now(),
-            primaryKey: 1
-          },
-          actions: [
-            {
-              action: "explore",
-              title: "Explore this new world",
-              icon: "images/checkmark.png"
-            },
-            {
-              action: "close",
-              title: "I don't want any of this",
-              icon: "images/xmark.png"
-            }
-          ]
         };
-        e.waitUntil(
-          window.registration.showNotification("Push Notification", options)
-        );
-      });
+        window.addEventListener('push', function(e) {
+          var body;
+          console.log('push event!!!!');
+          if (e.data) {
+            body = e.data.text();
+          } else {
+            body = 'Push message no payload';
+          }
+        
+          var options = {
+            body: body,
+            icon: 'images/notification-flat.png',
+            vibrate: [100, 50, 100],
+            data: {
+              dateOfArrival: Date.now(),
+              primaryKey: 1
+            },
+            actions: [
+              {action: 'explore', title: 'Explore this new world',
+                icon: 'images/checkmark.png'},
+              {action: 'close', title: 'I don\'t want any of this',
+                icon: 'images/xmark.png'},
+            ]
+          };
+          e.waitUntil(
+            window.registration.showNotification('Push Notification', options)
+          );
+        });
 
-      window.addEventListener("notificationclick", function(event) {
-        let url = "https://react-vsk.herokuapp.com/";
-        console.log("notificationclick event", event, window.clients);
-        event.notification.close(); // Android needs explicit close.
-        if (window.clients) {
-          event.waitUntil(
-            window.clients
-              .matchAll({ type: "window" })
-              .then(windowClients => {
+        window.addEventListener('notificationclick', function(event) {
+          let url = 'https://react-vsk.herokuapp.com/';
+          console.log('notificationclick event', event, window.clients);
+          event.notification.close(); // Android needs explicit close.
+          if(window.clients){
+            event.waitUntil(
+            window.clients.matchAll({type: 'window'}).then( windowClients => {
                 // Check if there is already a window/tab open with the target URL
                 for (var i = 0; i < windowClients.length; i++) {
-                  var client = windowClients[i];
-                  // If so, just focus it.
-                  if (client.url === url && "focus" in client) {
-                    return client.focus();
-                  }
+                    var client = windowClients[i];
+                    // If so, just focus it.
+                    if (client.url === url && 'focus' in client) {
+                        return client.focus();
+                    }
                 }
                 // If not, then open the target URL in a new window/tab.
                 if (window.clients.openWindow) {
-                  return window.clients.openWindow(url);
+                    return window.clients.openWindow(url);
                 }
-              })
-          );
-        }
+            })
+        );
+          }
+          
       });
-    };
-    registeredServiceWorker.enablePush('BLx__NGvdasMNkjd6VYPdzQJVBkb2qafh');
+      };
+    })
+    .catch(error => {
+      console.error("Error during service worker registration:", error);
+    });
 }
 
 function checkValidServiceWorker(swUrl) {
@@ -200,84 +164,4 @@ export function unregister() {
       registration.unregister();
     });
   }
-}
-
-function requestMessagingPermission() {
-  messaging
-    .requestPermission()
-    .then(function() {
-      console.log("Notification permission granted.");
-      return messaging.getToken();
-    })
-    .catch(function(err) {
-      console.log("Unable to get permission to notify. ", err);
-    });
-}
-
-function initializeFCMToken() {
-
-  messaging
-    .getToken()
-    .then(function(currentToken) {
-      if (currentToken) {
-        // const tokenCorrect = currentToken.substring(currentToken.indexOf(':') + 1, currentToken.length);
-        sendTokenToServer(currentToken, false);
-        console.log("DEBUG!!!! token: " + currentToken);
-        // updateUIForPushEnabled(currentToken);
-      } else {
-        // Show permission request.
-        console.log(
-          "No Instance ID token available. Request permission to generate one."
-        );
-        // Show permission UI.
-        // updateUIForPushPermissionRequired();
-      }
-    })
-    .catch(function(err) {
-      console.log("An error occurred while retrieving token. ", err);
-    });
-
-  // Callback fired if Instance ID token is updated.
-  messaging.onTokenRefresh(function() {
-    messaging
-      .getToken()
-      .then(function(refreshedToken) {
-        console.log("onTokenRefresh getToken Token refreshed.");
-        console.log("onTokenRefresh getToken", refreshedToken);
-        sendTokenToServer(refreshedToken, true);
-      })
-      .catch(function(err) {
-        console.log(
-          "onTokenRefresh getToken Unable to retrieve refreshed token ",
-          err
-        );
-      });
-  });
-}
-
-function sendTokenToServer(token, onRefresh) {
-  var xhr = new XMLHttpRequest();
-  xhr.open("POST", "/api/settoken?value=" + token, true);
-  xhr.setRequestHeader("Content-Type", "application/json");
-  xhr.send(null);
-  if (!onRefresh) {
-    registerMessageCallback();
-  }
-}
-
-function registerMessageCallback() {
-  //push notification with fcm
-  
-  var evt = new CustomEvent("registrationSW", {
-    detail: null
-  });
-
-  window.dispatchEvent(evt);
-  messaging.setBackgroundMessageHandler(function(payload) {
-    console.log(
-      "[firebase-messaging-sw.js] Received background message ",
-      payload
-    );
-    // ...
-  });
 }

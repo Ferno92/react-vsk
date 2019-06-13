@@ -22,7 +22,6 @@ render(
   </Router>,
   document.getElementById("root")
 );
-
 if(window.location.hostname === 'react-vsk.herokuapp.com'){
   initializeReactGA();
   history.listen(analyticsListener);

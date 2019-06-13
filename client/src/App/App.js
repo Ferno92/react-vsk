@@ -12,8 +12,7 @@ import SearchLive from "./pages/search-live/SearchLive";
 import store from "./store/store";
 import { updateLoggedUser } from "./actions/actions";
 import "firebase/auth";
-import firebase from "firebase";
-// import firebaseBase from 'firebase';
+import firebase from "firebase/app";
 import Profile from "./pages/profile/Profile";
 import MyTeams from "./pages/my-teams/MyTeams";
 //font awesome region
@@ -23,7 +22,6 @@ import { faTrophy } from "@fortawesome/free-solid-svg-icons";
 import EditTeam from "./pages/edit-team/EditTeam";
 import TeamService from "./service/TeamService";
 import NoMatch from "./pages/no-match/NoMatch";
-import register from "../registerServiceWorker";
 //end font awesome region
 
 export const theme = createMuiTheme({
@@ -57,8 +55,7 @@ export const firebaseConfig = {
   databaseURL: "https://react-pwa-2280e.firebaseio.com",
   projectId: "react-pwa-2280e",
   storageBucket: "react-pwa-2280e.appspot.com",
-  messagingSenderId: "522350313041",
-  appId: "1:522350313041:web:34b09ae5458bf478"
+  messagingSenderId: "522350313041"
 };
 
 export const newGuid = () => {
@@ -85,12 +82,6 @@ class App extends Component {
       store.dispatch(updateLoggedUser(true));
     }
     library.add(faTrophy);
-
-    const self = this;
-    window.addEventListener("registrationSW", function(e) {
-      console.log("EventListener registrationSW");
-      self.initFCMListener();
-    });
   }
 
   componentDidMount() {
@@ -101,18 +92,6 @@ class App extends Component {
   componentWillUnmount() {
     teamService.clear();
   }
-
-  initFCMListener = () => {
-    const messaging = firebase.messaging();
-
-    messaging.onMessage(function(payload) {
-      // Messages received. Either because the
-      // app is running in the foreground, or
-      // because the notification was clicked.
-      // `payload` will contain your data.
-      console.log("Message received. ", payload);
-    });
-  };
 
   loginSuccess = () => {
     this.child.current.showMessage("success", "Login effettuato con successo!");

@@ -87,7 +87,7 @@ class EditTeam extends React.Component {
   teamRef = null;
   contributorsRef = null;
   usersRef = null;
-  teamRefUrl = "";
+  teamRefUrl = '';
   calendarRef = null;
 
   componentDidMount() {
@@ -102,9 +102,10 @@ class EditTeam extends React.Component {
     if (this.props.match.params.owner) {
       userId = this.props.match.params.owner;
     }
-    this.teamRefUrl =
-      "users/" + userId + "/teams/" + this.props.match.params.id;
-    this.teamRef = this.db.ref(this.teamRefUrl);
+    this.teamRefUrl = "users/" + userId + "/teams/" + this.props.match.params.id
+    this.teamRef = this.db.ref(
+      this.teamRefUrl
+    );
     var self = this;
     this.teamRef.on("value", snapshot => {
       if (snapshot.val() === null) {
@@ -140,9 +141,11 @@ class EditTeam extends React.Component {
       self.setState({ usersInfoList: tempArray });
     });
 
-    this.calendarRef = this.db.ref("/calendar");
+    
+    this.calendarRef = this.db.ref("/calendar"
+    );
 
-    this.calendarRef.on("value", snapshot => {
+    this.calendarRef.on("value", snapshot =>{
       var tempCalendar = [];
       snapshot.forEach(childSnapshot => {
         var event = childSnapshot.val();
@@ -150,11 +153,11 @@ class EditTeam extends React.Component {
         tempCalendar.push(event);
       });
       console.log("calendarRef", tempCalendar);
-      this.setState({ calendar: tempCalendar });
-    });
+      this.setState({calendar: tempCalendar});
+    })
     Notification.requestPermission(function(status) {
-      console.log("Notification permission status:", status);
-    });
+      console.log('Notification permission status:', status);
+  });
     // const Http = new XMLHttpRequest();
     // const url =
     //   "https://www.cpvolley.it/csi-forli/campionato/1412/misto-open-promozione";
@@ -609,46 +612,43 @@ class EditTeam extends React.Component {
     this.props.history.push("/myteams");
   };
 
-  addCalendarEvent = () => {};
+  addCalendarEvent = () => {
+  };
 
   toggleCalendarDialog = () => {
-    const { openCalendarDialog } = this.state;
-    this.setState({ openCalendarDialog: !openCalendarDialog });
+    const {openCalendarDialog} = this.state;
+    this.setState({openCalendarDialog: !openCalendarDialog});
   };
 
-  addGameOnCalendar = (date, where, opponents) => {
+  addGameOnCalendar = (date, where, opponents) =>{
     console.log(date, where, opponents);
-    this.setState({ openCalendarDialog: false });
-    this.calendarRef.push({
-      date: date.toString(),
-      where: where,
-      opponents: opponents
-    });
-  };
+    this.setState({openCalendarDialog: false});
+    this.calendarRef.push({date: date.toString(), where: where, opponents: opponents});
+  }
 
-  onClickDate = () => {
+  onClickDate = ()=>{
     console.log("onClickDate", Date.now());
-    if (Notification.permission == "granted") {
-      // navigator.serviceWorker.getRegistration().then(function(reg) {
-      //   var options = {
-      //     body: 'Hey questo è un evento bellissimo!',
-      //     icon: '../public/icon.png',
-      //     vibrate: [100, 50, 100],
-      //     data: {
-      //       dateOfArrival: 1557991551000,
-      //       primaryKey: 1
-      //     },
-      //     actions: [
-      //       {action: 'explore', title: 'Open',
-      //         icon: '../images/done.svg'},
-      //       {action: 'close', title: 'Close',
-      //         icon: '../images/clear.svg'},
-      //     ]
-      //   };
-      //   reg.showNotification('Hello world!', options);
-      // });
+    if (Notification.permission == 'granted') {
+      navigator.serviceWorker.getRegistration().then(function(reg) {
+        var options = {
+          body: 'Hey questo è un evento bellissimo!',
+          icon: '../public/icon.png',
+          vibrate: [100, 50, 100],
+          data: {
+            dateOfArrival: 1557991551000,
+            primaryKey: 1
+          },
+          actions: [
+            {action: 'explore', title: 'Open',
+              icon: '../images/done.svg'},
+            {action: 'close', title: 'Close',
+              icon: '../images/clear.svg'},
+          ]
+        };
+        reg.showNotification('Hello world!', options);
+      });
     }
-  };
+  }
 
   render() {
     const { classes } = this.props;
@@ -970,13 +970,8 @@ class EditTeam extends React.Component {
                   </Button>
                 </div>
               )}
-              {calendar.map((item, index) => (
-                <CalendarCard
-                  key={item.key}
-                  date={item.date}
-                  onClickDate={this.onClickDate}
-                />
-              ))}
+              {calendar.map((item, index) => 
+                <CalendarCard key={item.key} date={item.date} onClickDate={this.onClickDate}/>)}
             </ExpansionPanelDetails>
           </ExpansionPanel>
 
@@ -1169,10 +1164,10 @@ class EditTeam extends React.Component {
           dialogTitle={deleteDialogTitle}
         />
         <AddCalendarDialog
-          open={openCalendarDialog}
-          onClose={this.toggleCalendarDialog}
-          teamName={team ? team.name : ""}
-          addOnCalendar={this.addGameOnCalendar}
+        open={openCalendarDialog}
+        onClose={this.toggleCalendarDialog}
+        teamName={team ? team.name : ''}
+        addOnCalendar={this.addGameOnCalendar}
         />
       </div>
     );
