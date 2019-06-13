@@ -182,9 +182,9 @@ function registerValidSW(swUrl) {
     }
  
     const response = await fetch('/api/vapidPublicKey');
-    const vapidPublicKey = await response.text();
-    const convertedVapidKey = urlBase64ToUint8Array(vapidPublicKey);
+    const vapidPublicKey = await response.json();
     console.log("vapidPublicKey", vapidPublicKey);
+    const convertedVapidKey = urlBase64ToUint8Array(vapidPublicKey);
     return registration.pushManager.subscribe({
       userVisibleOnly: true,
       applicationServerKey: convertedVapidKey
