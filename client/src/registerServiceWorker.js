@@ -181,7 +181,7 @@ function registerValidSW(swUrl) {
       return subscription;
     }
  
-    const response = await fetch('./vapidPublicKey');
+    const response = await fetch('/api/vapidPublicKey');
     const vapidPublicKey = await response.text();
     const convertedVapidKey = urlBase64ToUint8Array(vapidPublicKey);
     console.log("vapidPublicKey", vapidPublicKey);
@@ -192,7 +192,7 @@ function registerValidSW(swUrl) {
   });
 }).then(function(subscription) {
   console.log("fetch register");
-  fetch('./register', {
+  fetch('/api/register', {
     method: 'post',
     headers: {
       'Content-type': 'application/json'
