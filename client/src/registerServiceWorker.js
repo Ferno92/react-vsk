@@ -181,7 +181,7 @@ function registerValidSW(swUrl) {
       return subscription;
     }
  
-    await fetch('/api/vapidPublicKey').then((res) => { 
+    fetch('/api/vapidPublicKey').then((res) => { 
       status = res.status; 
       return res.json() 
     })
