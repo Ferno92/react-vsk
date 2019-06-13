@@ -47,7 +47,7 @@ app.get('/client/src/service-worker.js', (req, res) => {
 });
 
 //notification region
-app.get('/api/vapidPublicKey', function(req, res) {
+app.get('/api/vapidPublicKey', (req, res) => {
   res.json(vapidPublicKey);
 });
 
