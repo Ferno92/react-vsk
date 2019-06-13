@@ -181,25 +181,14 @@ function registerValidSW(swUrl) {
       return subscription;
     }
  
-    fetch('/api/vapidPublicKey').then((res) => { 
-      status = res.status; 
-      return res.json() 
-    })
-    .then((jsonData) => {
-      console.log(jsonData);
-      console.log(status);
-    })
-    .catch((err) => {
-      // handle error for example
-      console.error(err);
+    const response = await fetch('/api/vapidPublicKey');
+    const vapidPublicKey = await response.text();
+    const convertedVapidKey = urlBase64ToUint8Array(vapidPublicKey);
+    console.log("vapidPublicKey", vapidPublicKey);
+    return registration.pushManager.subscribe({
+      userVisibleOnly: true,
+      applicationServerKey: convertedVapidKey
     });
-    // const vapidPublicKey = await response.text();
-    // const convertedVapidKey = urlBase64ToUint8Array(vapidPublicKey);
-    // console.log("vapidPublicKey", vapidPublicKey);
-    // return registration.pushManager.subscribe({
-    //   userVisibleOnly: true,
-    //   applicationServerKey: convertedVapidKey
-    // });
   });
 }).then(function(subscription) {
   console.log("fetch register");
