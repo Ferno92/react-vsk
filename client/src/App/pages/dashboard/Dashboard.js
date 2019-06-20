@@ -81,11 +81,12 @@ class Dashboard extends React.Component {
       store.dispatch(showCreateMatch(false));
     };
 
-    var self = this;
-    window.addEventListener('subscription', function(event){
-      console.log("subscription event", event);
-      self.subscription = event.subscription;
-    });
+    window.addEventListener('subscription', this.onUpdateSubscription, false);
+  }
+
+  onUpdateSubscription = (event) => {
+    console.log("subscription event", event);
+    this.subscription = event.subscription;
   }
 
   goToNewMatch() {
@@ -120,6 +121,7 @@ class Dashboard extends React.Component {
     if (this.storeUnsubscribe !== null) {
       this.storeUnsubscribe();
     }
+    window.removeEventListener('subscription', this.onUpdateSubscription);
   }
 
   openGame(id) {

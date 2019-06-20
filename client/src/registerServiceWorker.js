@@ -202,7 +202,7 @@ function registerValidSW(swUrl) {
     }),
   });
   
-  const event = new Event('sw-installed');
+  const event = new Event('subscription');
   event.subscription = subscription;
   window.dispatchEvent(event)
 });
