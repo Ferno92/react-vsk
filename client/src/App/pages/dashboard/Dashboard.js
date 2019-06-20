@@ -132,7 +132,7 @@ class Dashboard extends React.Component {
   }
 
   clickLogin = ()=>{
-    
+    console.log("clickLogin", this.subscription);
     fetch('/api/sendNotification', {
       method: 'post',
       headers: {
