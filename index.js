@@ -48,24 +48,28 @@ app.post('/api/register', function(req, res) {
 });
 
 app.post('/api/sendNotification', function(req, res) {
-  console.log('sendNotification', req.body.subscription);
-  const subscription = req.body.subscription;
-  const payload = req.body.payload;
-  const options = {
-    TTL: req.body.ttl
-  };
-
-  setTimeout(function() {
-    payloads[req.body.subscription.endpoint] = payload;
-    webPush.sendNotification(subscription, null, options)
-    .then(function() {
-      res.sendStatus(201);
-    })
-    .catch(function(error) {
-      res.sendStatus(500);
-      console.log(error);
-    });
-  }, req.body.delay * 1000);
+  // console.log('sendNotification', JSON.stringify(req.query));
+  const subscription = req.query ? req.query.subscription : null;
+  if(subscription){
+    console.log('sendNotification!!!!')
+    const payload = req.query.payload;
+    const options = {
+      TTL: req.query.ttl
+    };
+  
+    setTimeout(function() {
+      payloads[req.query.subscription.endpoint] = payload;
+      webPush.sendNotification(subscription, null, options)
+      .then(function() {
+        res.sendStatus(201);
+      })
+      .catch(function(error) {
+        res.sendStatus(500);
+        console.log(error);
+      });
+    }, req.query.delay * 1000);
+  }
+  res.send({result: "OK"})
 });
 
 app.get('/api/getPayload', function(req, res) {
